@@ -1,0 +1,120 @@
+<div class="mes-sig-page fade-in">
+  <div class="page-topbar">
+    <a routerLink="/dashboard" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </a>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes signalements</h1>
+      <p class="page-subtitle">Gérez et suivez l'état de vos signalements</p>
+    </div>
+    <a routerLink="/dashboard/nouveau" class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Nouveau
+    </a>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar card">
+    <!-- Search -->
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Rechercher un signalement..." (input)="onSearch($event)" class="search-input" />
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-tabs">
+      <button
+        *ngFor="let f of filters"
+        class="filter-tab"
+        [class.active]="filterStatut() === f.value"
+        (click)="setFilter(f.value)">
+        {{ f.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Count -->
+  <p class="results-count" *ngIf="!loading()">
+    <strong>{{ filtered().length }}</strong> signalement{{ filtered().length !== 1 ? 's' : '' }}
+  </p>
+
+  <!-- Error -->
+  <div *ngIf="error()" class="alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ error() }}
+    <button (click)="load()" class="btn btn-sm btn-ghost">Réessayer</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="sig-grid">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading() && filtered().length === 0 && !error()" class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <h3>Aucun signalement trouvé</h3>
+    <p *ngIf="filterStatut() === 'TOUS' && !searchQuery()">Vous n'avez pas encore soumis de signalement.</p>
+    <p *ngIf="filterStatut() !== 'TOUS' || searchQuery()">Essayez de modifier vos filtres.</p>
+    <a *ngIf="filterStatut() === 'TOUS' && !searchQuery()" routerLink="/dashboard/nouveau" class="btn btn-primary btn-sm" style="margin-top:0.5rem">
+      Créer mon premier signalement
+    </a>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading() && filtered().length > 0" class="sig-grid">
+    <app-signalement-card
+      *ngFor="let s of filtered()"
+      [signalement]="s"
+      [showActions]="true"
+      [showVote]="false"
+      (onDelete)="onDelete($event)"
+      class="fade-up"
+    />
+  </div>
+
+  <!-- Delete modal -->
+  <div *ngIf="deleteModalOpen()" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-icon danger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </div>
+        <div class="modal-title-wrap">
+          <div class="modal-title">Supprimer le signalement ?</div>
+          <div class="modal-subtitle">
+            Cette action est définitive. Un signalement ne peut être supprimé que s’il est <strong>En attente</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body" *ngIf="deleteTarget() as t">
+        <div class="modal-preview">
+          <div class="preview-title">{{ t.titre }}</div>
+          <div class="preview-meta">
+            <span class="badge" [ngClass]="t.statut === 'EN_ATTENTE' ? 'badge-waiting' : 'badge-progress'">
+              {{ t.statut }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="deleteError()" class="alert-error fade-up" style="margin-top: 0.75rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ deleteError() }}
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="cancelDelete()" [disabled]="deleting()">Annuler</button>
+        <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="deleting()">
+          <span class="spinner tiny" *ngIf="deleting()"></span>
+          <span *ngIf="!deleting()">Supprimer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

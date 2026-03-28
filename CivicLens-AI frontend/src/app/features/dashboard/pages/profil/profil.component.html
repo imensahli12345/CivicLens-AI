@@ -1,0 +1,119 @@
+<div class="profil-page fade-in">
+  <div *ngIf="loading()" class="profil-loading card">
+    <div class="spinner-page"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <div *ngIf="!loading() && user()" class="profil-container">
+    <!-- En-tête du profil -->
+    <header class="profil-header">
+      <div class="profil-avatar-section">
+        <div class="profil-avatar">
+          <img *ngIf="photoUrl()" [src]="photoUrl()!" alt="Photo de profil" />
+          <span *ngIf="!photoUrl()" class="avatar-initials">{{ getInitials() }}</span>
+        </div>
+        <div class="avatar-status">
+          <div class="status-dot"></div>
+          <span>Actif</span>
+        </div>
+      </div>
+      
+      <div class="profil-info-header">
+        <h1 class="profil-fullname">{{ user()?.prenom }} {{ user()?.nom }}</h1>
+        <div class="profil-role">
+          <span class="role-badge">🇹🇳 Citoyen Tunisien</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Cartes d'informations -->
+    <div class="profil-cards-grid">
+      <!-- Carte Informations Personnelles -->
+      <section class="info-card personal-info">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <h2>Informations Personnelles</h2>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nom</label>
+            <p>{{ user()?.nom || 'Non renseigné' }}</p>
+          </div>
+          <div class="info-item">
+            <label>Prénom</label>
+            <p>{{ user()?.prenom || 'Non renseigné' }}</p>
+          </div>
+          <div class="info-item">
+            <label>CIN</label>
+            <p>{{ user()?.cin || 'Non renseigné' }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Carte Contact -->
+      <section class="info-card contact-info">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m22 7-10 5L2 7"/>
+            </svg>
+          </div>
+          <h2>Contact</h2>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <label>Email</label>
+            <p class="email-value">{{ user()?.email }}</p>
+          </div>
+          <div class="info-item full-width">
+            <label>Téléphone</label>
+            <p class="phone-value">{{ user()?.telephone || 'Non renseigné' }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Carte Localisation -->
+      <section class="info-card location-info">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h2>Localisation</h2>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Région</label>
+            <p>{{ user()?.region || 'Non renseignée' }}</p>
+          </div>
+          <div class="info-item">
+            <label>Délégation</label>
+            <p>{{ user()?.delegation || 'Non renseignée' }}</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Actions -->
+    <footer class="profil-actions">
+      <button routerLink="/dashboard/profil/modifier" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Modifier mon profil
+      </button>
+    </footer>
+  </div>
+</div>

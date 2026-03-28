@@ -1,0 +1,47 @@
+<div class="notifications-page fade-in">
+  <div class="page-topbar">
+    <a routerLink="/dashboard" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </a>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">Dernières mises à jour des événements auxquels vous participez</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des notifications...</p>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ errorMsg() }}
+  </div>
+
+  <div *ngIf="!loading() && !errorMsg() && notifications().length === 0" class="empty-state">
+    <div class="empty-state-icon">🔔</div>
+    <h3>Aucune notification</h3>
+    <p>Vous serez informé lorsqu’un événement auquel vous participez est modifié.</p>
+  </div>
+
+  <div *ngIf="!loading() && !errorMsg() && notifications().length > 0" class="notif-list">
+    <button
+      *ngFor="let n of notifications()"
+      class="notif-row"
+      (click)="goToEvent(n)"
+      [disabled]="!n.relatedEvenementId"
+    >
+      <span class="notif-row-dot" *ngIf="!n.isRead"></span>
+      <div class="notif-row-content">
+        <div class="notif-row-message">{{ n.message }}</div>
+        <div class="notif-row-time">{{ formatShortDate(n.createdAt) }}</div>
+      </div>
+    </button>
+  </div>
+</div>
+

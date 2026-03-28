@@ -1,0 +1,42 @@
+<div class="auth-shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-name">CivicLens</span>
+      <span class="brand-ai">AI</span>
+    </div>
+
+    <div class="country-pill" *ngIf="branding?.countryName || branding?.countryCode">
+      <span class="country-code" *ngIf="branding?.countryCode">{{ branding.countryCode }}</span>
+      <span class="country-name" *ngIf="branding?.countryName">{{ branding.countryName }}</span>
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <div class="auth-grid">
+      <section class="auth-panel">
+        <div class="panel-kicker">Plateforme citoyenne</div>
+        <h1 class="panel-title">Signalements, suivi, transparence.</h1>
+        
+
+        <div class="panel-encourage">
+          <p class="encourage-lead">Contribuez activement à l’amélioration de votre ville.</p>
+          <p class="encourage-body">
+            Signalez facilement les problèmes urbains en quelques clics et participez à une gestion plus efficace, transparente et collaborative, au service des citoyens et des autorités publiques.
+          </p>
+          <p class="encourage-body">
+            Grâce à votre contribution, les interventions peuvent être mieux priorisées et l’impact sur la qualité de vie collective renforcé.
+          </p>
+        </div>
+      </section>
+
+      <section class="auth-stage">
+        <div class="auth-card-shell">
+          <router-outlet />
+        </div>
+        <div class="stage-footnote">
+          Accès réservé. Utilisez vos identifiants pour continuer.
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

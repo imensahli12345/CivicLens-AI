@@ -1,0 +1,60 @@
+<div class="login-card">
+  <div class="login-header">
+    <div class="title-row">
+      <div class="app-mark" aria-hidden="true">CL</div>
+      <h1>Connexion</h1>
+    </div>
+    <p class="subtitle">Accédez à CivicLens AI pour continuer.</p>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <div class="input-wrapper">
+        <input
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+          placeholder="exemple@email.com"
+        />
+      </div>
+      <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+        {{ getErrorMessage('email') }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <div class="input-wrapper">
+        <input
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          placeholder="Votre mot de passe"
+        />
+      </div>
+      <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+        {{ getErrorMessage('password') }}
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+      <span *ngIf="!isLoading">Se connecter</span>
+      <span *ngIf="isLoading" class="spinner"></span>
+    </button>
+
+    <div class="login-footer">
+      <p>Vous n'avez pas de compte ? <a routerLink="/register">S'inscrire</a></p>
+    </div>
+  </form>
+</div>
