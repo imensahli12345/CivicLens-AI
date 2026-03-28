@@ -49,7 +49,8 @@ namespace CivicLens.API.Controllers
             {
                 Email = dto.Email,
                 MotDePasseHash = dto.MotDePasse,  // Le Repository va hasher avec BCrypt
-                Adresse = dto.Adresse
+                Region = dto.Region,
+                Delegation = dto.Delegation
             };
 
             var createdAdmin = _authService.CreateAdmin(admin);
@@ -85,7 +86,7 @@ namespace CivicLens.API.Controllers
             {
                 Email = dto.Email,
                 MotDePasseHash = dto.MotDePasse,
-                Adresse = dto.Adresse,
+                Delegation = dto.Delegation,
                 Matricule = dto.Matricule,
                 Region = dto.Region
             };
@@ -129,7 +130,7 @@ namespace CivicLens.API.Controllers
             {
                 Email = dto.Email,
                 MotDePasseHash = dto.MotDePasse,
-                Adresse = dto.Adresse,
+                Delegation = dto.Delegation,
                 NomOrganisation = dto.NomOrganisation,
                 TypeOrganisation = typeOrg,
                 DomaineOrganisation = domaine,
@@ -165,7 +166,7 @@ namespace CivicLens.API.Controllers
             {
                 Email = dto.Email,
                 MotDePasseHash = dto.MotDePasse,
-                Adresse = dto.Adresse,
+                Delegation = dto.Delegation,
                 Nom = dto.Nom,
                 Region = dto.Region,
                 Domaine = domaine,

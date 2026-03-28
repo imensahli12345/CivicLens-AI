@@ -21,7 +21,7 @@ public class BureauDeControleRepository : IBureauDeControleRepository
     {
         service.MotDePasseHash = BCrypt.Net.BCrypt.HashPassword(service.MotDePasseHash);
         service.Role = Role.SERVICE;
-        service.StatutCompte = StatutCompte.ACTIF;
+        service.StatutCompte = StatutCompte.INACTIF;
 
         _context.Services.Add(service);
         if (Save())

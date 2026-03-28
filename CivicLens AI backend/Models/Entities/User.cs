@@ -9,7 +9,8 @@ namespace CivicLens.API.Models.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Email { get; set; } = string.Empty;
         public string MotDePasseHash { get; set; } = string.Empty;
-        public string Adresse { get; set; } = string.Empty;
+        public string Region { get; set; } = string.Empty;
+        public string Delegation { get; set; } = string.Empty;
         public DateTime DateCreation { get; set; } = DateTime.UtcNow;
         public DateTime? DernierLogin { get; set; }
         public StatutCompte StatutCompte { get; set; } = StatutCompte.ACTIF;

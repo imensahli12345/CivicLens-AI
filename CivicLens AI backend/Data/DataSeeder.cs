@@ -1,4 +1,4 @@
-﻿using CivicLens.API.Models.Entities;
+using CivicLens.API.Models.Entities;
 using CivicLens.API.Models.Enums;
 
 namespace CivicLens.API.Data
@@ -15,7 +15,8 @@ namespace CivicLens.API.Data
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                     Email = "superadmin@civiclens.tn",
                     MotDePasseHash = BCrypt.Net.BCrypt.HashPassword("SuperAdmin@123"),
-                    Adresse = "Tunis",
+                    Region = "Tunis",
+                    Delegation = "Tunis",
                     Role = Role.SUPERADMIN,
                     StatutCompte = StatutCompte.ACTIF
                 };

@@ -1,4 +1,4 @@
-﻿namespace CivicLens.API.Models.Enums
+namespace CivicLens.API.Models.Enums
 {
     public enum Domaine
     {
@@ -6,7 +6,9 @@
         ECLAIRAGE,
         EAU,
         TRANSPORT,
+        ELECTRICITE,
         INFRASTRUCTURE,
+        DECHETS,
         AUTRE
     }
 }

@@ -7,6 +7,7 @@ namespace CivicLens.API.Models.DTOs
         public string Nom { get; set; } = string.Empty;
         public string Prenom { get; set; } = string.Empty;
         public string Cin { get; set; } = string.Empty;
-        public string Adresse { get; set; } = string.Empty;
+        public string Region { get; set; } = string.Empty;
+        public string Delegation { get; set; } = string.Empty;
     }
 }

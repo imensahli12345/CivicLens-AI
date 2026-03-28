@@ -28,10 +28,24 @@ namespace CivicLens_AI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("DateEvenement")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Delegation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Lieu")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -105,31 +119,37 @@ namespace CivicLens_AI.Migrations
                     b.ToTable("ImagesSignalement");
                 });
 
-            modelBuilder.Entity("CivicLens.API.Models.Entities.Localisation", b =>
+            modelBuilder.Entity("CivicLens.API.Models.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AdresseTexte")
+                    b.Property<Guid>("CitoyenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
+                    b.Property<Guid?>("RelatedEvenementId")
+                        .HasColumnType("uuid");
 
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<long>("SignalementId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SignalementId")
-                        .IsUnique();
+                    b.HasIndex("CitoyenId");
 
-                    b.ToTable("Localisations");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CivicLens.API.Models.Entities.Participation", b =>
@@ -171,6 +191,9 @@ namespace CivicLens_AI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("Adresse")
+                        .HasColumnType("jsonb");
+
                     b.Property<Guid>("CitoyenId")
                         .HasColumnType("uuid");
 
@@ -182,25 +205,24 @@ namespace CivicLens_AI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Domaine")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Gravite")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
 
                     b.Property<Guid?>("OrganisationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Priorite")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Region")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double>("ScoreAI")
+                    b.Property<double?>("ScoreAI")
                         .HasColumnType("double precision");
 
                     b.Property<string>("Statut")
@@ -222,12 +244,12 @@ namespace CivicLens_AI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Adresse")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("DateCreation")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Delegation")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DernierLogin")
                         .HasColumnType("timestamp with time zone");
@@ -237,6 +259,10 @@ namespace CivicLens_AI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("MotDePasseHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Region")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -291,10 +317,6 @@ namespace CivicLens_AI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Region")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasIndex("Matricule")
                         .IsUnique();
 
@@ -313,8 +335,14 @@ namespace CivicLens_AI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Prenom")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Telephone")
                         .HasColumnType("text");
 
                     b.HasIndex("Cin")
@@ -332,10 +360,6 @@ namespace CivicLens_AI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("NomOrganisation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Region")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -358,10 +382,6 @@ namespace CivicLens_AI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Region")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -403,15 +423,15 @@ namespace CivicLens_AI.Migrations
                     b.Navigation("Signalement");
                 });
 
-            modelBuilder.Entity("CivicLens.API.Models.Entities.Localisation", b =>
+            modelBuilder.Entity("CivicLens.API.Models.Entities.Notification", b =>
                 {
-                    b.HasOne("CivicLens.API.Models.Entities.Signalement", "Signalement")
-                        .WithOne("Localisation")
-                        .HasForeignKey("CivicLens.API.Models.Entities.Localisation", "SignalementId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("CivicLens.API.Models.Entities.Citoyen", "Citoyen")
+                        .WithMany("Notifications")
+                        .HasForeignKey("CitoyenId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Signalement");
+                    b.Navigation("Citoyen");
                 });
 
             modelBuilder.Entity("CivicLens.API.Models.Entities.Participation", b =>
@@ -525,8 +545,6 @@ namespace CivicLens_AI.Migrations
 
                     b.Navigation("Images");
 
-                    b.Navigation("Localisation");
-
                     b.Navigation("Votes");
                 });
 
@@ -538,6 +556,8 @@ namespace CivicLens_AI.Migrations
             modelBuilder.Entity("CivicLens.API.Models.Entities.Citoyen", b =>
                 {
                     b.Navigation("Evenements");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Participations");
 

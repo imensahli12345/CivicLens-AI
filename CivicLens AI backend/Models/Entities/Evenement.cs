@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CivicLens.API.Models.Entities
@@ -9,7 +9,12 @@ namespace CivicLens.API.Models.Entities
         public string Titre { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTime DateEvenement { get; set; }
+        public string Lieu { get; set; } = string.Empty;
         public int NombreVolontairesRequis { get; set; }
+        public string Delegation { get; set; } = string.Empty;
+
+        public bool IsConfirmed { get; set; } = false;
+        public DateTime? ConfirmedAt { get; set; }
 
         // Foreign Key
         public Guid OrganisateurId { get; set; }

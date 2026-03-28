@@ -6,6 +6,7 @@ using CivicLens.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.FileProviders;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ══════════════════════════════════════════════════════════════
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddHttpClient<IAIService, AIService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["AIApiUrl"] ?? "http://127.0.0.1:8001");
+});
 
 builder.Services.AddScoped<IBureauDeControleRepository, BureauDeControleRepository>();
 builder.Services.AddScoped<IBureauDeControleService, BureauDeControleService>();
@@ -157,6 +163,16 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("Frontend");
+
+var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
+Directory.CreateDirectory(uploadsRoot);
+Directory.CreateDirectory(Path.Combine(uploadsRoot, "signalements"));
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    RequestPath = "/uploads"
+});
 
 app.UseAuthentication();   // ← AVANT UseAuthorization (comme la référence)
 app.UseAuthorization();

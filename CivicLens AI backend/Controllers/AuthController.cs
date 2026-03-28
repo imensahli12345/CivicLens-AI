@@ -5,10 +5,11 @@ using CivicLens.API.Models.Enums;
 using CivicLens.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CivicLens.API.Controllers
 {
@@ -47,8 +48,17 @@ namespace CivicLens.API.Controllers
                     {
                         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.Role, user.Role.ToString())
+                        new Claim(ClaimTypes.Role, user.Role.ToString()),
+                        new Claim("region", user.Region ?? ""),
+                        new Claim("delegation", user.Delegation ?? "")
                     };
+
+                    if (user is Citoyen citoyen)
+                    {
+                        claims.Add(new Claim("nom", citoyen.Nom ?? ""));
+                        claims.Add(new Claim("prenom", citoyen.Prenom ?? ""));
+                        claims.Add(new Claim("cin", citoyen.Cin ?? ""));
+                    }
 
                     var token = _authService.GenerateToken(_config["Jwt:Key"]!, claims);
                     return Ok(token);
@@ -84,7 +94,8 @@ namespace CivicLens.API.Controllers
             {
                 Email          = dto.Email,
                 MotDePasseHash = dto.MotDePasse,
-                Adresse        = dto.Adresse,
+                Region         = dto.Region,
+                Delegation     = dto.Delegation,
                 Nom            = dto.Nom,
                 Prenom         = dto.Prenom,
                 Cin            = dto.Cin
@@ -161,6 +172,86 @@ namespace CivicLens.API.Controllers
             await _db.SaveChangesAsync();
 
             return Ok("Votre compte a été réactivé avec succès. Vous pouvez maintenant vous connecter.");
+        }
+    // ──────────────────────────────────────────────────────
+        // GET /api/auth/me
+        // ──────────────────────────────────────────────────────
+        [HttpGet("me")]
+        [Authorize(Roles = "CITOYEN")]
+        public async Task<IActionResult> GetMe()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return Unauthorized("Token invalide.");
+
+            var citoyen = await _db.Citoyens.FindAsync(userId);
+            if (citoyen == null)
+                return NotFound("Utilisateur introuvable.");
+
+            return Ok(new
+            {
+                id = citoyen.Id,
+                email = citoyen.Email,
+                nom = citoyen.Nom,
+                prenom = citoyen.Prenom,
+                region = citoyen.Region,
+                delegation = citoyen.Delegation,
+                cin = citoyen.Cin,
+                telephone = citoyen.Telephone,
+                role = citoyen.Role.ToString(),
+                photoUrl = citoyen.PhotoUrl
+            });
+        }
+
+        // ──────────────────────────────────────────────────────
+        // PUT /api/auth/me
+        // ──────────────────────────────────────────────────────
+        [HttpPut("me")]
+        [Authorize(Roles = "CITOYEN")]
+        public async Task<IActionResult> UpdateMe([FromBody] UpdateCitoyenDto dto)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return Unauthorized("Token invalide.");
+
+            var citoyen = await _db.Citoyens.FindAsync(userId);
+            if (citoyen == null)
+                return NotFound("Utilisateur introuvable.");
+
+            citoyen.Nom = dto.Nom ?? citoyen.Nom;
+            citoyen.Prenom = dto.Prenom ?? citoyen.Prenom;
+            citoyen.Region = dto.Region ?? citoyen.Region;
+            citoyen.Delegation = dto.Delegation ?? citoyen.Delegation;
+            citoyen.Telephone = dto.Telephone ?? citoyen.Telephone;
+            citoyen.PhotoUrl = dto.PhotoUrl ?? citoyen.PhotoUrl;
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Profil mis à jour avec succès" });
+        }
+
+        // ──────────────────────────────────────────────────────
+        // PUT /api/auth/me/password
+        // ──────────────────────────────────────────────────────
+        [HttpPut("me/password")]
+        [Authorize(Roles = "CITOYEN")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.NouveauMotDePasse))
+                return BadRequest("Le nouveau mot de passe est requis.");
+
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return Unauthorized("Token invalide.");
+
+            var citoyen = await _db.Citoyens.FindAsync(userId);
+            if (citoyen == null)
+                return NotFound("Utilisateur introuvable.");
+
+            citoyen.MotDePasseHash = BCrypt.Net.BCrypt.HashPassword(dto.NouveauMotDePasse);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Mot de passe mis à jour avec succès." });
         }
     }
 }

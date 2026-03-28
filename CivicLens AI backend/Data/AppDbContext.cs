@@ -15,12 +15,13 @@ namespace CivicLens.API.Data
         public DbSet<BureauDeControle> BureauxDeControle { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Signalement> Signalements { get; set; }
-        public DbSet<Localisation> Localisations { get; set; }
         public DbSet<ImageSignalement> ImagesSignalement { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<HistoriqueStatut> HistoriquesStatut { get; set; }
         public DbSet<Evenement> Evenements { get; set; }
         public DbSet<Participation> Participations { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -91,12 +92,6 @@ namespace CivicLens.API.Data
 
             // ── Relations ──
 
-            // Signalement → Localisation (1-1)
-            modelBuilder.Entity<Signalement>()
-                .HasOne(s => s.Localisation)
-                .WithOne(l => l.Signalement)
-                .HasForeignKey<Localisation>(l => l.SignalementId);
-
             // BureauDeControle → Services (1-many)
             modelBuilder.Entity<Service>()
                 .HasOne(s => s.BureauDeControle)
@@ -165,6 +160,13 @@ namespace CivicLens.API.Data
                 .HasOne(i => i.Signalement)
                 .WithMany(s => s.Images)
                 .HasForeignKey(i => i.SignalementId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Citoyen → Notifications
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Citoyen)
+                .WithMany(c => c.Notifications)
+                .HasForeignKey(n => n.CitoyenId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
