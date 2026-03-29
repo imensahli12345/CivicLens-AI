@@ -3,13 +3,13 @@
   min-height: calc(100vh - var(--header-height, 64px) - 4rem);
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 2rem 1rem 3rem;
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .profil-container {
   max-width: 1200px;
   margin: 0 auto;
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.2s ease-out;
 }
 
 /* En-tête du profil */
@@ -25,8 +25,8 @@
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
   position: relative;
   overflow: hidden;
-  animation: slideInScale 0.7s ease-out;
-  animation-delay: 0.1s;
+  animation: slideInScale 0.2s ease-out;
+  animation-delay: 0.05s;
   animation-fill-mode: both;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 1.5rem;
   padding-bottom: 2.5rem;
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 /* ─── Hero ─── */
@@ -18,8 +18,8 @@
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  animation: slideInScale 0.7s ease-out;
-  animation-delay: 0.1s;
+  animation: slideInScale 0.2s ease-out;
+  animation-delay: 0.05s;
   animation-fill-mode: both;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
