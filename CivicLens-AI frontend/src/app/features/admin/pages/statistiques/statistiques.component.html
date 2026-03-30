@@ -1,1 +1,58 @@
-<p>statistiques works!</p>
+<div class="page-container">
+  <div class="page-header">
+    <h1>📈 Statistiques</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="stats" class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.totalCitoyens }}</div>
+        <div class="stat-label">Citoyens</div>
+      </div>
+    </div>
+
+    <div class="stat-card purple">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.totalSignalements }}</div>
+        <div class="stat-label">Signalements</div>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.totalBureaux }}</div>
+        <div class="stat-label">Bureaux de Contrôle</div>
+      </div>
+    </div>
+
+    <div class="stat-card orange">
+      <div class="stat-icon">🏛️</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.totalOrganisations }}</div>
+        <div class="stat-label">Organisations</div>
+      </div>
+    </div>
+
+    <div class="stat-card yellow">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.signalementsEnAttente }}</div>
+        <div class="stat-label">Signalements en attente</div>
+      </div>
+    </div>
+
+    <div class="stat-card teal">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stats.signalementsResolus }}</div>
+        <div class="stat-label">Signalements résolus</div>
+      </div>
+    </div>
+  </div>
+</div>

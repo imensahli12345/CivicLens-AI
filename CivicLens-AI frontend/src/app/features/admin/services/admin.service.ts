@@ -11,7 +11,7 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   private getHeaders() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
@@ -21,7 +21,8 @@ export class AdminService {
 
   updateCitoyenStatut(id: string, statut: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/admin/citoyens/${id}/statut`, JSON.stringify(statut), {
-      headers: this.getHeaders().set('Content-Type', 'application/json')
+      headers: this.getHeaders().set('Content-Type', 'application/json'),
+      responseType: 'text'
     });
   }
 
@@ -30,11 +31,17 @@ export class AdminService {
   }
 
   createBureau(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/admin/create-bureau`, data, { headers: this.getHeaders() });
+    return this.http.post(`${this.baseUrl}/admin/create-bureau`, data, {
+      headers: this.getHeaders(),
+      responseType: 'text'
+    });
   }
 
   createOrganisation(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/admin/create-organisation`, data, { headers: this.getHeaders() });
+    return this.http.post(`${this.baseUrl}/admin/create-organisation`, data, {
+      headers: this.getHeaders(),
+      responseType: 'text'
+    });
   }
 
   getBureaux(): Observable<any[]> {

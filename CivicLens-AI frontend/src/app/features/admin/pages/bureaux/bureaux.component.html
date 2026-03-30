@@ -1,1 +1,82 @@
-<p>bureaux works!</p>
+<div class="page-container">
+  <div class="page-header">
+    <h1>🏢 Bureaux de Contrôle</h1>
+    <div class="header-actions">
+      <span class="badge">{{ bureaux.length }} bureaux</span>
+      <button class="btn-create" (click)="toggleForm()">
+        {{ showForm ? '✕ Annuler' : '+ Nouveau Bureau' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="alert success">{{ success }}</div>
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+
+  <div *ngIf="showForm" class="form-card">
+    <h2>Créer un Bureau de Contrôle</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="email@civiclens.tn" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" formControlName="motDePasse" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Matricule</label>
+          <input type="text" formControlName="matricule" placeholder="Ex: BDC-2024-001" />
+        </div>
+        <div class="form-group">
+          <label>Région</label>
+          <select formControlName="region">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Délégation</label>
+          <select formControlName="delegation">
+            <option value="">-- Choisir une région d'abord --</option>
+            <option *ngFor="let d of delegations" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" [disabled]="form.invalid || submitting">
+        {{ submitting ? 'Création...' : 'Créer le Bureau' }}
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Matricule</th>
+          <th>Région</th>
+          <th>Délégation</th>
+          <th>Statut</th>
+          <th>Services</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of bureaux">
+          <td>{{ b.email }}</td>
+          <td>{{ b.matricule }}</td>
+          <td>{{ b.region }}</td>
+          <td>{{ b.delegation }}</td>
+          <td>
+            <span class="status-badge" [class]="b.statut.toLowerCase()">{{ b.statut }}</span>
+          </td>
+          <td><span class="services-count">{{ b.services?.length || 0 }} services</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

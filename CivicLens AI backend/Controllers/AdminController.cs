@@ -26,7 +26,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("citoyens")]
-        [Authorize]
         public async Task<IActionResult> GetCitoyens()
         {
             var citoyens = await _db.Citoyens.ToListAsync();
@@ -45,7 +44,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpPut("citoyens/{id}/statut")]
-        [Authorize]
         public async Task<IActionResult> UpdateCitoyenStatut(Guid id, [FromBody] string statut)
         {
             var citoyen = await _db.Citoyens.FindAsync(id);
@@ -60,7 +58,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("stats")]
-        [Authorize]
         public async Task<IActionResult> GetStats()
         {
             var totalCitoyens = await _db.Citoyens.CountAsync();
@@ -81,7 +78,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("bureaux")]
-        [Authorize]
         public async Task<IActionResult> GetBureaux()
         {
             var bureaux = await _db.BureauxDeControle.Include(b => b.Services).ToListAsync();
@@ -102,7 +98,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpPost("create-admin")]
-        [Authorize]
         public IActionResult CreateAdmin([FromBody] CreateAdminDto dto)
         {
             if (_authService.IsEmailExists(dto.Email))
@@ -122,7 +117,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpPost("create-bureau")]
-        [Authorize]
         public IActionResult CreateBureau([FromBody] CreateBureauDto dto)
         {
             if (_authService.IsEmailExists(dto.Email))
@@ -146,7 +140,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpPost("create-organisation")]
-        [Authorize]
         public IActionResult CreateOrganisation([FromBody] CreateOrganisationDto dto)
         {
             if (_authService.IsEmailExists(dto.Email))
@@ -175,7 +168,6 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpPost("create-service")]
-        [Authorize]
         public IActionResult CreateService([FromBody] CreateServiceDto dto)
         {
             if (_bureauDeControleService.GetBureauById(dto.BureauDeControleId) is not BureauDeControle bureau)
