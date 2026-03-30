@@ -13,9 +13,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CivicLens.API.Controllers
 {
-    /// <summary>
-    /// Contrôleur d'authentification — endpoints publics.
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -31,9 +28,6 @@ namespace CivicLens.API.Controllers
             _db          = db;
         }
 
-        // ──────────────────────────────────────────────────────
-        // POST /api/auth/login
-        // ──────────────────────────────────────────────────────
         [HttpPost]
         [Route("login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
@@ -46,9 +40,9 @@ namespace CivicLens.API.Controllers
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                        new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.Role, user.Role.ToString()),
+                        new Claim("nameid", user.Id.ToString()),
+                        new Claim("email", user.Email),
+                        new Claim("role", user.Role.ToString()),
                         new Claim("region", user.Region ?? ""),
                         new Claim("delegation", user.Delegation ?? "")
                     };
@@ -77,9 +71,6 @@ namespace CivicLens.API.Controllers
             }
         }
 
-        // ──────────────────────────────────────────────────────
-        // POST /api/auth/register
-        // ──────────────────────────────────────────────────────
         [HttpPost]
         [Route("register")]
         public IActionResult Register([FromBody] RegisterCitoyenDto dto)
@@ -109,16 +100,6 @@ namespace CivicLens.API.Controllers
             return BadRequest("Échec de l'inscription.");
         }
 
-        // ──────────────────────────────────────────────────────
-        // GET /api/auth/Reactivate?token=...
-        // Public endpoint — user is locked out so no [Authorize]
-        // ──────────────────────────────────────────────────────
-        /// <summary>
-        /// Validates a dedicated reactivation JWT and sets the Citoyen's
-        /// StatutCompte back to ACTIF.
-        /// The token must contain a "purpose": "reactivate" claim so that
-        /// normal login tokens cannot be used here.
-        /// </summary>
         [HttpGet("Reactivate")]
         public async Task<IActionResult> Reactivate([FromQuery] string token)
         {
@@ -149,12 +130,11 @@ namespace CivicLens.API.Controllers
                 return BadRequest("Token invalide ou corrompu.");
             }
 
-            // Verify it is a reactivation token, not a login token
             var purpose = principal.FindFirstValue("purpose");
             if (purpose != "reactivate")
                 return BadRequest("Ce lien n'est pas un lien de réactivation valide.");
 
-            var userIdStr = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = principal.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return BadRequest("Identifiant utilisateur invalide.");
 
@@ -165,22 +145,17 @@ namespace CivicLens.API.Controllers
             if (citoyen.StatutCompte == StatutCompte.ACTIF)
                 return Ok("Votre compte est déjà actif. Vous pouvez vous connecter normalement.");
 
-            // Reactivate from INACTIF or SUSPENDU — the token was legitimately issued
-            // when the user went INACTIF, but the background service may have since
-            // pushed them to SUSPENDU before they clicked the link. Both cases are valid.
             citoyen.StatutCompte = StatutCompte.ACTIF;
             await _db.SaveChangesAsync();
 
             return Ok("Votre compte a été réactivé avec succès. Vous pouvez maintenant vous connecter.");
         }
-    // ──────────────────────────────────────────────────────
-        // GET /api/auth/me
-        // ──────────────────────────────────────────────────────
+
         [HttpGet("me")]
         [Authorize(Roles = "CITOYEN")]
         public async Task<IActionResult> GetMe()
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 
@@ -203,14 +178,11 @@ namespace CivicLens.API.Controllers
             });
         }
 
-        // ──────────────────────────────────────────────────────
-        // PUT /api/auth/me
-        // ──────────────────────────────────────────────────────
         [HttpPut("me")]
         [Authorize(Roles = "CITOYEN")]
         public async Task<IActionResult> UpdateMe([FromBody] UpdateCitoyenDto dto)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 
@@ -230,9 +202,6 @@ namespace CivicLens.API.Controllers
             return Ok(new { message = "Profil mis à jour avec succès" });
         }
 
-        // ──────────────────────────────────────────────────────
-        // PUT /api/auth/me/password
-        // ──────────────────────────────────────────────────────
         [HttpPut("me/password")]
         [Authorize(Roles = "CITOYEN")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
@@ -240,7 +209,7 @@ namespace CivicLens.API.Controllers
             if (string.IsNullOrWhiteSpace(dto.NouveauMotDePasse))
                 return BadRequest("Le nouveau mot de passe est requis.");
 
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 

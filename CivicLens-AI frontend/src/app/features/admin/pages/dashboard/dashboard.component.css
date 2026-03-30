@@ -1,0 +1,74 @@
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+}
+
+.sidebar {
+  width: 240px;
+  background: #1a1f36;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  height: 100vh;
+}
+
+.sidebar-brand {
+  padding: 24px 20px;
+  font-size: 18px;
+  border-bottom: 1px solid #2d3555;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-name strong {
+  color: #4f8ef7;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  flex: 1;
+}
+
+.sidebar-nav a {
+  padding: 14px 24px;
+  color: #a0aec0;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background: #2d3555;
+  color: white;
+  border-left: 3px solid #4f8ef7;
+}
+
+.logout-btn {
+  margin: 16px;
+  padding: 12px;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.logout-btn:hover {
+  background: #c53030;
+}
+
+.admin-main {
+  margin-left: 240px;
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+}

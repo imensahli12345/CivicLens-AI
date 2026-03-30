@@ -1,0 +1,43 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>👥 Gestion des Citoyens</h1>
+    <span class="badge">{{ citoyens.length }} citoyens</span>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>CIN</th>
+          <th>Région</th>
+          <th>Délégation</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of citoyens">
+          <td>{{ c.prenom }} {{ c.nom }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.cin }}</td>
+          <td>{{ c.region }}</td>
+          <td>{{ c.delegation }}</td>
+          <td>
+            <span class="status-badge" [class]="c.statut.toLowerCase()">
+              {{ c.statut }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-activate" *ngIf="c.statut !== 'ACTIF'" (click)="updateStatut(c.id, 'ACTIF')">Activer</button>
+            <button class="btn-suspend" *ngIf="c.statut !== 'SUSPENDU'" (click)="updateStatut(c.id, 'SUSPENDU')">Suspendre</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

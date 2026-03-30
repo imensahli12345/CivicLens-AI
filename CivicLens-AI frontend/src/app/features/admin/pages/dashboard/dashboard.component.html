@@ -1,0 +1,18 @@
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🏛️</span>
+      <span class="brand-name">CivicLens <strong>Admin</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="active">📊 Tableau de bord</a>
+      <a routerLink="/admin/citoyens" routerLinkActive="active">👥 Citoyens</a>
+      <a routerLink="/admin/bureaux" routerLinkActive="active">🏢 Bureaux & Orgs</a>
+      <a routerLink="/admin/statistiques" routerLinkActive="active">📈 Statistiques</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">🚪 Déconnexion</button>
+  </aside>
+  <main class="admin-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

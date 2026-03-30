@@ -30,6 +30,17 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  private getRoleFromToken(): string {
+    const token = localStorage.getItem('access_token');
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload['role'] || '';
+    } catch {
+      return '';
+    }
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -44,14 +55,14 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         this.successMessage = 'Connexion réussie !';
         this.isLoading = false;
-        
-        // Option 1: Rediriger vers une page d'accueil temporaire
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          const role = this.getRoleFromToken();
+          if (role === 'SUPERADMIN' || role === 'ADMIN') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         }, 1500);
-        
-        // Option 2: Afficher un message de succès et rester sur la page
-        // (à vous de choisir selon vos besoins)
       },
       error: (error) => {
         this.errorMessage = this.getFriendlyLoginError(error);
@@ -64,10 +75,8 @@ export class LoginComponent implements OnInit {
     const status = error?.status;
     if (status === 0) return "Impossible de contacter le serveur. Vérifiez votre connexion ou réessayez plus tard.";
     if (status === 401) return 'Email ou mot de passe incorrect.';
-
     const backendMsg = (error?.error && typeof error.error === 'string') ? error.error.trim() : '';
     if (backendMsg) return backendMsg;
-
     return 'Impossible de se connecter pour le moment. Veuillez réessayer.';
   }
 
