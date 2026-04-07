@@ -47,4 +47,8 @@ export class AdminService {
   getBureaux(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/admin/bureaux`, { headers: this.getHeaders() });
   }
+
+  getOrganisations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/admin/organisations`, { headers: this.getHeaders() });
+  }
 }

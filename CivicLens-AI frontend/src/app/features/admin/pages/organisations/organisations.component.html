@@ -1,0 +1,92 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>🏛️ Organisations</h1>
+    <div class="header-actions">
+      <span class="badge">{{ filteredOrganisations.length }} organisations</span>
+      <button class="btn-create" (click)="toggleForm()">
+        {{ showForm ? '✕ Annuler' : '+ Nouvelle Organisation' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn" [class.active]="selectedDomaine === ''" (click)="filterByDomaine('')">Tous</button>
+    <button class="filter-btn" *ngFor="let d of domaines" [class.active]="selectedDomaine === d" (click)="filterByDomaine(d)">{{ d }}</button>
+  </div>
+
+  <div *ngIf="success" class="alert success">{{ success }}</div>
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+
+  <div *ngIf="showForm" class="form-card">
+    <h2>Créer une Organisation</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom de l'organisation</label>
+          <input type="text" formControlName="nomOrganisation" placeholder="Ex: Ministère des Transports" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="email@org.tn" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" formControlName="motDePasse" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type</label>
+          <select formControlName="typeOrganisation">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let t of typesOrganisation" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Domaine</label>
+          <select formControlName="domaineOrganisation">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gouvernorat <span style="color:#9ca3af;font-weight:400">(optionnel)</span></label>
+          <select formControlName="region">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" [disabled]="form.invalid || submitting">
+        {{ submitting ? 'Création...' : 'Créer l\'Organisation' }}
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>Domaine</th>
+          <th>Gouvernorat</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of filteredOrganisations">
+          <td>{{ o.nomOrganisation }}</td>
+          <td>{{ o.email }}</td>
+          <td><span class="type-badge">{{ o.typeOrganisation }}</span></td>
+          <td><span class="domaine-badge">{{ o.domaineOrganisation }}</span></td>
+          <td>{{ o.region || '—' }}</td>
+          <td><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

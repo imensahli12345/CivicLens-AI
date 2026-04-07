@@ -18,6 +18,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/bureaux/bureaux.component').then(m => m.BureauxComponent)
       },
       {
+        path: 'organisations',
+        loadComponent: () =>
+          import('./pages/organisations/organisations.component').then(m => m.OrganisationsComponent)
+      },
+      {
         path: 'statistiques',
         loadComponent: () =>
           import('./pages/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
