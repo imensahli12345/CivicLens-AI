@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CivicLens AI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+173e41b2dff395b5a7b78359305b167a3c53886f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b43cd2abdf144e75e43109c51011841b0543518b")]
 [assembly: System.Reflection.AssemblyProductAttribute("CivicLens AI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CivicLens AI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

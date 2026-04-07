@@ -78,9 +78,13 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("bureaux")]
-        public async Task<IActionResult> GetBureaux()
+        public async Task<IActionResult> GetBureaux([FromQuery] string? region = null)
         {
-            var bureaux = await _db.BureauxDeControle.Include(b => b.Services).ToListAsync();
+            var query = _db.BureauxDeControle.Include(b => b.Services).AsQueryable();
+            if (!string.IsNullOrEmpty(region))
+                query = query.Where(b => b.Region == region);
+
+            var bureaux = await query.ToListAsync();
             return Ok(bureaux.Select(b => new {
                 id = b.Id,
                 email = b.Email,
@@ -94,6 +98,21 @@ namespace CivicLens.API.Controllers
                     domaine = s.Domaine.ToString(),
                     statut = s.StatutCompte.ToString()
                 })
+            }));
+        }
+
+        [HttpGet("organisations")]
+        public async Task<IActionResult> GetOrganisations()
+        {
+            var orgs = await _db.Organisations.ToListAsync();
+            return Ok(orgs.Select(o => new {
+                id = o.Id,
+                email = o.Email,
+                nomOrganisation = o.NomOrganisation,
+                typeOrganisation = o.TypeOrganisation.ToString(),
+                domaineOrganisation = o.DomaineOrganisation.ToString(),
+                region = o.Region,
+                statut = o.StatutCompte.ToString()
             }));
         }
 
@@ -155,7 +174,6 @@ namespace CivicLens.API.Controllers
             {
                 Email = dto.Email,
                 MotDePasseHash = dto.MotDePasse,
-                Delegation = dto.Delegation,
                 NomOrganisation = dto.NomOrganisation,
                 TypeOrganisation = typeOrg,
                 DomaineOrganisation = domaine,
