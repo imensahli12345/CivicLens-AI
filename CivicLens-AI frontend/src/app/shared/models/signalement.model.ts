@@ -1,4 +1,11 @@
-export type SignalementStatut = 'EN_ATTENTE' | 'EN_COURS' | 'RESOLU' | 'REJETE';
+export type SignalementStatut =
+  | 'EN_ATTENTE'
+  | 'OUVERTE'
+  | 'ENVOYEE'
+  | 'EN_COURS_DETUDE'
+  | 'EN_COURS'
+  | 'RESOLU'
+  | 'REJETE';
 export type SignalementCategorie =
   | 'ROUTE'
   | 'ECLAIRAGE'

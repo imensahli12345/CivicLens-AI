@@ -5,6 +5,7 @@ import { SignalementService } from '../../../../core/services/signalement.servic
 import { Signalement } from '../../../../shared/models/signalement.model';
 import * as L from 'leaflet';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-signalement-details',
@@ -17,6 +18,7 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
   signalement = signal<Signalement | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  backLink = signal<string>('/dashboard/region');
   
   private map: L.Map | undefined;
   // Use custom marker to avoid webpack issues
@@ -43,7 +45,8 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
 
   constructor(
     private route: ActivatedRoute,
-    private signalementService: SignalementService
+    private signalementService: SignalementService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +63,11 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
     this.signalementService.getSignalementById(id).subscribe({
       next: (data) => {
         this.signalement.set(data);
+        const currentUserId =
+          this.authService.getCurrentUserFromStorage()?.id ||
+          this.authService.getCurrentUser()?.id ||
+          null;
+        this.backLink.set(currentUserId && data.citoyenId === currentUserId ? '/dashboard/mes-signalements' : '/dashboard/region');
         this.loading.set(false);
         // Map will be drawn in AfterViewInit or when data loads if AfterViewInit already ran
         setTimeout(() => this.initMap(data.latitude || 0, data.longitude || 0), 100);

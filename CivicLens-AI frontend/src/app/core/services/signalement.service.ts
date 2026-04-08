@@ -89,6 +89,14 @@ export class SignalementService {
 
   // Statistiques citoyen
   getMesStats(): Observable<SignalementStats> {
-    return this.api.get<SignalementStats>('/signalements/mes/stats');
+    return this.api.get<any>('/signalements/mes/stats').pipe(
+      import_rxjs_map((s) => ({
+        total: s?.total ?? s?.Total ?? 0,
+        enAttente: s?.enAttente ?? s?.EnAttente ?? 0,
+        enCours: s?.enCours ?? s?.EnCours ?? 0,
+        resolus: s?.resolus ?? s?.Resolus ?? 0,
+        rejetes: s?.rejetes ?? s?.Rejetes ?? 0
+      }))
+    );
   }
 }

@@ -35,18 +35,22 @@ export class HomePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const cached = this.authService.getCurrentUserFromStorage() || this.authService.getCurrentUser();
+    if (cached) {
+      this.user.set(cached);
+    }
+    this.loadStats();
+    this.loadEvenements();
+    this.loadDelegation();
+
     this.authService.fetchMe().subscribe({
       next: (u) => {
         this.user.set(u);
-        this.loadStats();
-        this.loadEvenements();
         this.loadDelegation();
       },
       error: () => {
-        this.user.set(this.authService.getCurrentUser());
-        this.loadStats();
-        this.loadEvenements();
-        this.loadDelegation();
+        const fallback = this.authService.getCurrentUserFromStorage() || this.authService.getCurrentUser();
+        this.user.set(fallback);
       }
     });
   }
@@ -79,7 +83,9 @@ export class HomePageComponent implements OnInit {
     }
     this.signalementService.getSignalementsDelegation(delegation).subscribe({
       next: (list) => {
-        this.delegationSignalements.set(list.slice(0, 3));
+        const myId = this.user()?.id;
+        const filtered = myId ? list.filter(s => s.citoyenId !== myId) : list;
+        this.delegationSignalements.set(filtered.slice(0, 3));
         this.loadingDelegation.set(false);
       },
       error: () => this.loadingDelegation.set(false)

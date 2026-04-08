@@ -23,6 +23,9 @@ export class SignalementCardComponent {
   statusLabels: Record<string, string> = {
     EN_ATTENTE: 'En attente',
     EN_COURS:   'En cours',
+    OUVERTE:    'En cours',
+    ENVOYEE:    'En cours',
+    EN_COURS_DETUDE: 'En cours',
     RESOLU:     'Résolu',
     REJETE:     'Rejeté'
   };
@@ -30,6 +33,9 @@ export class SignalementCardComponent {
   statusClasses: Record<string, string> = {
     EN_ATTENTE: 'badge-waiting',
     EN_COURS:   'badge-progress',
+    OUVERTE:    'badge-progress',
+    ENVOYEE:    'badge-progress',
+    EN_COURS_DETUDE: 'badge-progress',
     RESOLU:     'badge-resolved',
     REJETE:     'badge-rejected'
   };

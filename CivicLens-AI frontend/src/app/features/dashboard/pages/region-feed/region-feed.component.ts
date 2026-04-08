@@ -23,6 +23,7 @@ export class RegionFeedComponent implements OnInit {
   sortBy = signal<SortOption>('recent');
   filterCat = signal<SignalementCategorie | 'TOUTES'>('TOUTES');
   userDelegation = signal<string>('');
+  private currentUserId = signal<string | null>(null);
 
   categories: { value: SignalementCategorie | 'TOUTES'; label: string }[] = [
     { value: 'TOUTES',       label: 'Toutes catégories' },
@@ -60,6 +61,12 @@ export class RegionFeedComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    const cachedUser = this.authService.getCurrentUserFromStorage() || this.authService.getCurrentUser();
+    if (cachedUser?.id) this.currentUserId.set(cachedUser.id);
+    if (cachedUser?.delegation) {
+      this.userDelegation.set(cachedUser.delegation);
+      this.fetchSignalements(cachedUser.delegation);
+    }
     this.authService.fetchMe().subscribe({
       next: (user) => {
         const delegation = user.delegation;
@@ -68,16 +75,18 @@ export class RegionFeedComponent implements OnInit {
           this.loading.set(false);
           return;
         }
+        this.currentUserId.set(user.id);
         this.userDelegation.set(delegation);
         this.fetchSignalements(delegation);
       },
       error: () => {
-        const fallbackUser = this.authService.getCurrentUser();
+        const fallbackUser = this.authService.getCurrentUserFromStorage() || this.authService.getCurrentUser();
         if (!fallbackUser?.delegation) {
           this.error.set('Délégation de l\'utilisateur introuvable (hors ligne)');
           this.loading.set(false);
           return;
         }
+        if (fallbackUser?.id) this.currentUserId.set(fallbackUser.id);
         this.userDelegation.set(fallbackUser.delegation);
         this.fetchSignalements(fallbackUser.delegation);
       }
@@ -87,7 +96,8 @@ export class RegionFeedComponent implements OnInit {
   private fetchSignalements(delegation: string): void {
     this.signalementService.getSignalementsDelegation(delegation).subscribe({
       next: (list) => {
-        this.signalements.set(list);
+        const myId = this.currentUserId();
+        this.signalements.set(myId ? list.filter(s => s.citoyenId !== myId) : list);
         this.loading.set(false);
       },
       error: (err) => {

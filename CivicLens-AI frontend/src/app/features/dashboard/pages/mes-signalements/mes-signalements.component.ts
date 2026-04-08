@@ -39,7 +39,13 @@ export class MesSignalementsComponent implements OnInit {
     let list = this.signalements();
     const q = this.searchQuery().toLowerCase().trim();
     const f = this.filterStatut();
-    if (f !== 'TOUS') list = list.filter(s => s.statut === f);
+    if (f !== 'TOUS') {
+      if (f === 'EN_COURS') {
+        list = list.filter(s => ['EN_COURS', 'OUVERTE', 'ENVOYEE', 'EN_COURS_DETUDE'].includes(s.statut as any));
+      } else {
+        list = list.filter(s => s.statut === f);
+      }
+    }
     if (q) list = list.filter(s =>
       s.titre.toLowerCase().includes(q) ||
       s.adresse.toLowerCase().includes(q) ||
