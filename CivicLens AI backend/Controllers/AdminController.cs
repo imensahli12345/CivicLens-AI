@@ -26,9 +26,24 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("citoyens")]
-        public async Task<IActionResult> GetCitoyens()
+        public async Task<IActionResult> GetCitoyens([FromQuery] string? region = null, [FromQuery] string? delegation = null, [FromQuery] string? statut = null)
         {
-            var citoyens = await _db.Citoyens.ToListAsync();
+            var query = _db.Citoyens.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(region))
+                query = query.Where(c => c.Region == region);
+
+            if (!string.IsNullOrWhiteSpace(delegation))
+                query = query.Where(c => c.Delegation == delegation);
+
+            if (!string.IsNullOrWhiteSpace(statut))
+            {
+                if (!Enum.TryParse<StatutCompte>(statut, true, out var parsed))
+                    return BadRequest("Statut invalide.");
+                query = query.Where(c => c.StatutCompte == parsed);
+            }
+
+            var citoyens = await query.ToListAsync();
             return Ok(citoyens.Select(c => new {
                 id = c.Id,
                 nom = c.Nom,
@@ -41,20 +56,6 @@ namespace CivicLens.API.Controllers
                 statut = c.StatutCompte.ToString(),
                 dateCreation = c.DateCreation
             }));
-        }
-
-        [HttpPut("citoyens/{id}/statut")]
-        public async Task<IActionResult> UpdateCitoyenStatut(Guid id, [FromBody] string statut)
-        {
-            var citoyen = await _db.Citoyens.FindAsync(id);
-            if (citoyen == null) return NotFound("Citoyen introuvable.");
-
-            if (!Enum.TryParse<StatutCompte>(statut, true, out var newStatut))
-                return BadRequest("Statut invalide.");
-
-            citoyen.StatutCompte = newStatut;
-            await _db.SaveChangesAsync();
-            return Ok("Statut mis à jour.");
         }
 
         [HttpGet("stats")]
