@@ -72,26 +72,24 @@ namespace CivicLens_AI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AncienStatut")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("DateChangement")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("IdModificateur")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("NouveauStatut")
+                    b.Property<string>("IdModificateurs")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<long>("SignalementId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Statuts")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("SignalementId");
+                    b.HasIndex("SignalementId")
+                        .IsUnique();
 
                     b.ToTable("HistoriquesStatut");
                 });

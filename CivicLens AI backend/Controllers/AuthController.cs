@@ -210,7 +210,7 @@ namespace CivicLens.API.Controllers
             if (string.IsNullOrWhiteSpace(dto.NouveauMotDePasse))
                 return BadRequest("Le nouveau mot de passe est requis.");
 
-            var userIdStr = User.FindFirstValue("nameid");
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 

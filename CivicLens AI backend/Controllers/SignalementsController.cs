@@ -155,9 +155,8 @@ namespace CivicLens.API.Controllers
                 _db.HistoriquesStatut.Add(new HistoriqueStatut
                 {
                     SignalementId = signalement.Id,
-                    AncienStatut = StatutSignalement.EN_ATTENTE,
-                    NouveauStatut = StatutSignalement.EN_ATTENTE,
-                    IdModificateur = citoyenId,
+                    Statuts = new List<StatutSignalement> { StatutSignalement.EN_ATTENTE },
+                    IdModificateurs = new List<Guid>(),
                     DateChangement = signalement.DateCreation
                 });
 
@@ -228,21 +227,21 @@ namespace CivicLens.API.Controllers
                 .Select(i => i.UrlImage)
                 .ToListAsync(ct);
 
-            var historiques = await _db.HistoriquesStatut
+            var historique = await _db.HistoriquesStatut
                 .AsNoTracking()
-                .Where(h => h.SignalementId == id)
-                .OrderBy(h => h.DateChangement)
-                .Select(h => new
-                {
-                    h.Id,
-                    h.AncienStatut,
-                    h.NouveauStatut,
-                    h.DateChangement,
-                    h.IdModificateur
-                })
-                .ToListAsync(ct);
+                .FirstOrDefaultAsync(h => h.SignalementId == id, ct);
 
-            return Ok(new { signalement, images, historiques });
+            var historiqueDto = historique == null
+                ? null
+                : new
+                {
+                    historique.Id,
+                    historique.DateChangement,
+                    Statuts = historique.Statuts.Select(s => s.ToString()).ToList(),
+                    IdModificateurs = historique.IdModificateurs
+                };
+
+            return Ok(new { signalement, images, historique = historiqueDto });
         }
 
         [HttpGet("mes/stats")]

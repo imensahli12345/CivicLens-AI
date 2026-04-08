@@ -1,6 +1,7 @@
 using CivicLens.API.Models.Entities;
 using CivicLens.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CivicLens.API.Data
 {
@@ -22,6 +23,14 @@ namespace CivicLens.API.Data
         public DbSet<Participation> Participations { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+
+        private static string SerializeStatuts(List<StatutSignalement> v) => JsonSerializer.Serialize(v);
+        private static List<StatutSignalement> DeserializeStatuts(string v) =>
+            string.IsNullOrWhiteSpace(v) ? new List<StatutSignalement>() : (JsonSerializer.Deserialize<List<StatutSignalement>>(v) ?? new List<StatutSignalement>());
+
+        private static string SerializeGuids(List<Guid> v) => JsonSerializer.Serialize(v);
+        private static List<Guid> DeserializeGuids(string v) =>
+            string.IsNullOrWhiteSpace(v) ? new List<Guid>() : (JsonSerializer.Deserialize<List<Guid>>(v) ?? new List<Guid>());
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -70,12 +79,14 @@ namespace CivicLens.API.Data
                 .HasConversion<string>();
 
             modelBuilder.Entity<HistoriqueStatut>()
-                .Property(h => h.AncienStatut)
-                .HasConversion<string>();
+                .Property(h => h.Statuts)
+                .HasConversion(v => SerializeStatuts(v), v => DeserializeStatuts(v))
+                .HasColumnType("jsonb");
 
             modelBuilder.Entity<HistoriqueStatut>()
-                .Property(h => h.NouveauStatut)
-                .HasConversion<string>();
+                .Property(h => h.IdModificateurs)
+                .HasConversion(v => SerializeGuids(v), v => DeserializeGuids(v))
+                .HasColumnType("jsonb");
 
             // ── Unique Constraints ──
             modelBuilder.Entity<User>()
@@ -89,6 +100,9 @@ namespace CivicLens.API.Data
 
             modelBuilder.Entity<Vote>()
                 .HasIndex(v => new { v.CitoyenId, v.SignalementId }).IsUnique();
+
+            modelBuilder.Entity<HistoriqueStatut>()
+                .HasIndex(h => h.SignalementId).IsUnique();
 
             // ── Relations ──
 
