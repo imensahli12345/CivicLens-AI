@@ -219,5 +219,25 @@
       "country": "Tunisie"
     },
     "from_cache": false
+  },
+  "36.856,11.082": {
+    "zone_score": 1.0,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "address": {
+      "city": "Azmour",
+      "county": "Kelibia Ouest",
+      "postcode": "8065",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Azmour",
+      "county": "Délégation de Kelibia Ouest",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
   }
 }
