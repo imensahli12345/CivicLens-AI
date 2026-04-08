@@ -20,8 +20,17 @@ export class AuthService {
       },
       { responseType: 'text' }
     ).pipe(
-      tap(token => {
+      tap(response => {
+        let token = response;
+        try {
+          // Tenter de parser si c'est du JSON
+          const json = JSON.parse(response);
+          token = json.token || json.accessToken || json.jwt || response;
+        } catch {
+          // Sinon, on garde la chaîne brute
+        }
         localStorage.setItem('access_token', token);
+        localStorage.removeItem('current_user'); // Forcer le rafraîchissement des données du nouvel utilisateur
       })
     );
   }
@@ -44,6 +53,8 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('current_user');
+    localStorage.removeItem('phone-notification-dismissed');
   }
 
   getToken(): string | null {
@@ -70,12 +81,26 @@ export class AuthService {
     const payload = this.decodeToken(token);
     if (!payload) return null;
 
+    // Extraire l'ID depuis plusieurs clés possibles
     const id =
       payload.nameid ||
       payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
       payload.sub ||
       payload.id ||
       '';
+
+    // Extraire le rôle depuis plusieurs clés possibles
+    const role = 
+      payload.role || 
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
+      'CITOYEN';
+
+    // Préparer l'URL de la photo si elle existe et est relative
+    let photoUrl = payload.photoUrl || payload['photoUrl'] || null;
+    if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('data:')) {
+      const baseUrl = environment.apiUrl.replace('/api', '');
+      photoUrl = `${baseUrl}${photoUrl.startsWith('/') ? '' : '/'}${photoUrl}`;
+    }
 
     return {
       id,
@@ -86,8 +111,8 @@ export class AuthService {
       delegation: payload.delegation || '',
       cin: payload.cin || '',
       telephone: payload.telephone || payload['telephone'] || '',
-      role: payload.role || 'CITOYEN',
-      photoUrl: payload.photoUrl || payload['photoUrl'] || null,
+      role: role,
+      photoUrl: photoUrl,
     };
   }
 
@@ -96,6 +121,11 @@ export class AuthService {
     try {
       const user = await this.fetchMe().toPromise();
       if (user) {
+        // Préparer l'URL de la photo si elle est relative
+        if (user.photoUrl && !user.photoUrl.startsWith('http') && !user.photoUrl.startsWith('data:')) {
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          user.photoUrl = `${baseUrl}${user.photoUrl.startsWith('/') ? '' : '/'}${user.photoUrl}`;
+        }
         // Mettre à jour les données utilisateur dans le token ou localStorage
         localStorage.setItem('current_user', JSON.stringify(user));
         return user;
@@ -120,7 +150,15 @@ export class AuthService {
   }
 
   fetchMe(): Observable<User> {
-    return this.apiService.get<User>('/auth/me');
+    return this.apiService.get<User>('/auth/me').pipe(
+      tap(user => {
+        // Préparer l'URL de la photo si elle est relative
+        if (user.photoUrl && !user.photoUrl.startsWith('http') && !user.photoUrl.startsWith('data:')) {
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          user.photoUrl = `${baseUrl}${user.photoUrl.startsWith('/') ? '' : '/'}${user.photoUrl}`;
+        }
+      })
+    );
   }
 
   getUserRole(): string {

@@ -61,7 +61,7 @@
           </div>
           <div class="photos-gallery">
             <div class="photo-wrapper" *ngFor="let url of sig.imagesUrl">
-              <img [src]="'http://localhost:5242' + url" alt="Photo incident" class="sig-photo" />
+              <img [src]="getImageUrl(url)" alt="Photo incident" class="sig-photo" />
             </div>
           </div>
         </div>

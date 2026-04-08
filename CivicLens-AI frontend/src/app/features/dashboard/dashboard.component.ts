@@ -66,6 +66,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const storedUser = this.authService.getCurrentUserFromStorage();
     this.user.set(storedUser);
     this.config.set(getDashboardConfig(storedUser?.role || 'CITOYEN'));
+    
+    // Si on n'a pas de données en cache, rafraîchir immédiatement depuis l'API
+    if (!localStorage.getItem('current_user')) {
+      this.authService.refreshCurrentUser().then(freshUser => {
+        if (freshUser) {
+          this.user.set(freshUser);
+        }
+      });
+    }
   }
 
   private startUserCheck(): void {
@@ -91,7 +100,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       } catch (error) {
         console.log('Erreur lors de la vérification du profil:', error);
       }
-    }, 3000); // Réduit à 3 secondes pour une meilleure réactivité
+    }, 30000); // Augmenté à 30 secondes pour une meilleure stabilité et moins de charge serveur
   }
 
   toggleSidebar(): void {

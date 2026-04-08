@@ -13,13 +13,9 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(isFormData = false): HttpHeaders {
-    const token = localStorage.getItem('access_token');
     let headersConfig: any = {};
     if (!isFormData) {
       headersConfig['Content-Type'] = 'application/json';
-    }
-    if (token) {
-      headersConfig['Authorization'] = `Bearer ${token}`;
     }
     return new HttpHeaders(headersConfig);
   }

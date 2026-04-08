@@ -108,10 +108,9 @@ export class ProfilEditComponent implements OnInit {
     this.errorMsg.set(null);
 
     const raw = this.form.getRawValue();
-    const savedPhoto = this.user()?.photoUrl ?? '';
     const payload = {
       ...raw,
-      photoUrl: this.photoDirty() ? savedPhoto : (raw.photoUrl ?? savedPhoto),
+      photoUrl: this.photoDirty() ? this.photoPreview : (raw.photoUrl || this.user()?.photoUrl || null),
     };
 
     this.apiService.put('/auth/me', payload).subscribe({
@@ -126,7 +125,7 @@ export class ProfilEditComponent implements OnInit {
           telephone: raw.telephone, // Ajouter le téléphone
           region: raw.region,
           delegation: raw.delegation,
-          photoUrl: this.photoDirty() ? (u.photoUrl ?? null) : (payload.photoUrl ?? u.photoUrl ?? null),
+          photoUrl: this.photoDirty() ? this.photoPreview : (payload.photoUrl ?? u.photoUrl ?? null),
         };
         this.user.set(updatedUser);
         

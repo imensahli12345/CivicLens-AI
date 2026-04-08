@@ -68,7 +68,10 @@ export class SignalementCardComponent {
   getImageUrl(): string | null {
     if (!this.signalement.imageUrl) return null;
     const baseUrl = environment.apiUrl.replace('/api', '');
-    return `${baseUrl}${this.signalement.imageUrl}`;
+    const url = this.signalement.imageUrl;
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    if (url.startsWith('/')) return `${baseUrl}${url}`;
+    return `${baseUrl}/${url}`;
   }
 
   getFormattedAddress(): string {

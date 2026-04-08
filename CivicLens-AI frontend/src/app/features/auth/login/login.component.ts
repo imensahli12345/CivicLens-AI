@@ -30,17 +30,6 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private getRoleFromToken(): string {
-    const token = localStorage.getItem('access_token');
-    if (!token) return '';
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload['role'] || '';
-    } catch {
-      return '';
-    }
-  }
-
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -56,7 +45,7 @@ export class LoginComponent implements OnInit {
         this.successMessage = 'Connexion réussie !';
         this.isLoading = false;
         setTimeout(() => {
-          const role = this.getRoleFromToken();
+          const role = this.authService.getUserRole();
           if (role === 'SUPERADMIN' || role === 'ADMIN') {
             this.router.navigate(['/admin']);
           } else {

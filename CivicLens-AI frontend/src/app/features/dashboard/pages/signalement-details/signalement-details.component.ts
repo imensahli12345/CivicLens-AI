@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SignalementService } from '../../../../core/services/signalement.service';
 import { Signalement } from '../../../../shared/models/signalement.model';
 import * as L from 'leaflet';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-signalement-details',
@@ -112,6 +113,13 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
     return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
+  }
+
+  getImageUrl(url: string): string {
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    if (url.startsWith('/')) return `${baseUrl}${url}`;
+    return `${baseUrl}/${url}`;
   }
 
   onVote(): void {
