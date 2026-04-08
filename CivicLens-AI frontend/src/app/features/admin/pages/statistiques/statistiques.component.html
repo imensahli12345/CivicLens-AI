@@ -6,52 +6,88 @@
   <div *ngIf="loading" class="loading">Chargement...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <div *ngIf="stats" class="stats-grid">
-    <div class="stat-card blue">
-      <div class="stat-icon">👥</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.totalCitoyens }}</div>
-        <div class="stat-label">Citoyens</div>
+  <div *ngIf="totals && series" class="cards-grid">
+    <div class="metric-card" *ngFor="let c of cards" [class]="'metric-card ' + c.color">
+      <div class="metric-top">
+        <div class="metric-icon">
+          <svg *ngIf="c.icon === 'users'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <path d="M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+            <path d="M22 21v-2a3 3 0 0 0-2-2.83" />
+            <path d="M18 3.17a4 4 0 0 1 0 7.66" />
+          </svg>
+          <svg *ngIf="c.icon === 'alert'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+            <path d="M10.3 3.6 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" />
+          </svg>
+          <svg *ngIf="c.icon === 'building'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M3 21h18" />
+            <path d="M7 21V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14" />
+            <path d="M9 9h2" />
+            <path d="M13 9h2" />
+            <path d="M9 13h2" />
+            <path d="M13 13h2" />
+            <path d="M9 17h2" />
+            <path d="M13 17h2" />
+          </svg>
+          <svg *ngIf="c.icon === 'bank'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M3 10h18" />
+            <path d="M5 10V8l7-4 7 4v2" />
+            <path d="M4 21h16" />
+            <path d="M6 10v9" />
+            <path d="M10 10v9" />
+            <path d="M14 10v9" />
+            <path d="M18 10v9" />
+          </svg>
+          <svg *ngIf="c.icon === 'check'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          <svg *ngIf="c.icon === 'lock'" viewBox="0 0 24 24" fill="none" class="metric-svg">
+            <path d="M17 11V8a5 5 0 0 0-10 0v3" />
+            <path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2Z" />
+          </svg>
+        </div>
+        <div class="metric-meta">
+          <div class="metric-value">{{ c.value }}</div>
+          <div class="metric-label">{{ c.label }}</div>
+        </div>
       </div>
-    </div>
 
-    <div class="stat-card purple">
-      <div class="stat-icon">🚨</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.totalSignalements }}</div>
-        <div class="stat-label">Signalements</div>
+      <button class="metric-chart" type="button" (click)="openChart(c.seriesKey, c.label, c.color)">
+        <svg class="mini-chart" viewBox="0 0 260 72" preserveAspectRatio="none">
+          <path class="mini-area" [attr.d]="getAreaPath(series[c.seriesKey], 260, 72, 10)"></path>
+          <path class="mini-line" [attr.d]="getLinePath(series[c.seriesKey], 260, 72, 10)"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-modal-overlay" *ngIf="chartOpen" (click)="closeChart()">
+    <div class="chart-modal" (click)="$event.stopPropagation()">
+      <div class="chart-modal-head">
+        <div class="chart-modal-title">{{ activeChartTitle }}</div>
+        <button class="chart-modal-close" type="button" (click)="closeChart()">✕</button>
       </div>
-    </div>
+      <div class="chart-modal-body" *ngIf="activeChartKey">
+        <div class="chart-modal-sub">Période : {{ data?.range?.days }} derniers jours</div>
+        <svg class="big-chart" viewBox="0 0 820 260" preserveAspectRatio="none" [attr.data-color]="activeChartColor">
+          <g class="axis" *ngIf="getNiceMax(getActiveSeries())">
+            <line class="axis-line" x1="40" y1="40" x2="40" y2="220"></line>
+            <line class="axis-line" x1="40" y1="220" x2="780" y2="220"></line>
 
-    <div class="stat-card green">
-      <div class="stat-icon">🏢</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.totalBureaux }}</div>
-        <div class="stat-label">Bureaux de Contrôle</div>
-      </div>
-    </div>
+            <g *ngFor="let t of getYTicks(getActiveSeries(), 820, 260, 40, 4)">
+              <line class="grid-line" x1="40" [attr.y1]="t.y" x2="780" [attr.y2]="t.y"></line>
+              <text class="axis-label" x="34" [attr.y]="t.y + 4" text-anchor="end">{{ t.label }}</text>
+            </g>
 
-    <div class="stat-card orange">
-      <div class="stat-icon">🏛️</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.totalOrganisations }}</div>
-        <div class="stat-label">Organisations</div>
-      </div>
-    </div>
+            <text class="axis-label" x="40" y="244" text-anchor="start">{{ getXAxisLabels(getActiveSeries()).start }}</text>
+            <text class="axis-label" x="780" y="244" text-anchor="end">{{ getXAxisLabels(getActiveSeries()).end }}</text>
+          </g>
 
-    <div class="stat-card yellow">
-      <div class="stat-icon">⏳</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.signalementsEnAttente }}</div>
-        <div class="stat-label">Signalements en attente</div>
-      </div>
-    </div>
-
-    <div class="stat-card teal">
-      <div class="stat-icon">✅</div>
-      <div class="stat-info">
-        <div class="stat-value">{{ stats.signalementsResolus }}</div>
-        <div class="stat-label">Signalements résolus</div>
+          <path class="big-area" [attr.d]="getAreaPath(getActiveSeries(), 820, 260, 40)"></path>
+          <path class="big-line" [attr.d]="getLinePath(getActiveSeries(), 820, 260, 40)"></path>
+        </svg>
       </div>
     </div>
   </div>

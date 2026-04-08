@@ -29,8 +29,8 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'statistiques',
-        loadComponent: () =>
-          import('./pages/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
       }
     ]
   }

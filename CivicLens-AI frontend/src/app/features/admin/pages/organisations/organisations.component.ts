@@ -2,23 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-organisations',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './organisations.component.html',
   styleUrl: './organisations.component.css'
 })
 export class OrganisationsComponent implements OnInit {
   organisations: any[] = [];
-  filteredOrganisations: any[] = [];
   loading = true;
   error = '';
   success = '';
   showForm = false;
   submitting = false;
   selectedDomaine = '';
+  selectedType = '';
+  searchQuery = '';
+  selectedOrganisation: any | null = null;
+  detailsOpen = false;
+  togglingId: string | null = null;
 
   form: FormGroup;
 
@@ -46,25 +51,43 @@ export class OrganisationsComponent implements OnInit {
     this.loadOrganisations();
   }
 
+  get filteredOrganisations(): any[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.organisations;
+    return this.organisations.filter((o) => {
+      const name = (o?.nomOrganisation ?? '').toLowerCase();
+      const email = (o?.email ?? '').toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
+  }
+
   loadOrganisations() {
     this.loading = true;
-    this.adminService.getOrganisations().subscribe({
+    this.adminService.getOrganisationsFiltered({
+      domaine: this.selectedDomaine || undefined,
+      type: this.selectedType || undefined
+    }).subscribe({
       next: (data) => {
         this.organisations = data;
-        this.filteredOrganisations = data;
         this.loading = false;
       },
       error: () => { this.error = 'Erreur de chargement'; this.loading = false; }
     });
   }
 
-  filterByDomaine(domaine: string) {
-    this.selectedDomaine = domaine;
-    if (!domaine) {
-      this.filteredOrganisations = this.organisations;
-    } else {
-      this.filteredOrganisations = this.organisations.filter(o => o.domaineOrganisation === domaine);
-    }
+  onDomaineChange(): void {
+    this.loadOrganisations();
+  }
+
+  onTypeChange(): void {
+    this.loadOrganisations();
+  }
+
+  resetFilters(): void {
+    this.selectedDomaine = '';
+    this.selectedType = '';
+    this.searchQuery = '';
+    this.loadOrganisations();
   }
 
   toggleForm() {
@@ -88,6 +111,34 @@ export class OrganisationsComponent implements OnInit {
       error: (err) => {
         this.error = typeof err.error === 'string' ? err.error : 'Erreur lors de la création';
         this.submitting = false;
+      }
+    });
+  }
+
+  openDetails(org: any): void {
+    this.selectedOrganisation = org;
+    this.detailsOpen = true;
+  }
+
+  closeDetails(): void {
+    this.detailsOpen = false;
+    this.selectedOrganisation = null;
+  }
+
+  toggleOrganisation(org: any): void {
+    if (!org?.id) return;
+    const next = org.statut === 'ACTIF' ? 'INACTIF' : 'ACTIF';
+    const prev = org.statut;
+    this.togglingId = org.id;
+    org.statut = next;
+    this.adminService.updateOrganisationStatut(org.id, next).subscribe({
+      next: (res) => {
+        org.statut = res?.statut ?? next;
+        this.togglingId = null;
+      },
+      error: () => {
+        org.statut = prev;
+        this.togglingId = null;
       }
     });
   }

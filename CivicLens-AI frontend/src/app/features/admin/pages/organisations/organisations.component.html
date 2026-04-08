@@ -9,9 +9,34 @@
     </div>
   </div>
 
-  <div class="filter-bar">
-    <button class="filter-btn" [class.active]="selectedDomaine === ''" (click)="filterByDomaine('')">Tous</button>
-    <button class="filter-btn" *ngFor="let d of domaines" [class.active]="selectedDomaine === d" (click)="filterByDomaine(d)">{{ d }}</button>
+  <div class="filters-card">
+    <div class="filters-head">
+      <div class="filters-title">Filtres</div>
+      <button class="btn-reset" (click)="resetFilters()" [disabled]="!selectedDomaine && !selectedType && !searchQuery">
+        Réinitialiser
+      </button>
+    </div>
+
+    <div class="filters-grid">
+      <div class="control">
+        <label>Rechercher</label>
+        <input type="text" placeholder="Nom ou email…" [(ngModel)]="searchQuery" />
+      </div>
+      <div class="control">
+        <label>Domaine</label>
+        <select [(ngModel)]="selectedDomaine" (change)="onDomaineChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>Type</label>
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let t of typesOrganisation" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="success" class="alert success">{{ success }}</div>
@@ -75,6 +100,7 @@
           <th>Domaine</th>
           <th>Gouvernorat</th>
           <th>Statut</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -85,8 +111,63 @@
           <td><span class="domaine-badge">{{ o.domaineOrganisation }}</span></td>
           <td>{{ o.region || '—' }}</td>
           <td><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></td>
+          <td class="actions-cell">
+            <button class="btn-details" type="button" (click)="openDetails(o)">Détails</button>
+          </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="modal-overlay" *ngIf="detailsOpen" (click)="closeDetails()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">Organisation</div>
+        <button class="modal-close" type="button" (click)="closeDetails()">✕</button>
+      </div>
+
+      <div *ngIf="selectedOrganisation as o" class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Nom</div>
+            <div class="info-value">{{ o.nomOrganisation }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ o.email }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Type</div>
+            <div class="info-value"><span class="type-badge">{{ o.typeOrganisation }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Domaine</div>
+            <div class="info-value"><span class="domaine-badge">{{ o.domaineOrganisation }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Gouvernorat</div>
+            <div class="info-value">{{ o.region || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Délégation</div>
+            <div class="info-value">{{ o.delegation || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Statut</div>
+            <div class="info-value"><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Création</div>
+            <div class="info-value">{{ o.dateCreation ? (o.dateCreation | date:'dd/MM/yyyy') : '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" *ngIf="selectedOrganisation as o">
+        <button class="status-toggle status-toggle-primary" type="button" (click)="toggleOrganisation(o)" [disabled]="togglingId === o.id">
+          {{ o.statut === 'ACTIF' ? 'Désactiver le compte' : 'Activer le compte' }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

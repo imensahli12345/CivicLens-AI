@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-bureaux',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './bureaux.component.html',
   styleUrl: './bureaux.component.css'
 })
@@ -18,6 +19,12 @@ export class BureauxComponent implements OnInit {
   showForm = false;
   submitting = false;
   delegations: string[] = [];
+  filterRegion = '';
+  filterDelegation = '';
+  filterDelegations: string[] = [];
+  selectedBureau: any | null = null;
+  detailsOpen = false;
+  togglingId: string | null = null;
 
   form: FormGroup;
 
@@ -84,9 +91,57 @@ export class BureauxComponent implements OnInit {
 
   loadBureaux() {
     this.loading = true;
-    this.adminService.getBureaux().subscribe({
-      next: (data) => { this.bureaux = data; this.loading = false; },
+    this.adminService.getBureauxFiltered({
+      region: this.filterRegion || undefined,
+      delegation: this.filterDelegation || undefined
+    }).subscribe({
+      next: (data) => { this.bureaux = data || []; this.loading = false; },
       error: () => { this.error = 'Erreur de chargement'; this.loading = false; }
+    });
+  }
+
+  onFilterRegionChange(): void {
+    this.filterDelegations = this.filterRegion ? (this.regionDelegations[this.filterRegion] || []) : [];
+    this.filterDelegation = '';
+    this.loadBureaux();
+  }
+
+  onFilterDelegationChange(): void {
+    this.loadBureaux();
+  }
+
+  resetFilters(): void {
+    this.filterRegion = '';
+    this.filterDelegation = '';
+    this.filterDelegations = [];
+    this.loadBureaux();
+  }
+
+  openDetails(bureau: any): void {
+    this.selectedBureau = bureau;
+    this.detailsOpen = true;
+  }
+
+  closeDetails(): void {
+    this.detailsOpen = false;
+    this.selectedBureau = null;
+  }
+
+  toggleBureau(bureau: any): void {
+    if (!bureau?.id) return;
+    const next = bureau.statut === 'ACTIF' ? 'INACTIF' : 'ACTIF';
+    const prev = bureau.statut;
+    this.togglingId = bureau.id;
+    bureau.statut = next;
+    this.adminService.updateBureauStatut(bureau.id, next).subscribe({
+      next: (res) => {
+        bureau.statut = res?.statut ?? next;
+        this.togglingId = null;
+      },
+      error: () => {
+        bureau.statut = prev;
+        this.togglingId = null;
+      }
     });
   }
 

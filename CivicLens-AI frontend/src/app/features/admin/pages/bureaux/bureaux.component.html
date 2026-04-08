@@ -12,6 +12,31 @@
   <div *ngIf="success" class="alert success">{{ success }}</div>
   <div *ngIf="error" class="alert error">{{ error }}</div>
 
+  <div class="filters-card">
+    <div class="filters-head">
+      <div class="filters-title">Filtres</div>
+      <button class="btn-reset" (click)="resetFilters()" [disabled]="!filterRegion && !filterDelegation">
+        Réinitialiser
+      </button>
+    </div>
+    <div class="filters-grid">
+      <div class="control">
+        <label>Gouvernorat</label>
+        <select [(ngModel)]="filterRegion" (change)="onFilterRegionChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>Délégation</label>
+        <select [(ngModel)]="filterDelegation" (change)="onFilterDelegationChange()" [disabled]="!filterRegion">
+          <option value="">Toutes</option>
+          <option *ngFor="let d of filterDelegations" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div *ngIf="showForm" class="form-card">
     <h2>Créer un Bureau de Contrôle</h2>
     <form [formGroup]="form" (ngSubmit)="submit()">
@@ -31,7 +56,7 @@
           <input type="text" formControlName="matricule" placeholder="Ex: BDC-2024-001" />
         </div>
         <div class="form-group">
-          <label>Région</label>
+          <label>Gouvernorat</label>
           <select formControlName="region">
             <option value="">-- Choisir --</option>
             <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
@@ -59,10 +84,11 @@
         <tr>
           <th>Email</th>
           <th>Matricule</th>
-          <th>Région</th>
+          <th>Gouvernorat</th>
           <th>Délégation</th>
           <th>Statut</th>
           <th>Services</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -75,8 +101,69 @@
             <span class="status-badge" [class]="b.statut.toLowerCase()">{{ b.statut }}</span>
           </td>
           <td><span class="services-count">{{ b.services?.length || 0 }} services</span></td>
+          <td class="actions-cell">
+            <button class="status-toggle" type="button" (click)="toggleBureau(b)" [disabled]="togglingId === b.id">
+              {{ b.statut === 'ACTIF' ? 'Désactiver' : 'Activer' }}
+            </button>
+            <button class="btn-details" type="button" (click)="openDetails(b)">Détails</button>
+          </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="modal-overlay" *ngIf="detailsOpen" (click)="closeDetails()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">Bureau de contrôle</div>
+        <button class="modal-close" type="button" (click)="closeDetails()">✕</button>
+      </div>
+
+      <div *ngIf="selectedBureau as b" class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ b.email }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Matricule</div>
+            <div class="info-value">{{ b.matricule }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Gouvernorat</div>
+            <div class="info-value">{{ b.region }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Délégation</div>
+            <div class="info-value">{{ b.delegation }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Statut</div>
+            <div class="info-value">
+              <span class="status-badge" [class]="b.statut.toLowerCase()">{{ b.statut }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="services-section">
+          <div class="services-title">Services</div>
+          <div class="services-table">
+            <div class="services-row services-head">
+              <div>Nom</div>
+              <div>Domaine</div>
+              <div>Statut</div>
+            </div>
+            <div class="services-row" *ngFor="let s of (b.services || [])">
+              <div class="service-name">{{ s.nom }}</div>
+              <div><span class="pill">{{ s.domaine }}</span></div>
+              <div><span class="status-badge" [class]="s.statut.toLowerCase()">{{ s.statut }}</span></div>
+            </div>
+            <div class="services-empty" *ngIf="!b.services || b.services.length === 0">
+              Aucun service.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
