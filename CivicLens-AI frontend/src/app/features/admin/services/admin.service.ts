@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -15,15 +15,12 @@ export class AdminService {
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  getCitoyens(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/admin/citoyens`, { headers: this.getHeaders() });
-  }
-
-  updateCitoyenStatut(id: string, statut: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/admin/citoyens/${id}/statut`, JSON.stringify(statut), {
-      headers: this.getHeaders().set('Content-Type', 'application/json'),
-      responseType: 'text'
-    });
+  getCitoyens(filters?: { region?: string; delegation?: string; statut?: string }): Observable<any[]> {
+    let params = new HttpParams();
+    if (filters?.region) params = params.set('region', filters.region);
+    if (filters?.delegation) params = params.set('delegation', filters.delegation);
+    if (filters?.statut) params = params.set('statut', filters.statut);
+    return this.http.get<any[]>(`${this.baseUrl}/admin/citoyens`, { headers: this.getHeaders(), params });
   }
 
   getStats(): Observable<any> {

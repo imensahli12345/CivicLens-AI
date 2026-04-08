@@ -6,7 +6,12 @@ export const ADMIN_ROUTES: Routes = [
     path: '',
     component: DashboardComponent,
     children: [
-      { path: '', redirectTo: 'citoyens', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+      },
       {
         path: 'citoyens',
         loadComponent: () =>
