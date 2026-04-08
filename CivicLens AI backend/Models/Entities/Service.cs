@@ -1,4 +1,4 @@
-﻿using CivicLens.API.Models.Enums;
+using CivicLens.API.Models.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +10,6 @@ namespace CivicLens.API.Models.Entities
     public class Service : User
     {
         public string Nom { get; set; } = string.Empty;
-        public string Region { get; set; } = string.Empty;
         public Domaine Domaine { get; set; }
 
         // Foreign Key

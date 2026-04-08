@@ -23,8 +23,8 @@ namespace CivicLens.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEvenement([FromBody] CreateEvenementDto dto, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var citoyen = await _db.Citoyens.FirstOrDefaultAsync(c => c.Id == citoyenId, ct);
@@ -89,8 +89,8 @@ namespace CivicLens.API.Controllers
         [HttpGet("mes")]
         public async Task<IActionResult> GetMyEvenements(CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var evenements = await _db.Evenements
@@ -131,8 +131,8 @@ namespace CivicLens.API.Controllers
         [HttpGet("region")]
         public async Task<IActionResult> GetRegionEvenements(CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var citoyen = await _db.Citoyens.FirstOrDefaultAsync(c => c.Id == citoyenId, ct);
@@ -224,8 +224,8 @@ namespace CivicLens.API.Controllers
         [HttpPost("{id:guid}/participer")]
         public async Task<IActionResult> Participate([FromRoute] Guid id, [FromBody] CreateParticipationDto dto, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var evenement = await _db.Evenements.FindAsync(new object[] { id }, ct);
@@ -259,8 +259,8 @@ namespace CivicLens.API.Controllers
         [HttpDelete("{id:guid}/participer")]
         public async Task<IActionResult> CancelParticipation([FromRoute] Guid id, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var participation = await _db.Participations
@@ -290,8 +290,8 @@ namespace CivicLens.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateEvenement([FromRoute] Guid id, [FromBody] UpdateEvenementDto dto, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
@@ -355,8 +355,8 @@ namespace CivicLens.API.Controllers
         {
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var evenement = await _db.Evenements
@@ -414,8 +414,8 @@ namespace CivicLens.API.Controllers
         [HttpPost("{id:guid}/confirm")]
         public async Task<IActionResult> ConfirmEvenement([FromRoute] Guid id, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             await using var tx = await _db.Database.BeginTransactionAsync(ct);

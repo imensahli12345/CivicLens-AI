@@ -11,7 +11,7 @@ namespace CivicLens.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "ADMIN,SUPERADMIN")]
     public class AdminController : ControllerBase
     {
         private readonly IAuthService _authService;

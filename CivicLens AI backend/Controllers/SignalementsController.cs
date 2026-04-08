@@ -46,8 +46,8 @@ namespace CivicLens.API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Create([FromForm] CreateSignalementDto dto, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var citoyenExists = await _db.Citoyens.FindAsync([citoyenId], ct) is not null;
@@ -248,8 +248,8 @@ namespace CivicLens.API.Controllers
         [HttpGet("mes/stats")]
         public async Task<IActionResult> GetMyStats(CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized();
 
             var signalements = await _db.Signalements
@@ -272,8 +272,8 @@ namespace CivicLens.API.Controllers
         [HttpGet("mes")]
         public async Task<IActionResult> GetMySignalements(CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized();
 
             var signalements = await _db.Signalements
@@ -342,7 +342,7 @@ namespace CivicLens.API.Controllers
 
             var searchPattern = $"%{nomDelegation.Trim()}%";
 
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
             Guid.TryParse(userIdStr, out var currentUserId);
 
             var signalements = await _db.Signalements
@@ -380,7 +380,7 @@ namespace CivicLens.API.Controllers
                 return NotFound("Signalement introuvable.");
 
             // Optionnel: vérifier si c'est bien le créateur qui supprime
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
             if (Guid.TryParse(userIdStr, out var citoyenId) && signalement.CitoyenId != citoyenId)
             {
                 return Forbid("Vous ne pouvez supprimer que vos propres signalements.");
@@ -427,8 +427,8 @@ namespace CivicLens.API.Controllers
         [HttpPost("{id:long}/vote")]
         public async Task<IActionResult> Vote([FromRoute] long id, CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return Unauthorized("Token invalide.");
 
             var signalement = await _db.Signalements.FindAsync(new object[] { id }, ct);

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.FileProviders;
+using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
@@ -29,8 +30,6 @@ builder.Services.AddScoped<IBureauDeControleService, BureauDeControleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<InactivityCheckService>();
 
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,8 +45,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-        RoleClaimType = "role",
-        NameClaimType = "nameid"
+        RoleClaimType = ClaimTypes.Role,
+        NameClaimType = ClaimTypes.NameIdentifier
     };
 });
 

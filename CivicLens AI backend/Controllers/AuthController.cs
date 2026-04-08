@@ -40,9 +40,9 @@ namespace CivicLens.API.Controllers
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim("nameid", user.Id.ToString()),
-                        new Claim("email", user.Email),
-                        new Claim("role", user.Role.ToString()),
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.Role, user.Role.ToString()),
                         new Claim("region", user.Region ?? ""),
                         new Claim("delegation", user.Delegation ?? "")
                     };
@@ -52,6 +52,7 @@ namespace CivicLens.API.Controllers
                         claims.Add(new Claim("nom", citoyen.Nom ?? ""));
                         claims.Add(new Claim("prenom", citoyen.Prenom ?? ""));
                         claims.Add(new Claim("cin", citoyen.Cin ?? ""));
+                        claims.Add(new Claim("telephone", citoyen.Telephone ?? ""));
                     }
 
                     var token = _authService.GenerateToken(_config["Jwt:Key"]!, claims);
@@ -134,7 +135,7 @@ namespace CivicLens.API.Controllers
             if (purpose != "reactivate")
                 return BadRequest("Ce lien n'est pas un lien de réactivation valide.");
 
-            var userIdStr = principal.FindFirstValue("nameid");
+            var userIdStr = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? principal.FindFirstValue("nameid");
             if (!Guid.TryParse(userIdStr, out var userId))
                 return BadRequest("Identifiant utilisateur invalide.");
 
@@ -155,8 +156,8 @@ namespace CivicLens.API.Controllers
         [Authorize(Roles = "CITOYEN")]
         public async Task<IActionResult> GetMe()
         {
-            var userIdStr = User.FindFirstValue("nameid");
-            if (!Guid.TryParse(userIdStr, out var userId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 
             var citoyen = await _db.Citoyens.FindAsync(userId);
@@ -182,8 +183,8 @@ namespace CivicLens.API.Controllers
         [Authorize(Roles = "CITOYEN")]
         public async Task<IActionResult> UpdateMe([FromBody] UpdateCitoyenDto dto)
         {
-            var userIdStr = User.FindFirstValue("nameid");
-            if (!Guid.TryParse(userIdStr, out var userId))
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized("Token invalide.");
 
             var citoyen = await _db.Citoyens.FindAsync(userId);

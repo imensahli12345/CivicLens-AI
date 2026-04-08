@@ -27,8 +27,8 @@ namespace CivicLens.API.Controllers
 
         private async Task<Guid?> GetCurrentCitoyenIdAsync(CancellationToken ct)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var citoyenId))
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
                 return null;
             // We expect Role=Citoyen already, but keep it safe
             var exists = await _db.Citoyens.AsNoTracking().AnyAsync(c => c.Id == citoyenId, ct);
