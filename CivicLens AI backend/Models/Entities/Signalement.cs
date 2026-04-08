@@ -10,6 +10,7 @@ namespace CivicLens.API.Models.Entities
         public long Id { get; set; }
         public string Description { get; set; } = string.Empty;
         public DateTime DateCreation { get; set; } = DateTime.UtcNow;
+        public DateTime? DateResolution { get; set; }
         public StatutSignalement Statut { get; set; } = StatutSignalement.EN_ATTENTE;
         public Gravite? Gravite { get; set; }
         public Priorite? Priorite { get; set; }

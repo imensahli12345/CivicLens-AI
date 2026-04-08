@@ -198,6 +198,9 @@ namespace CivicLens_AI.Migrations
                     b.Property<DateTime>("DateCreation")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DateResolution")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");

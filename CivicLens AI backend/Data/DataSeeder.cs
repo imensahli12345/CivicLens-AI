@@ -14,7 +14,7 @@ namespace CivicLens.API.Data
                 {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                     Email = "superadmin@civiclens.tn",
-                    MotDePasseHash = BCrypt.Net.BCrypt.HashPassword("SuperAdmin@123"),
+                    MotDePasseHash = BCrypt.Net.BCrypt.HashPassword("SuperAdmin@123%"),
                     Region = "Tunis",
                     Delegation = "Tunis",
                     Role = Role.SUPERADMIN,

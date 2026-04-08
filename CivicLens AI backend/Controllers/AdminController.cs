@@ -78,12 +78,118 @@ namespace CivicLens.API.Controllers
             });
         }
 
+        [HttpGet("stats/timeseries")]
+        public async Task<IActionResult> GetStatsTimeseries([FromQuery] int days = 30)
+        {
+            if (days < 7) days = 7;
+            if (days > 120) days = 120;
+
+            var start = DateTime.UtcNow.Date.AddDays(-(days - 1));
+            var endExclusive = DateTime.UtcNow.Date.AddDays(1);
+
+            var totalCitoyens = await _db.Citoyens.CountAsync();
+            var totalSignalements = await _db.Signalements.CountAsync();
+            var totalOrganisations = await _db.Organisations.CountAsync();
+            var totalBureaux = await _db.BureauxDeControle.CountAsync();
+            var signalementsEnAttente = await _db.Signalements.CountAsync(s => s.Statut == StatutSignalement.EN_ATTENTE);
+            var signalementsResolus = await _db.Signalements.CountAsync(s => s.Statut == StatutSignalement.RESOLU);
+
+            var signalementsCreated = await _db.Signalements
+                .AsNoTracking()
+                .Where(s => s.DateCreation >= start && s.DateCreation < endExclusive)
+                .GroupBy(s => s.DateCreation.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var enAttenteCreated = await _db.Signalements
+                .AsNoTracking()
+                .Where(s => s.DateCreation >= start && s.DateCreation < endExclusive && s.Statut == StatutSignalement.EN_ATTENTE)
+                .GroupBy(s => s.DateCreation.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var resolusResolved = await _db.Signalements
+                .AsNoTracking()
+                .Where(s => s.DateResolution != null && s.DateResolution >= start && s.DateResolution < endExclusive)
+                .GroupBy(s => s.DateResolution!.Value.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var citoyensCreated = await _db.Citoyens
+                .AsNoTracking()
+                .Where(c => c.DateCreation >= start && c.DateCreation < endExclusive)
+                .GroupBy(c => c.DateCreation.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var bureauxCreated = await _db.BureauxDeControle
+                .AsNoTracking()
+                .Where(b => b.DateCreation >= start && b.DateCreation < endExclusive)
+                .GroupBy(b => b.DateCreation.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var organisationsCreated = await _db.Organisations
+                .AsNoTracking()
+                .Where(o => o.DateCreation >= start && o.DateCreation < endExclusive)
+                .GroupBy(o => o.DateCreation.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var dailyActive = await _db.Users
+                .AsNoTracking()
+                .Where(u => u.DernierLogin != null && u.DernierLogin >= start && u.DernierLogin < endExclusive)
+                .GroupBy(u => u.DernierLogin!.Value.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var citoyenMap = citoyensCreated.ToDictionary(x => x.Date, x => x.Count);
+            var bureauMap = bureauxCreated.ToDictionary(x => x.Date, x => x.Count);
+            var orgMap = organisationsCreated.ToDictionary(x => x.Date, x => x.Count);
+            var activeMap = dailyActive.ToDictionary(x => x.Date, x => x.Count);
+            var signalementsMap = signalementsCreated.ToDictionary(x => x.Date, x => x.Count);
+            var enAttenteMap = enAttenteCreated.ToDictionary(x => x.Date, x => x.Count);
+            var resolusMap = resolusResolved.ToDictionary(x => x.Date, x => x.Count);
+
+            var dates = Enumerable.Range(0, days)
+                .Select(i => start.AddDays(i))
+                .ToList();
+
+            var series = new
+            {
+                citoyens = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = citoyenMap.TryGetValue(d, out var v) ? v : 0 }),
+                bureaux = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = bureauMap.TryGetValue(d, out var v) ? v : 0 }),
+                organisations = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = orgMap.TryGetValue(d, out var v) ? v : 0 }),
+                logins = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = activeMap.TryGetValue(d, out var v) ? v : 0 }),
+                signalements = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = signalementsMap.TryGetValue(d, out var v) ? v : 0 }),
+                enAttente = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = enAttenteMap.TryGetValue(d, out var v) ? v : 0 }),
+                resolus = dates.Select(d => new { date = d.ToString("yyyy-MM-dd"), value = resolusMap.TryGetValue(d, out var v) ? v : 0 })
+            };
+
+            return Ok(new
+            {
+                totals = new
+                {
+                    totalCitoyens,
+                    totalSignalements,
+                    totalOrganisations,
+                    totalBureaux,
+                    signalementsEnAttente,
+                    signalementsResolus
+                },
+                range = new { days, start = start.ToString("yyyy-MM-dd"), end = DateTime.UtcNow.Date.ToString("yyyy-MM-dd") },
+                series
+            });
+        }
+
         [HttpGet("bureaux")]
-        public async Task<IActionResult> GetBureaux([FromQuery] string? region = null)
+        public async Task<IActionResult> GetBureaux([FromQuery] string? region = null, [FromQuery] string? delegation = null)
         {
             var query = _db.BureauxDeControle.Include(b => b.Services).AsQueryable();
-            if (!string.IsNullOrEmpty(region))
+            if (!string.IsNullOrWhiteSpace(region))
                 query = query.Where(b => b.Region == region);
+            if (!string.IsNullOrWhiteSpace(delegation))
+                query = query.Where(b => b.Delegation == delegation);
 
             var bureaux = await query.ToListAsync();
             return Ok(bureaux.Select(b => new {
@@ -103,9 +209,25 @@ namespace CivicLens.API.Controllers
         }
 
         [HttpGet("organisations")]
-        public async Task<IActionResult> GetOrganisations()
+        public async Task<IActionResult> GetOrganisations([FromQuery] string? domaine = null, [FromQuery] string? type = null)
         {
-            var orgs = await _db.Organisations.ToListAsync();
+            var query = _db.Organisations.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(domaine))
+            {
+                if (!Enum.TryParse<Domaine>(domaine, true, out var parsedDomaine))
+                    return BadRequest("Domaine invalide.");
+                query = query.Where(o => o.DomaineOrganisation == parsedDomaine);
+            }
+
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                if (!Enum.TryParse<TypeOrganisation>(type, true, out var parsedType))
+                    return BadRequest("Type invalide.");
+                query = query.Where(o => o.TypeOrganisation == parsedType);
+            }
+
+            var orgs = await query.ToListAsync();
             return Ok(orgs.Select(o => new {
                 id = o.Id,
                 email = o.Email,
@@ -113,8 +235,44 @@ namespace CivicLens.API.Controllers
                 typeOrganisation = o.TypeOrganisation.ToString(),
                 domaineOrganisation = o.DomaineOrganisation.ToString(),
                 region = o.Region,
-                statut = o.StatutCompte.ToString()
+                delegation = o.Delegation,
+                statut = o.StatutCompte.ToString(),
+                dateCreation = o.DateCreation
             }));
+        }
+
+        [HttpPut("bureaux/{id:guid}/statut")]
+        public async Task<IActionResult> UpdateBureauStatut([FromRoute] Guid id, [FromBody] UpdateAccountStatusDto dto)
+        {
+            if (!Enum.TryParse<StatutCompte>(dto.Statut, true, out var parsed))
+                return BadRequest("Statut invalide.");
+
+            if (parsed != StatutCompte.ACTIF && parsed != StatutCompte.INACTIF)
+                return BadRequest("Statut non autorisé.");
+
+            var bureau = await _db.BureauxDeControle.FindAsync(id);
+            if (bureau == null) return NotFound("Bureau introuvable.");
+
+            bureau.StatutCompte = parsed;
+            await _db.SaveChangesAsync();
+            return Ok(new { statut = bureau.StatutCompte.ToString() });
+        }
+
+        [HttpPut("organisations/{id:guid}/statut")]
+        public async Task<IActionResult> UpdateOrganisationStatut([FromRoute] Guid id, [FromBody] UpdateAccountStatusDto dto)
+        {
+            if (!Enum.TryParse<StatutCompte>(dto.Statut, true, out var parsed))
+                return BadRequest("Statut invalide.");
+
+            if (parsed != StatutCompte.ACTIF && parsed != StatutCompte.INACTIF)
+                return BadRequest("Statut non autorisé.");
+
+            var org = await _db.Organisations.FindAsync(id);
+            if (org == null) return NotFound("Organisation introuvable.");
+
+            org.StatutCompte = parsed;
+            await _db.SaveChangesAsync();
+            return Ok(new { statut = org.StatutCompte.ToString() });
         }
 
         [HttpPost("create-admin")]
