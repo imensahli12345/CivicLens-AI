@@ -1,0 +1,173 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>🏛️ Organisations</h1>
+    <div class="header-actions">
+      <span class="badge">{{ filteredOrganisations.length }} organisations</span>
+      <button class="btn-create" (click)="toggleForm()">
+        {{ showForm ? '✕ Annuler' : '+ Nouvelle Organisation' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-head">
+      <div class="filters-title">Filtres</div>
+      <button class="btn-reset" (click)="resetFilters()" [disabled]="!selectedDomaine && !selectedType && !searchQuery">
+        Réinitialiser
+      </button>
+    </div>
+
+    <div class="filters-grid">
+      <div class="control">
+        <label>Rechercher</label>
+        <input type="text" placeholder="Nom ou email…" [(ngModel)]="searchQuery" />
+      </div>
+      <div class="control">
+        <label>Domaine</label>
+        <select [(ngModel)]="selectedDomaine" (change)="onDomaineChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>Type</label>
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let t of typesOrganisation" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="alert success">{{ success }}</div>
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+
+  <div *ngIf="showForm" class="form-card">
+    <h2>Créer une Organisation</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom de l'organisation</label>
+          <input type="text" formControlName="nomOrganisation" placeholder="Ex: Ministère des Transports" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="email@org.tn" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" formControlName="motDePasse" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type</label>
+          <select formControlName="typeOrganisation">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let t of typesOrganisation" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Domaine</label>
+          <select formControlName="domaineOrganisation">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gouvernorat <span style="color:#9ca3af;font-weight:400">(optionnel)</span></label>
+          <select formControlName="region">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" [disabled]="form.invalid || submitting">
+        {{ submitting ? 'Création...' : 'Créer l\'Organisation' }}
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>Domaine</th>
+          <th>Gouvernorat</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of filteredOrganisations">
+          <td>{{ o.nomOrganisation }}</td>
+          <td>{{ o.email }}</td>
+          <td><span class="type-badge">{{ o.typeOrganisation }}</span></td>
+          <td><span class="domaine-badge">{{ o.domaineOrganisation }}</span></td>
+          <td>{{ o.region || '—' }}</td>
+          <td><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></td>
+          <td class="actions-cell">
+            <button class="btn-details" type="button" (click)="openDetails(o)">Détails</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal-overlay" *ngIf="detailsOpen" (click)="closeDetails()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">Organisation</div>
+        <button class="modal-close" type="button" (click)="closeDetails()">✕</button>
+      </div>
+
+      <div *ngIf="selectedOrganisation as o" class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Nom</div>
+            <div class="info-value">{{ o.nomOrganisation }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ o.email }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Type</div>
+            <div class="info-value"><span class="type-badge">{{ o.typeOrganisation }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Domaine</div>
+            <div class="info-value"><span class="domaine-badge">{{ o.domaineOrganisation }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Gouvernorat</div>
+            <div class="info-value">{{ o.region || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Délégation</div>
+            <div class="info-value">{{ o.delegation || '—' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Statut</div>
+            <div class="info-value"><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Création</div>
+            <div class="info-value">{{ o.dateCreation ? (o.dateCreation | date:'dd/MM/yyyy') : '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" *ngIf="selectedOrganisation as o">
+        <button class="status-toggle status-toggle-primary" type="button" (click)="toggleOrganisation(o)" [disabled]="togglingId === o.id">
+          {{ o.statut === 'ACTIF' ? 'Désactiver le compte' : 'Activer le compte' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

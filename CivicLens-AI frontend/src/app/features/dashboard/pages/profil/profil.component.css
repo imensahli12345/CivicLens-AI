@@ -1,0 +1,414 @@
+/* Profil Page - Design Moderne et Professionnel */
+.profil-page {
+  min-height: calc(100vh - var(--header-height, 64px) - 4rem);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 2rem 1rem 3rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.profil-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeInUp 0.2s ease-out;
+}
+
+/* En-tête du profil */
+.profil-header {
+  background: linear-gradient(135deg, #1A2233 0%, #243047 100%);
+  border-radius: 20px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+  position: relative;
+  overflow: hidden;
+  animation: slideInScale 0.2s ease-out;
+  animation-delay: 0.05s;
+  animation-fill-mode: both;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profil-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px rgba(37, 99, 235, 0.2);
+}
+
+.profil-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+.profil-avatar-section {
+  position: relative;
+  z-index: 1;
+}
+
+.profil-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 30px;
+  background: linear-gradient(145deg, #ffffff, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #60A5FA;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.profil-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-initials {
+  background: linear-gradient(145deg, #60A5FA, #93C5FD);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.avatar-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.profil-info-header {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.profil-fullname {
+  margin: 0 0 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* Grille des cartes */
+.profil-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.8s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+/* Cartes d'information */
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  animation: slideInScale 0.5s ease-out;
+  animation-fill-mode: both;
+  position: relative;
+  overflow: hidden;
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.05), transparent);
+  transition: left 0.6s ease;
+}
+
+.info-card:hover::before {
+  left: 100%;
+}
+
+.info-card:nth-child(1) { animation-delay: 0.3s; }
+.info-card:nth-child(2) { animation-delay: 0.4s; }
+.info-card:nth-child(3) { animation-delay: 0.5s; }
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.personal-info .card-icon {
+  background: linear-gradient(135deg, #60A5FA, #93C5FD);
+  color: white;
+}
+
+.contact-info .card-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.location-info .card-icon {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-item p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.email-value {
+  font-family: 'Courier New', monospace;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.phone-value {
+  font-family: 'Courier New', monospace;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Actions */
+.profil-actions {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #1A2233, #243047);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(96, 165, 250, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(96, 165, 250, 0.4);
+  background: linear-gradient(135deg, #243047, #1A2233);
+}
+
+/* Loading */
+.profil-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.spinner-page {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(96, 165, 250, 0.15);
+  border-top-color: #60A5FA;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Animations keyframes pour profil */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profil-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+  
+  .profil-fullname {
+    font-size: 2rem;
+  }
+  
+  .profil-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .profil-page {
+    padding: 1rem 0.5rem 2rem;
+  }
+  
+  .profil-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .profil-avatar {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profil-fullname {
+    font-size: 1.75rem;
+  }
+  
+  .info-card {
+    padding: 1.25rem;
+  }
+}

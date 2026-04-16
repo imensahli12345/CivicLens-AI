@@ -1,0 +1,113 @@
+<div class="nouveau-page fade-in">
+  <div class="page-header">
+    <a routerLink="/dashboard/mes-signalements" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </a>
+    <div>
+      <h1 class="page-title">Nouveau signalement</h1>
+      <p class="page-subtitle">Simple, rapide, automatique. Décrivez le problème, ajoutez des photos, nous nous occupons du reste (titre, catégorie, adresse).</p>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  <div *ngIf="success()" class="success-card fade-up">
+    <div class="success-icon">✅</div>
+    <h3>Signalement soumis avec succès !</h3>
+    <p>L'intelligence artificielle est en train d'analyser vos données. Vous allez être redirigé...</p>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!success()" class="form-card card fade-up">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- Error banner -->
+      <div *ngIf="error()" class="alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ error() }}
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="description">Description <span class="required">*</span></label>
+        <textarea
+          id="description"
+          class="form-control"
+          [class.error]="hasError('description', 'required') || hasError('description', 'minlength')"
+          placeholder="Décrivez le problème en détail : localisation approximative, éléments distinctifs..."
+          formControlName="description"
+          rows="4"
+          maxlength="500"
+        ></textarea>
+        <div class="field-footer">
+          <span *ngIf="hasError('description', 'required')" class="field-error">La description est requise</span>
+          <span *ngIf="hasError('description', 'minlength')" class="field-error">Minimum 20 caractères</span>
+          <span class="char-count">{{ form.get('description')?.value?.length || 0 }}/500</span>
+        </div>
+      </div>
+
+      <!-- Photos Upload -->
+      <div class="form-group">
+        <label class="form-label">Photos (Max 3)</label>
+        <div class="upload-area" [class.disabled]="images.length >= 3">
+          <input 
+            type="file" 
+            id="photos" 
+            multiple 
+            accept="image/*" 
+            (change)="onFileChange($event)"
+            [disabled]="images.length >= 3"
+            class="file-input-hidden"
+          />
+          <label for="photos" class="upload-label">
+            <span class="upload-icon">📷</span>
+            <span>Ajouter des photos</span>
+            <span class="upload-hint">{{ images.length }}/3 images sélectionnées</span>
+          </label>
+        </div>
+        
+        <!-- Image Preview -->
+        <div class="image-previews" *ngIf="images.length > 0">
+          <div class="preview-chip" *ngFor="let img of images; let i = index">
+            <span class="preview-name">{{ img.name }}</span>
+            <button type="button" class="btn-remove-img" (click)="removeImage(i)">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localisation -->
+      <div class="form-group">
+        <label class="form-label">Localisation Exacte <span class="required">*</span></label>
+        
+        <div class="location-box" [class.located]="form.value.latitude">
+          <p style="font-size: 13px; color: #555; margin-bottom: 15px;">
+            Cliquez sur la carte pour définir l'emplacement précis du problème, ou utilisez le bouton pour centrer sur votre position.
+          </p>
+          <button type="button" class="btn btn-secondary btn-locate" (click)="locateMe()" [disabled]="locating()">
+            <svg *ngIf="!locating()" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+            <span class="spinner" *ngIf="locating()"></span>
+            {{ locating() ? 'Recherche en cours...' : 'Me localiser' }}
+          </button>
+          
+          <div id="map" style="height: 300px; width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid #ddd; z-index: 1;"></div>
+          
+          <div class="location-status" *ngIf="form.value.latitude" style="margin-top: 10px;">
+            <span class="status-icon">✅</span> Position enregistrée : {{ form.value.latitude }}, {{ form.value.longitude }}
+          </div>
+        </div>
+        <span *ngIf="hasError('latitude', 'required') && form.get('latitude')?.touched" class="field-error">Votre position est requise. Cliquez sur "Me localiser" ou sur la carte.</span>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <a routerLink="/dashboard/mes-signalements" class="btn btn-ghost">Annuler</a>
+        <button type="submit" class="btn btn-primary" [disabled]="loading()">
+          <svg *ngIf="!loading()" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span class="spinner" *ngIf="loading()"></span>
+          {{ loading() ? 'Envoi en cours...' : 'Soumettre le signalement' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

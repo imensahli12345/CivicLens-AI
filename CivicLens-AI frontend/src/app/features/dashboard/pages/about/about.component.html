@@ -1,0 +1,88 @@
+<div class="about-page fade-in">
+
+  <!-- Hero -->
+  <div class="about-hero card">
+    <div class="hero-left">
+      <div class="hero-badge">Plateforme citoyenne · Tunisie</div>
+      <h1 class="hero-title">CivicLens <span>AI</span></h1>
+      <p class="hero-desc">
+        CivicLens AI est une plateforme numérique dédiée à la gestion collaborative des signalements urbains en Tunisie.
+        Elle connecte les citoyens, les services municipaux et les bureaux de contrôle autour d'un objectif commun :
+        une ville plus propre, plus sûre et mieux gérée.
+      </p>
+    </div>
+    <div class="hero-visual">
+      <div class="city-icon">🏙️</div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-pill card" *ngFor="let s of stats">
+      <span class="stat-pill-value">{{ s.value }}</span>
+      <span class="stat-pill-label">{{ s.label }}</span>
+    </div>
+  </div>
+
+  <!-- Features grid -->
+  <section>
+    <h2 class="section-title">Fonctionnalités clés</h2>
+    <div class="features-grid">
+      <div class="feature-card card" *ngFor="let f of features; let i = index"
+           [style.animation-delay]="(i * 0.06) + 's'" class="fade-up">
+        <div class="feature-icon">{{ f.icon }}</div>
+        <h3 class="feature-title">{{ f.title }}</h3>
+        <p class="feature-desc">{{ f.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how-card card">
+    <h2 class="section-title" style="margin-bottom:1.5rem">Comment ça fonctionne ?</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h4>Inscrivez-vous</h4>
+          <p>Créez votre compte citoyen avec votre CIN et vos coordonnées en moins d'une minute.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h4>Signalez</h4>
+          <p>Décrivez le problème, choisissez une catégorie et précisez l'adresse. C'est tout.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h4>Suivez</h4>
+          <p>Votre signalement est transmis aux services compétents. Suivez son avancement en temps réel.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h4>Votre ville s'améliore</h4>
+          <p>Les gestionnaires interviennent, le statut passe à Résolu. Votre engagement compte.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-bottom card">
+    <h3>Prêt à contribuer ?</h3>
+    <p>Faites entendre votre voix. Chaque signalement compte.</p>
+    <a routerLink="/dashboard/nouveau" class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Créer un signalement
+    </a>
+  </div>
+
+</div>

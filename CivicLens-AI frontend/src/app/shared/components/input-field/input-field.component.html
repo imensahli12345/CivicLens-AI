@@ -1,0 +1,19 @@
+<div class="input-container">
+  <label class="input-label">{{ label }}</label>
+  <div class="input-wrapper" [class.has-error]="showError">
+    <i *ngIf="icon" class="input-icon">{{ icon }}</i>
+    <input
+      [type]="type"
+      [placeholder]="placeholder"
+      [value]="value"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+      class="input-field"
+      [class.has-icon]="icon"
+    />
+  </div>
+  <div *ngIf="showError && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+</div>

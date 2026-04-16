@@ -1,0 +1,297 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* Animation d'entrée pour les cartes */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  animation: fadeInUp 0.2s ease-out;
+}
+
+.home-grid > .card {
+  animation: slideInScale 0.2s ease-out;
+  animation-fill-mode: both;
+}
+
+.home-grid > .card:nth-child(1) { animation-delay: 0.05s; }
+.home-grid > .card:nth-child(2) { animation-delay: 0.1s; }
+
+@media (max-width: 900px) {
+  .home-grid { 
+    grid-template-columns: 1fr; 
+  }
+  .home-grid > .card:nth-child(1) { animation-delay: 0.05s; }
+  .home-grid > .card:nth-child(2) { animation-delay: 0.1s; }
+  .home-grid > .card:nth-child(1) { animation-delay: 0.1s; }
+  .home-grid > .card:nth-child(2) { animation-delay: 0.3s; }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.card:hover .card-title {
+  transform: translateX(4px);
+}
+
+.card-title-icon {
+  width: 28px; height: 28px;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.card:hover .card-title-icon {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.sig-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* Animation pour les cartes d'événements et signalements */
+.event-mini-card, .signalement-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  animation: fadeInLeft 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.event-mini-card:hover, .signalement-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.event-mini-card:nth-child(1) { animation-delay: 0.1s; }
+.event-mini-card:nth-child(2) { animation-delay: 0.2s; }
+.event-mini-card:nth-child(3) { animation-delay: 0.3s; }
+
+.signalement-card:nth-child(1) { animation-delay: 0.1s; }
+.signalement-card:nth-child(2) { animation-delay: 0.2s; }
+.signalement-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* Animation pour les dates d'événements */
+.event-mini-date {
+  transition: all 0.3s ease;
+}
+
+.event-mini-card:hover .event-mini-date {
+  transform: scale(1.05);
+  background: var(--accent);
+  color: white;
+}
+
+/* Animation pour les boutons */
+.btn {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Animation pour les skeletons */
+.skeleton-item {
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--border) 50%, var(--bg-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Animation pour les empty states */
+.empty-state {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+/* Animations keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* Skeleton */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.skeleton-item {
+  height: 108px;
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--border) 50%, var(--bg-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* CTA Banner */
+.cta-banner {
+  background: linear-gradient(135deg, #1A2233 0%, #243047 100%);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border: 1px solid rgba(37,99,235,0.25);
+  box-shadow: 0 4px 20px rgba(37,99,235,0.12);
+}
+.cta-content h3 {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+.cta-content p {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.6);
+}
+@media (max-width: 640px) {
+  .cta-banner { flex-direction: column; align-items: flex-start; }
+}
+
+.event-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.75rem;
+}
+.event-mini-card:hover {
+  border-color: #bfdbfe;
+  background: #f8fafc;
+  transform: translateX(4px);
+}
+
+.event-mini-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-radius: 8px;
+  min-width: 50px;
+  height: 50px;
+}
+.event-mini-date .d {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.event-mini-date .m {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.event-mini-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+.event-mini-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

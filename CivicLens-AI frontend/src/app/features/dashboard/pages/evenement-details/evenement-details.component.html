@@ -1,0 +1,245 @@
+<div class="page-container fade-in">
+  <div class="page-topbar">
+    <a routerLink="/dashboard/evenements" [queryParams]="{ tab: backTab }" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour aux événements
+    </a>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert-error fade-up" style="max-width: 760px; margin: 0.75rem auto; justify-content:center; text-align:center;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>{{ errorMsg }}</div>
+  </div>
+
+  <div *ngIf="evenement && !isLoading" class="details-layout">
+    <div class="main-column fade-up">
+      <div class="event-header-card">
+        <div class="event-date-large" [class.past]="isPast(evenement.dateEvenement)">
+          <span class="day">{{ evenement.dateEvenement | date:'dd' }}</span>
+          <span class="month">{{ evenement.dateEvenement | date:'MMM yyyy' }}</span>
+          <span class="time">{{ evenement.dateEvenement | date:'HH:mm' }}</span>
+        </div>
+        
+        <div class="header-info">
+          <h1>{{ evenement.titre }}</h1>
+          <p class="organizer">Organisé par <strong>{{ evenement.organisateurNom }}</strong></p>
+          <div class="location-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ evenement.lieu }} <span class="delegation-hint" *ngIf="evenement.delegation">({{ evenement.delegation }})</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h2>À propos de cet événement</h2>
+        <div class="description-content">
+          {{ evenement.description }}
+        </div>
+      </div>
+
+      <div class="details-section participants-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+          <h2 style="margin:0;">Participants ({{ evenement.nombreParticipations }} / {{ evenement.nombreVolontairesRequis }})</h2>
+          <a
+            *ngIf="evenement.participations && evenement.participations.length > 3"
+            [routerLink]="['/dashboard/evenements', evenement.id, 'participants']"
+            [queryParams]="{ tab: backTab }"
+            class="btn btn-ghost btn-sm"
+          >
+            Voir tous
+          </a>
+        </div>
+        <div *ngIf="!evenement.participations || evenement.participations.length === 0" class="empty-participants">
+          Soyez le premier à rejoindre cette initiative !
+        </div>
+        <ul *ngIf="evenement.participations && evenement.participations.length > 0" class="participants-list">
+          <li *ngFor="let p of (evenement.participations | slice:0:3)" class="participant-item">
+            <div class="avatar">{{ p.citoyenNom.charAt(0).toUpperCase() }}</div>
+            <div class="p-info">
+              <span class="p-name">{{ p.citoyenNom }}</span>
+              <span class="p-date">Atteint le {{ p.dateParticipation | date:'longDate':'fr' }}</span>
+            </div>
+            <div *ngIf="p.commentaire" class="p-comment">"{{ p.commentaire }}"</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar-column fade-up" style="animation-delay: 0.1s;">
+      <div class="action-card">
+        <h3>Rejoindre l'initiative</h3>
+        <p class="progress-text"><strong>{{ evenement.nombreParticipations }}</strong> participants sur <strong>{{ evenement.nombreVolontairesRequis }}</strong> visés.</p>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="(evenement.nombreParticipations / evenement.nombreVolontairesRequis) * 100"></div>
+        </div>
+
+        <button *ngIf="!isOrganizer && !hasParticipated && !isPast(evenement.dateEvenement)" class="btn btn-primary btn-block" (click)="participer()" [disabled]="isParticipating">
+          <span *ngIf="isParticipating" class="spinner small"></span>
+          <span *ngIf="!isParticipating">Participer à l'événement</span>
+        </button>
+
+        <div *ngIf="isOrganizer" class="status-alert owner-info">
+          Vous êtes l'organisateur de cet événement.
+        </div>
+
+        <div *ngIf="isOrganizer && evenement.isConfirmed" class="status-alert success-info" style="margin-top: 0.75rem;">
+          Événement confirmé ✓
+        </div>
+
+        <div *ngIf="isOrganizer && !evenement.isConfirmed && confirmHint" class="status-alert over" style="margin-top: 0.75rem;">
+          {{ confirmHint }}
+        </div>
+
+        <div *ngIf="isOrganizer && timeLockHint" class="status-alert over" style="margin-top: 0.75rem;">
+          {{ timeLockHint }}
+        </div>
+
+        <div *ngIf="isOrganizer" class="owner-actions">
+          <button class="btn btn-primary btn-block" (click)="openConfirmEvenement()" [disabled]="!canConfirmWindow || confirming || saving || deleting">
+            Confirmer l'événement
+          </button>
+          <button class="btn btn-outline btn-block" (click)="openEdit()" [disabled]="!canManageEvent || saving || deleting">
+            Modifier (lieu / date)
+          </button>
+          <button class="btn btn-outline btn-block" style="color: #ef4444; border-color: #fca5a5;"
+                  (click)="openDelete()" [disabled]="!canManageEvent || saving || deleting">
+            Supprimer l'événement
+          </button>
+        </div>
+
+        <div *ngIf="hasParticipated && !isOrganizer" class="status-alert success-info">
+          Vous participez à cet événement !
+        </div>
+
+        <div *ngIf="hasParticipated && !isOrganizer" class="cancel-section">
+          <button class="btn btn-outline btn-block" style="color: #ef4444; border-color: #fca5a5; margin-top: 1rem;" 
+                  (click)="openCancelParticipation()" 
+                  [disabled]="!canCancel || canceling">
+            <span *ngIf="canceling" class="spinner small"></span>
+            <span *ngIf="!canceling">Annuler ma participation</span>
+          </button>
+          <p *ngIf="!canCancel" class="hint-text text-danger" style="font-size: 0.8rem; margin-top: 0.5rem; text-align: center; color: #dc2626;">
+            L'annulation est impossible à moins de 3 jours de l'événement.
+          </p>
+        </div>
+
+        <div *ngIf="isPast(evenement.dateEvenement)" class="status-alert over">
+          Cet événement est passé ou terminé.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div *ngIf="editModalOpen" class="modal-overlay" (click)="closeEdit()">
+  <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-icon info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">Modifier l'événement</div>
+        <div class="modal-subtitle">Vous pouvez modifier uniquement le <strong>lieu</strong> et la <strong>date</strong> (jusqu'à 24h avant).</div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Lieu</label>
+        <input class="form-control" [(ngModel)]="editLieu" placeholder="Lieu de rendez-vous" />
+      </div>
+      <div class="form-group" style="margin-top: 0.75rem;">
+        <label class="form-label">Date & heure</label>
+        <input type="datetime-local" class="form-control" [(ngModel)]="editDateLocal" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeEdit()" [disabled]="saving">Annuler</button>
+      <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving">
+        <span class="spinner tiny" *ngIf="saving"></span>
+        <span *ngIf="!saving">Enregistrer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div *ngIf="deleteModalOpen" class="modal-overlay" (click)="closeDelete()">
+  <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-icon danger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">Supprimer l'événement ?</div>
+        <div class="modal-subtitle">Cette action est définitive. (Suppression bloquée à moins de 24h.)</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeDelete()" [disabled]="deleting">Annuler</button>
+      <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="deleting">
+        <span class="spinner tiny" *ngIf="deleting"></span>
+        <span *ngIf="!deleting">Supprimer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel participation modal -->
+<div *ngIf="cancelModalOpen" class="modal-overlay" (click)="closeCancelParticipation()">
+  <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-icon danger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">Annuler votre participation ?</div>
+        <div class="modal-subtitle">
+          Votre engagement citoyen est précieux pour la réussite de cet événement.
+          L'organisateur compte sur vous pour cette initiative communautaire.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeCancelParticipation()" [disabled]="canceling">Retour</button>
+      <button class="btn btn-danger" (click)="confirmCancelParticipation()" [disabled]="canceling">
+        <span class="spinner tiny" *ngIf="canceling"></span>
+        <span *ngIf="!canceling">Confirmer l'annulation</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm event modal -->
+<div *ngIf="confirmModalOpen" class="modal-overlay" (click)="closeConfirmEvenement()">
+  <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-icon info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">Confirmer l'événement ?</div>
+        <div class="modal-subtitle">
+          Une notification sera envoyée aux participants pour confirmer le rendez-vous.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeConfirmEvenement()" [disabled]="confirming">Retour</button>
+      <button class="btn btn-primary" (click)="confirmEvenement()" [disabled]="confirming">
+        <span class="spinner tiny" *ngIf="confirming"></span>
+        <span *ngIf="!confirming">Confirmer</span>
+      </button>
+    </div>
+  </div>
+</div>

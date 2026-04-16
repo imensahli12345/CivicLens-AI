@@ -1,0 +1,165 @@
+<div class="register-card">
+  <div class="register-header">
+    <div class="title-row">
+      <div class="app-mark" aria-hidden="true">CL</div>
+      <h1>Création de compte</h1>
+    </div>
+    <p class="subtitle">Rejoignez CivicLens AI pour déclarer et suivre vos signalements.</p>
+  </div>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <div class="input-wrapper">
+            <input
+              type="text"
+              formControlName="nom"
+              class="form-control"
+              [class.is-invalid]="registerForm.get('nom')?.invalid && registerForm.get('nom')?.touched"
+              placeholder="Votre nom"
+            />
+          </div>
+          <div *ngIf="registerForm.get('nom')?.invalid && registerForm.get('nom')?.touched" class="error-message">
+            {{ getErrorMessage('nom') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prénom</label>
+          <div class="input-wrapper">
+            <input
+              type="text"
+              formControlName="prenom"
+              class="form-control"
+              [class.is-invalid]="registerForm.get('prenom')?.invalid && registerForm.get('prenom')?.touched"
+              placeholder="Votre prénom"
+            />
+          </div>
+          <div *ngIf="registerForm.get('prenom')?.invalid && registerForm.get('prenom')?.touched" class="error-message">
+            {{ getErrorMessage('prenom') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <div class="input-wrapper">
+          <input
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+            placeholder="exemple@email.com"
+          />
+        </div>
+        <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="error-message">
+          {{ getErrorMessage('email') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              formControlName="password"
+              class="form-control"
+              [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+              placeholder="••••••"
+            />
+          </div>
+          <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="error-message">
+            {{ getErrorMessage('password') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirmer mot de passe</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              class="form-control"
+              [class.is-invalid]="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched"
+              placeholder="••••••"
+            />
+          </div>
+          <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched" class="error-message">
+            {{ getErrorMessage('confirmPassword') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Région (Gouvernorat)</label>
+          <div class="input-wrapper">
+            <select
+              formControlName="region"
+              class="form-control"
+              [class.is-invalid]="registerForm.get('region')?.invalid && registerForm.get('region')?.touched"
+              (change)="onRegionChange($event)"
+            >
+              <option value="" disabled selected>Sélectionnez une région</option>
+              <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+            </select>
+          </div>
+          <div *ngIf="registerForm.get('region')?.invalid && registerForm.get('region')?.touched" class="error-message">
+            {{ getErrorMessage('region') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Délégation</label>
+          <div class="input-wrapper">
+            <select
+              formControlName="delegation"
+              class="form-control"
+              [class.is-invalid]="registerForm.get('delegation')?.invalid && registerForm.get('delegation')?.touched"
+            >
+              <option value="" disabled selected>Sélectionnez une délégation</option>
+              <option *ngFor="let del of delegations" [value]="del">{{ del }}</option>
+            </select>
+          </div>
+          <div *ngIf="registerForm.get('delegation')?.invalid && registerForm.get('delegation')?.touched" class="error-message">
+            {{ getErrorMessage('delegation') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">CIN (8 chiffres)</label>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            formControlName="cin"
+            class="form-control"
+            [class.is-invalid]="registerForm.get('cin')?.invalid && registerForm.get('cin')?.touched"
+            placeholder="12345678"
+            maxlength="8"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            (input)="onCinInput($event)"
+          />
+        </div>
+        <div *ngIf="registerForm.get('cin')?.invalid && registerForm.get('cin')?.touched" class="error-message">
+          {{ getErrorMessage('cin') }}
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        <span *ngIf="!isLoading">S'inscrire</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+
+      <div class="register-footer">
+        <p>Déjà inscrit ? <a routerLink="/login">Se connecter</a></p>
+      </div>
+    </form>
+</div>

@@ -1,0 +1,82 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+Application bundle generation failed. [2.011 seconds]
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'imagesUrl' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:46:50:
+[37m      46 │ ...d section-card" *ngIf="sig.[32mimagesUrl[37m && sig.imagesUrl.length > 0">
+         ╵                               [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'imagesUrl' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:46:67:
+[37m      46 │ ...d section-card" *ngIf="sig.imagesUrl && sig.[32mimagesUrl[37m.length > 0">
+         ╵                                                [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'imagesUrl' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:49:40:
+[37m      49 │ ...img *ngFor="let url of sig.[32mimagesUrl[37m" [src]="'http://localhost:...
+         ╵                               [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scoreAI' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:69:44:
+[37m      69 │ ...       <span class="stat-value">{{ sig.[32mscoreAI[37m | percent }}</span>
+         ╵                                           [32m~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'gravite' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:73:44:
+[37m      73 │             <span class="stat-value">{{ sig.[32mgravite[37m }}</span>
+         ╵                                             [32m~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'priorite' does not exist on type 'Signalement'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.html:77:44:
+[37m      77 │             <span class="stat-value">{{ sig.[32mpriorite[37m }}</span>
+         ╵                                             [32m~~~~~~~~[0m
+
+  Error occurs in the template of component SignalementDetailsComponent.
+
+    src/app/features/dashboard/pages/signalement-details/signalement-details.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./signalement-details.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

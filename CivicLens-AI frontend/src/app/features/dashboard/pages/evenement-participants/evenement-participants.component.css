@@ -1,0 +1,90 @@
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem 1rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(2, 132, 199, 0.12);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.participants-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284C7, #38BDF8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.p-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.p-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.p-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.p-comment {
+  margin-left: auto;
+  font-style: italic;
+  color: var(--text-secondary);
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+

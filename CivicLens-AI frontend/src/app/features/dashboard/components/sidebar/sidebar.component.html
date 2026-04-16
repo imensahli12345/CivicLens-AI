@@ -1,0 +1,55 @@
+<aside class="sidebar" [class.collapsed]="!isOpen">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <span>CL</span>
+    </div>
+    <span class="logo-text" *ngIf="isOpen">
+      <strong>CivicLens</strong> <em>AI</em>
+    </span>
+    <button class="sidebar-toggle" (click)="toggleSidebar.emit()" [title]="isOpen ? 'Réduire' : 'Agrandir'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline *ngIf="isOpen" points="15 18 9 12 15 6"></polyline>
+        <polyline *ngIf="!isOpen" points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Nav Links -->
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let link of links"
+      [routerLink]="link.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{exact: link.route === '/dashboard'}"
+      class="nav-link"
+      [title]="!isOpen ? link.label : ''"
+    >
+      <span class="nav-icon" [innerHTML]="getIcon(link.icon)"></span>
+      <span class="nav-label" *ngIf="isOpen">{{ link.label }}</span>
+      <span class="nav-badge" *ngIf="isOpen && link.badge">{{ link.badge }}</span>
+    </a>
+  </nav>
+
+  <!-- User footer -->
+  <div class="sidebar-footer">
+    <div class="user-info" *ngIf="isOpen">
+      <div class="user-avatar">
+        <img *ngIf="getPhotoUrl()" [src]="getPhotoUrl()" alt="Avatar" />
+        <span *ngIf="!getPhotoUrl()">{{ getInitials() }}</span>
+      </div>
+      <div class="user-meta">
+        <span class="user-name">{{ user?.prenom }} {{ user?.nom }}</span>
+        <span class="user-role">Citoyen</span>
+      </div>
+    </div>
+    <div class="user-avatar-sm" *ngIf="!isOpen">
+      <img *ngIf="getPhotoUrl()" [src]="getPhotoUrl()" alt="Avatar" />
+      <span *ngIf="!getPhotoUrl()">{{ getInitials() }}</span>
+    </div>
+    <button class="btn-logout" (click)="logout()" [title]="'Se déconnecter'">
+      <span [innerHTML]="getIcon('log-out')"></span>
+      <span *ngIf="isOpen">Déconnexion</span>
+    </button>
+  </div>
+</aside>

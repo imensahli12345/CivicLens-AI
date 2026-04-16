@@ -1,0 +1,30 @@
+<div class="stats-grid">
+  <div *ngFor="let card of cards; let i = index"
+       class="stat-card fade-up clickable"
+       (click)="goToStatus(card.statusFilter)"
+       [style.animation-delay]="(i * 0.08) + 's'"
+       [class]="'stat-' + card.color">
+
+    <div *ngIf="loading" class="stat-skeleton"></div>
+
+    <ng-container *ngIf="!loading">
+      <div class="stat-glow"></div>
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-label">{{ card.label }}</span>
+          <div class="stat-icon-wrapper">
+             <div class="stat-icon" [ngSwitch]="card.icon">
+                <svg *ngSwitchCase="'layers'" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <svg *ngSwitchCase="'clock'" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg *ngSwitchCase="'activity'" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <svg *ngSwitchCase="'check'" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+             </div>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value">{{ getValue(card.key) }}</span>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

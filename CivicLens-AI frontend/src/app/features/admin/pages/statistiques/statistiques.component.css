@@ -1,0 +1,285 @@
+.page-container {
+  padding: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  color: #1a1f36;
+  margin: 0;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(420px, 1fr));
+  gap: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.metric-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  padding: 16px 16px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 190px;
+  position: relative;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1200px 140px at 20% 0%, rgba(79, 142, 247, 0.10), transparent 40%);
+  pointer-events: none;
+}
+
+.metric-card.purple::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(139, 92, 246, 0.12), transparent 40%); }
+.metric-card.green::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(16, 185, 129, 0.12), transparent 40%); }
+.metric-card.orange::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(249, 115, 22, 0.12), transparent 40%); }
+.metric-card.yellow::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(245, 158, 11, 0.12), transparent 40%); }
+.metric-card.teal::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(20, 184, 166, 0.12), transparent 40%); }
+.metric-card.dark::before { background: radial-gradient(1200px 140px at 20% 0%, rgba(17, 24, 39, 0.10), transparent 40%); }
+
+.metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  padding-top: 4px;
+}
+
+.metric-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.04);
+  color: rgba(15, 23, 42, 0.75);
+}
+
+.metric-svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.metric-meta {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.metric-value {
+  font-size: 40px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.metric-chart {
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.mini-chart {
+  width: 100%;
+  height: 92px;
+  border-radius: 14px;
+  display: block;
+  background:
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px) 0 0/100% 24px,
+    linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px) 0 0/52px 100%;
+}
+
+.mini-area {
+  opacity: 0.18;
+}
+
+.mini-line {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.metric-card.blue .mini-line { stroke: rgba(79, 142, 247, 0.95); }
+.metric-card.purple .mini-line { stroke: rgba(139, 92, 246, 0.95); }
+.metric-card.green .mini-line { stroke: rgba(16, 185, 129, 0.95); }
+.metric-card.orange .mini-line { stroke: rgba(249, 115, 22, 0.95); }
+.metric-card.yellow .mini-line { stroke: rgba(245, 158, 11, 0.95); }
+.metric-card.teal .mini-line { stroke: rgba(20, 184, 166, 0.95); }
+.metric-card.dark .mini-line { stroke: rgba(17, 24, 39, 0.95); }
+
+.metric-card.blue .mini-area { fill: rgba(79, 142, 247, 0.95); }
+.metric-card.purple .mini-area { fill: rgba(139, 92, 246, 0.95); }
+.metric-card.green .mini-area { fill: rgba(16, 185, 129, 0.95); }
+.metric-card.orange .mini-area { fill: rgba(249, 115, 22, 0.95); }
+.metric-card.yellow .mini-area { fill: rgba(245, 158, 11, 0.95); }
+.metric-card.teal .mini-area { fill: rgba(20, 184, 166, 0.95); }
+.metric-card.dark .mini-area { fill: rgba(17, 24, 39, 0.95); }
+
+.metric-card.blue .metric-icon { background: rgba(79, 142, 247, 0.12); color: rgba(29, 78, 216, 0.9); }
+.metric-card.purple .metric-icon { background: rgba(139, 92, 246, 0.14); color: rgba(91, 33, 182, 0.9); }
+.metric-card.green .metric-icon { background: rgba(16, 185, 129, 0.14); color: rgba(4, 120, 87, 0.9); }
+.metric-card.orange .metric-icon { background: rgba(249, 115, 22, 0.14); color: rgba(194, 65, 12, 0.9); }
+.metric-card.teal .metric-icon { background: rgba(20, 184, 166, 0.14); color: rgba(15, 118, 110, 0.9); }
+.metric-card.dark .metric-icon { background: rgba(17, 24, 39, 0.08); color: rgba(17, 24, 39, 0.9); }
+
+.metric-chart:hover .mini-chart {
+  box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.12);
+}
+
+.chart-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 80;
+}
+
+.chart-modal {
+  width: 100%;
+  max-width: 920px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 40px 100px rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+}
+
+.chart-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+}
+
+.chart-modal-title {
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.chart-modal-close {
+  height: 34px;
+  width: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.chart-modal-body {
+  padding: 16px;
+}
+
+.chart-modal-sub {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.big-chart {
+  width: 100%;
+  height: 260px;
+  display: block;
+  border-radius: 16px;
+  background:
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px) 0 0/100% 32px,
+    linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px) 0 0/70px 100%;
+}
+
+.axis-line {
+  stroke: rgba(15, 23, 42, 0.35);
+  stroke-width: 2;
+}
+
+.grid-line {
+  stroke: rgba(15, 23, 42, 0.08);
+  stroke-width: 1;
+}
+
+.axis-label {
+  fill: rgba(15, 23, 42, 0.6);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.big-area {
+  opacity: 0.16;
+}
+
+.big-line {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke: rgba(79, 142, 247, 0.95);
+}
+
+.big-chart[data-color="purple"] .big-line { stroke: rgba(139, 92, 246, 0.95); }
+.big-chart[data-color="green"] .big-line { stroke: rgba(16, 185, 129, 0.95); }
+.big-chart[data-color="orange"] .big-line { stroke: rgba(249, 115, 22, 0.95); }
+.big-chart[data-color="yellow"] .big-line { stroke: rgba(245, 158, 11, 0.95); }
+.big-chart[data-color="teal"] .big-line { stroke: rgba(20, 184, 166, 0.95); }
+.big-chart[data-color="dark"] .big-line { stroke: rgba(17, 24, 39, 0.95); }
+
+.big-chart[data-color="blue"] .big-area { fill: rgba(79, 142, 247, 0.95); }
+.big-chart[data-color="purple"] .big-area { fill: rgba(139, 92, 246, 0.95); }
+.big-chart[data-color="green"] .big-area { fill: rgba(16, 185, 129, 0.95); }
+.big-chart[data-color="orange"] .big-area { fill: rgba(249, 115, 22, 0.95); }
+.big-chart[data-color="yellow"] .big-area { fill: rgba(245, 158, 11, 0.95); }
+.big-chart[data-color="teal"] .big-area { fill: rgba(20, 184, 166, 0.95); }
+.big-chart[data-color="dark"] .big-area { fill: rgba(17, 24, 39, 0.95); }
+
+.loading { color: #6b7280; font-size: 16px; }
+.error { color: #ef4444; font-size: 16px; }
+
+@media (max-width: 900px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-modal {
+    max-width: 720px;
+  }
+  .big-chart {
+    height: 220px;
+  }
+}

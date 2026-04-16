@@ -1,0 +1,87 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>👥 Gestion des Citoyens</h1>
+    <span class="badge">{{ filteredCitoyens.length }} citoyens</span>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-head">
+      <div class="filters-title">Filtres</div>
+      <button class="btn-reset" (click)="resetFilters()" [disabled]="!selectedRegion && !selectedDelegation && !selectedStatut && !searchQuery">
+        Réinitialiser
+      </button>
+    </div>
+
+    <div class="filters-grid">
+      <div class="control">
+        <label>Rechercher</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            placeholder="Nom, email, CIN…"
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange()"
+          />
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Gouvernorat</label>
+        <select [(ngModel)]="selectedRegion" (change)="onRegionChange()">
+          <option value="">Tous</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>Délégation</label>
+        <select [(ngModel)]="selectedDelegation" (change)="onDelegationChange()" [disabled]="!selectedRegion">
+          <option value="">Toutes</option>
+          <option *ngFor="let d of delegations" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>Statut du compte</label>
+        <select [(ngModel)]="selectedStatut" (change)="onStatutChange()">
+          <option value="">Tous</option>
+          <option value="ACTIF">ACTIF</option>
+          <option value="INACTIF">INACTIF</option>
+          <option value="SUSPENDU">SUSPENDU</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>CIN</th>
+          <th>Région</th>
+          <th>Délégation</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filteredCitoyens">
+          <td>{{ c.prenom }} {{ c.nom }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.cin }}</td>
+          <td>{{ c.region }}</td>
+          <td>{{ c.delegation }}</td>
+          <td>
+            <span class="status-badge" [class]="c.statut.toLowerCase()">
+              {{ c.statut }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

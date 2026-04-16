@@ -1,0 +1,74 @@
+<div class="region-page fade-in">
+  <div class="page-topbar">
+    <a routerLink="/dashboard" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </a>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Signalements de {{ userDelegation() || 'ma délégation' }}</h1>
+      <p class="page-subtitle">Consultez et votez pour les signalements près de chez vous</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar card">
+    <div class="sort-group">
+      <span class="toolbar-label">Trier par :</span>
+      <button class="sort-btn" [class.active]="sortBy() === 'recent'" (click)="sortBy.set('recent')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Plus récents
+      </button>
+      <button class="sort-btn" [class.active]="sortBy() === 'votes'" (click)="sortBy.set('votes')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg>
+        Plus votés
+      </button>
+    </div>
+
+    <div class="cat-select-wrap">
+      <select class="form-control cat-select" [ngModel]="filterCat()" (ngModelChange)="filterCat.set($event)">
+        <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Count -->
+  <p class="results-count" *ngIf="!loading()">
+    <strong>{{ filtered().length }}</strong> signalement{{ filtered().length !== 1 ? 's' : '' }} dans {{ userDelegation() || 'votre délégation' }}
+  </p>
+
+  <!-- Error -->
+  <div *ngIf="error()" class="alert-error">
+    {{ error() }}
+    <button (click)="load()" class="btn btn-sm btn-ghost">Réessayer</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="sig-grid">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading() && filtered().length === 0 && !error()" class="empty-state">
+    <div class="empty-state-icon">🗺️</div>
+    <h3>Aucun signalement à proximité</h3>
+    <p>Il n'y a pas encore de signalements dans {{ userDelegation() || 'votre délégation' }}.</p>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading() && filtered().length > 0" class="sig-grid">
+    <app-signalement-card
+      *ngFor="let s of filtered()"
+      [signalement]="s"
+      [showActions]="false"
+      [showVote]="true"
+      [showDetailsBtn]="true"
+      (onVote)="onVote($event)"
+      (click)="goToDetails(s.id)"
+      style="cursor: pointer;"
+      class="fade-up"
+    />
+  </div>
+</div>
