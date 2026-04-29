@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  map-service:
+    build: ./backend
+    container_name: civiclens-map-service
+    ports:
+      - "8001:8001"
+    environment:
+      # ⚠️ Change this to point to your existing PostgreSQL instance
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@host.docker.internal:5432/civiclens
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8001
+      USE_REDIS: "false"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Optional: test frontend (nginx static) ───────────────────────────────
+  map-frontend:
+    image: nginx:alpine
+    container_name: civiclens-map-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - map-service
+    restart: unless-stopped
+
+# ── Note ─────────────────────────────────────────────────────────────────────
+# This compose file connects to your EXISTING PostgreSQL database.
+# It does NOT create a new database — it reuses the one from .NET backend.
+# Make sure host.docker.internal resolves on your machine (default on Docker Desktop).
+# On Linux, add: extra_hosts: - "host.docker.internal:host-gateway"
