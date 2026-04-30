@@ -17,7 +17,13 @@ namespace CivicLens.API.Services.Classes
         public async Task<Organisation?> GetByIdAsync(Guid id, CancellationToken ct)
             => await _repository.GetByIdAsync(id, ct);
 
+        public async Task<Organisation?> GetFirstAsync(CancellationToken ct)
+            => await _repository.GetFirstAsync(ct);
+
         public async Task<List<Organisation>> GetListAsync(Domaine? domaine, CancellationToken ct)
             => await _repository.GetListAsync(domaine, ct);
+
+        public async Task<string?> GetNameByIdAsync(Guid id, CancellationToken ct)
+            => await _repository.GetNameByIdAsync(id, ct);
     }
 }

@@ -7,12 +7,14 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
 
   const allowedRoles: string[] = route.data['roles'] || [];
+  const normalizedAllowedRoles = allowedRoles.map((role) => authService.normalizeRole(role));
   const userRole = authService.getUserRole();
+  const normalizedUserRole = authService.normalizeRole(userRole);
 
-  if (allowedRoles.length === 0 || allowedRoles.includes(userRole)) {
+  if (normalizedAllowedRoles.length === 0 || normalizedAllowedRoles.includes(normalizedUserRole)) {
     return true;
   }
 
-  router.navigate(['/dashboard']);
+  router.navigate([authService.getHomeRouteByRole(userRole)]);
   return false;
 };

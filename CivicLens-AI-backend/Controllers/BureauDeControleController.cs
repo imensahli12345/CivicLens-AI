@@ -1,261 +1,301 @@
-using CivicLens.API.Data;
 using CivicLens.API.Models.DTOs;
 using CivicLens.API.Models.Entities;
-using CivicLens.API.Models.Enums;
 using CivicLens.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CivicLens.API.Controllers
 {
     [Route("api/bureau")]
     [ApiController]
-    [Authorize(Roles = "BUREAUDECONTROLE")]
+    //[Authorize(Roles = "BUREAUDECONTROLE")]
     public class BureauDeControleController : ControllerBase
     {
-        private readonly AppDbContext _db;
-        private readonly ISignalementService _signalementService;
+        private readonly IWebHostEnvironment _env;
+        private readonly IBureauDeControleService _bureauService;
+        private readonly ISignalementManagementService _signalementManagementService;
         private readonly IHistoriqueService _historiqueService;
         private readonly IOrganisationService _organisationService;
-        private readonly INotificationService _notificationService;
 
         public BureauDeControleController(
-            AppDbContext db,
-            ISignalementService signalementService,
+            IWebHostEnvironment env,
+            IBureauDeControleService bureauService,
+            ISignalementManagementService signalementManagementService,
             IHistoriqueService historiqueService,
-            IOrganisationService organisationService,
-            INotificationService notificationService)
+            IOrganisationService organisationService)
         {
-            _db                  = db;
-            _signalementService  = signalementService;
-            _historiqueService   = historiqueService;
+            _env = env;
+            _bureauService = bureauService;
+            _signalementManagementService = signalementManagementService;
+            _historiqueService = historiqueService;
             _organisationService = organisationService;
-            _notificationService = notificationService;
         }
-
-        // ── Résolution de l'acteur ─────────────────────────────────────────
 
         private Guid? GetCurrentUserId()
         {
-            var str = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
-            return Guid.TryParse(str, out var id) ? id : null;
+            var value = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            return Guid.TryParse(value, out var id) ? id : null;
         }
 
         private async Task<BureauDeControle?> GetCurrentBureauAsync(CancellationToken ct)
         {
             var userId = GetCurrentUserId();
-            if (userId == null) return null;
-            return await _db.BureauxDeControle.AsNoTracking().FirstOrDefaultAsync(b => b.Id == userId.Value, ct);
+            if (userId == null)
+            {
+                if (!_env.IsDevelopment())
+                    return null;
+
+                return await _bureauService.GetFirstBureauAsync(ct);
+            }
+
+            return await _bureauService.GetBureauByIdAsync(userId.Value, ct);
         }
 
-        // ── GET /api/bureau/signalements ───────────────────────────────────
-        // domaine = null → bureau voit tous les domaines de sa délégation
-
-        [HttpGet("signalements")]
-        public async Task<IActionResult> GetSignalements(CancellationToken ct)
+        [HttpGet("signalements/tous")]
+        public async Task<IActionResult> GetAllSignalements(CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var signalements = await _signalementService.GetListAsync(null, bureau.Delegation, ct);
-
-            return Ok(signalements.Select(s => new
-            {
-                id               = s.Id,
-                titre            = $"Signalement #{s.Id}",
-                description      = s.Description,
-                descriptionService = s.DescriptionService,
-                createdAt        = s.DateCreation,
-                statut           = s.Statut.ToString(),
-                gravite          = s.Gravite.ToString(),
-                priorite         = s.Priorite.ToString(),
-                domaine          = s.Domaine.ToString(),
-                scoreAI          = s.ScoreAI,
-                adresse          = s.Adresse,
-                latitude         = s.Latitude,
-                longitude        = s.Longitude,
-                votes            = s.Votes.Count,
-                organisationId   = s.OrganisationId,
-                imageUrl         = s.Images.FirstOrDefault()?.UrlImage
-            }));
+            var signalements = await _signalementManagementService.GetAllSignalementsAsync(null, bureau.Delegation, ct);
+            return Ok(signalements);
         }
 
-        // ── GET /api/bureau/signalements/{id} ──────────────────────────────
+        [HttpGet("signalements")]
+        public async Task<IActionResult> GetSignalements([FromQuery] SignalementFilterDto filter, CancellationToken ct)
+        {
+            var bureau = await GetCurrentBureauAsync(ct);
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
+
+            try
+            {
+                var signalements = await _signalementManagementService.GetSignalementsAsync(null, bureau.Delegation, filter, ct);
+                return Ok(signalements);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("signalements/{id:long}")]
         public async Task<IActionResult> GetSignalementById([FromRoute] long id, CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var signalement = await _signalementService.GetByIdAsync(id, null, bureau.Delegation, ct);
+            var signalement = await _signalementManagementService.GetSignalementByIdAsync(id, null, bureau.Delegation, ct);
             if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre délégation.");
+                return NotFound("Signalement introuvable ou hors de votre delegation.");
 
-            var historiques = await _historiqueService.GetExpandedBySignalementIdAsync(id, ct);
-
-            return Ok(new
-            {
-                signalement = new
-                {
-                    id               = signalement.Id,
-                    titre            = $"Signalement #{signalement.Id}",
-                    description      = signalement.Description,
-                    descriptionService = signalement.DescriptionService,
-                    createdAt        = signalement.DateCreation,
-                    dateResolution   = signalement.DateResolution,
-                    statut           = signalement.Statut.ToString(),
-                    gravite          = signalement.Gravite.ToString(),
-                    priorite         = signalement.Priorite.ToString(),
-                    domaine          = signalement.Domaine.ToString(),
-                    scoreAI          = signalement.ScoreAI,
-                    adresse          = signalement.Adresse,
-                    citoyenId        = signalement.CitoyenId,
-                    organisationId   = signalement.OrganisationId,
-                    votes            = signalement.Votes.Count
-                },
-                images = signalement.Images.Select(i => i.UrlImage).ToList(),
-                historiques
-            });
+            return Ok(signalement);
         }
 
-        // ── PUT /api/bureau/signalements/{id}/ouvrir ───────────────────────
+        [HttpGet("signalements/{id:long}/historique")]
+        public async Task<IActionResult> GetHistorique([FromRoute] long id, CancellationToken ct)
+        {
+            var bureau = await GetCurrentBureauAsync(ct);
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
+
+            var signalement = await _signalementManagementService.GetSignalementByIdAsync(id, null, bureau.Delegation, ct);
+            if (signalement == null)
+                return NotFound("Signalement introuvable ou hors de votre delegation.");
+
+            var historiques = await _historiqueService.GetExpandedBySignalementIdAsync(id, ct);
+            return Ok(historiques);
+        }
 
         [HttpPut("signalements/{id:long}/ouvrir")]
         public async Task<IActionResult> OuvrirSignalement([FromRoute] long id, CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var signalement = await _signalementService.GetByIdAsync(id, null, bureau.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre délégation.");
-
-            if (signalement.Statut != StatutSignalement.EN_ATTENTE)
-                return BadRequest($"Impossible d'ouvrir (statut actuel : {signalement.Statut}). Seuls les signalements EN_ATTENTE peuvent être ouverts.");
-
-            signalement.Statut = StatutSignalement.OUVERTE;
-            _historiqueService.Add(signalement.Id, StatutSignalement.OUVERTE, bureau.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_OUVERTE",
-                $"Votre signalement #{signalement.Id} a été pris en charge par le bureau de contrôle et est maintenant à l'état OUVERT.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new { message = "Signalement ouvert avec succès.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            try
+            {
+                var signalement = await _signalementManagementService.OuvrirSignalementAsync(id, null, bureau.Delegation, bureau.Id, ct);
+                return Ok(new { message = "Signalement ouvert avec succes.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        // ── PUT /api/bureau/signalements/{id}/envoyer ──────────────────────
 
         [HttpPut("signalements/{id:long}/envoyer")]
-        public async Task<IActionResult> EnvoyerSignalement(
-            [FromRoute] long id, [FromBody] SendSignalementDto dto, CancellationToken ct)
+        public async Task<IActionResult> EnvoyerSignalement([FromRoute] long id, [FromBody] SendSignalementDto dto, CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var signalement = await _signalementService.GetByIdAsync(id, null, bureau.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre délégation.");
-
-            if (signalement.Statut != StatutSignalement.OUVERTE)
-                return BadRequest($"Impossible d'envoyer (statut actuel : {signalement.Statut}). Seuls les signalements OUVERTS peuvent être envoyés.");
-
-            var organisation = await _organisationService.GetByIdAsync(dto.OrganisationId, ct);
-            if (organisation == null)
-                return NotFound("Organisation introuvable.");
-
-            if (signalement.Domaine.HasValue && organisation.DomaineOrganisation != signalement.Domaine.Value)
-                return BadRequest($"L'organisation sélectionnée ({organisation.DomaineOrganisation}) ne correspond pas au domaine du signalement ({signalement.Domaine}).");
-
-            signalement.Statut         = StatutSignalement.ENVOYEE;
-            signalement.OrganisationId = organisation.Id;
-            if (!string.IsNullOrWhiteSpace(dto.DescriptionSupplementaire))
-                signalement.DescriptionService = dto.DescriptionSupplementaire.Trim();
-
-            _historiqueService.Add(signalement.Id, StatutSignalement.ENVOYEE, bureau.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_ENVOYEE",
-                $"Votre signalement #{signalement.Id} a été transmis à l'organisation compétente ({organisation.NomOrganisation}) pour traitement.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new
+            try
             {
-                message         = "Signalement envoyé avec succès à l'organisation.",
-                signalementId   = signalement.Id,
-                statut          = signalement.Statut.ToString(),
-                organisationId  = signalement.OrganisationId,
-                organisationNom = organisation.NomOrganisation
-            });
+                var signalement = await _signalementManagementService.EnvoyerSignalementAsync(id, null, bureau.Delegation, bureau.Id, dto.OrganisationId, dto.DescriptionSupplementaire, ct);
+                var organisation = await _organisationService.GetByIdAsync(dto.OrganisationId, ct);
+                return Ok(new
+                {
+                    message = "Signalement envoye avec succes a l'organisation.",
+                    signalementId = signalement.Id,
+                    statut = signalement.Statut.ToString(),
+                    organisationId = signalement.OrganisationId,
+                    organisationNom = organisation?.NomOrganisation
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        // ── PUT /api/bureau/signalements/{id}/rejeter ──────────────────────
 
         [HttpPut("signalements/{id:long}/rejeter")]
         public async Task<IActionResult> RejeterSignalement([FromRoute] long id, CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var signalement = await _signalementService.GetByIdAsync(id, null, bureau.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre délégation.");
-
-            if (signalement.Statut != StatutSignalement.OUVERTE)
-                return BadRequest($"Impossible de rejeter (statut actuel : {signalement.Statut}). Seuls les signalements OUVERTS peuvent être rejetés.");
-
-            signalement.Statut = StatutSignalement.REJETE;
-            _historiqueService.Add(signalement.Id, StatutSignalement.REJETE, bureau.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_REJETE",
-                $"Votre signalement #{signalement.Id} a été examiné mais n'a pas pu être transmis à une organisation. Il a été rejeté.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new { message = "Signalement rejeté.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            try
+            {
+                var signalement = await _signalementManagementService.RejeterSignalementAsync(id, null, bureau.Delegation, bureau.Id, ct);
+                return Ok(new { message = "Signalement rejete.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        // ── GET /api/bureau/stats ──────────────────────────────────────────
 
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            var stats = await _signalementService.GetStatsAsync(null, bureau.Delegation, ct);
+            var stats = await _signalementManagementService.GetStatsAsync(null, bureau.Delegation, ct);
             return Ok(stats);
         }
 
-        // ── GET /api/bureau/organisations ──────────────────────────────────
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyProfile(CancellationToken ct)
+        {
+            var bureau = await GetCurrentBureauAsync(ct);
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
+            return Ok(new
+            {
+                id = bureau.Id,
+                email = bureau.Email,
+                region = bureau.Region,
+                delegation = bureau.Delegation,
+                matricule = bureau.Matricule,
+                //statut = bureau.StatutCompte.ToString()
+            });
+        }
+
+        [HttpGet("services")]
+        public async Task<IActionResult> GetServices(CancellationToken ct)
+        {
+            var bureau = await GetCurrentBureauAsync(ct);
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
+
+            var services = await _bureauService.GetServicesAsync(bureau.Id, ct);
+            return Ok(new
+            {
+                bureauId = bureau.Id,
+                bureauEmail = bureau.Email,
+                services = services.Select(service => new
+                {
+                    id = service.Id,
+                    nom = service.Nom,
+                    email = service.Email,
+                    domaine = service.Domaine.ToString(),
+                    statut = service.StatutCompte.ToString()
+                })
+            });
+        }
+[HttpPut("services/{serviceId:guid}/activer")]
+public async Task<IActionResult> ActivateService([FromRoute] Guid serviceId, CancellationToken ct)
+{
+    var bureau = await GetCurrentBureauAsync(ct);
+    if (bureau == null)
+        return Unauthorized("Bureau de controle introuvable pour ce token.");
+
+    try
+    {
+        await _bureauService.ActivateServiceAsync(bureau.Id, serviceId, ct);
+        return Ok("Ce service est activé.");
+    }
+    catch (KeyNotFoundException)
+    {
+        return NotFound("Service introuvable pour ce bureau.");
+    }
+    catch (InvalidOperationException)
+    {
+        // Status was not changed (e.g. already active, or wrong bureau)
+        return NotFound("Le statut n'a pas pu être modifié, veuillez réessayer.");
+    }
+}
+
+[HttpPut("services/{serviceId:guid}/desactiver")]
+public async Task<IActionResult> DeactivateService([FromRoute] Guid serviceId, CancellationToken ct)
+{
+    var bureau = await GetCurrentBureauAsync(ct);
+    if (bureau == null)
+        return Unauthorized("Bureau de controle introuvable pour ce token.");
+
+    try
+    {
+        await _bureauService.DeactivateServiceAsync(bureau.Id, serviceId, ct);
+        return Ok("Ce service est désactivé.");
+    }
+    catch (KeyNotFoundException)
+    {
+        return NotFound("Service introuvable pour ce bureau.");
+    }
+    catch (InvalidOperationException)
+    {
+        return NotFound("Le statut n'a pas pu être modifié, veuillez réessayer.");
+    }
+}
         [HttpGet("organisations")]
         public async Task<IActionResult> GetOrganisations(CancellationToken ct)
         {
             var bureau = await GetCurrentBureauAsync(ct);
-            if (bureau == null) return Unauthorized("Bureau de contrôle introuvable pour ce token.");
+            if (bureau == null)
+                return Unauthorized("Bureau de controle introuvable pour ce token.");
 
-            // Bureau can send to any active organisation (no domain filter)
             var organisations = await _organisationService.GetListAsync(null, ct);
-
             return Ok(organisations.Select(o => new
             {
-                id                  = o.Id,
-                nomOrganisation     = o.NomOrganisation,
+                id = o.Id,
+                nomOrganisation = o.NomOrganisation,
                 domaineOrganisation = o.DomaineOrganisation.ToString(),
-                typeOrganisation    = o.TypeOrganisation.ToString(),
-                region              = o.Region,
-                delegation          = o.Delegation,
-                email               = o.Email
+                typeOrganisation = o.TypeOrganisation.ToString(),
+                region = o.Region,
+                //delegation = o.Delegation,
+                email = o.Email
             }));
         }
     }

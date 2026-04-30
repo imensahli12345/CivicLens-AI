@@ -1,0 +1,42 @@
+<section class="quick-actions-card">
+  <h2 class="heading">{{ heading }}</h2>
+
+  <div class="actions-grid">
+    <button
+      type="button"
+      class="action-item"
+      *ngFor="let action of actions"
+      [style.--action-accent]="action.accentColor"
+      (click)="onActionClick(action)"
+    >
+      <span class="icon-chip">
+        <ng-container [ngSwitch]="action.icon">
+          <svg *ngSwitchCase="'layers'" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m12 3 9 4.5-9 4.5L3 7.5 12 3Z"></path>
+            <path d="m3 12 9 4.5 9-4.5"></path>
+            <path d="m3 16.5 9 4.5 9-4.5"></path>
+          </svg>
+          <svg *ngSwitchCase="'alert'" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 9v4"></path>
+            <path d="M12 17h.01"></path>
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+          </svg>
+          <svg *ngSwitchCase="'flag'" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 21V5"></path>
+            <path d="M4 5h11l-1.5 3L15 11H4"></path>
+          </svg>
+          <svg *ngSwitchCase="'calendar-range'" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M16 2v4M8 2v4M3 10h18"></path>
+            <path d="M7 14h3M14 14h3M7 18h10"></path>
+          </svg>
+          <svg *ngSwitchDefault viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+        </ng-container>
+      </span>
+      <span class="title">{{ action.title }}</span>
+      <span class="subtitle">{{ action.subtitle }}</span>
+    </button>
+  </div>
+</section>

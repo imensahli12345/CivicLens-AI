@@ -26,6 +26,9 @@ namespace CivicLens.API.Services.Classes
 
         public void Add(long signalementId, StatutSignalement statut, Guid actorId)
         {
+            if (actorId == Guid.Empty)
+                throw new ArgumentException("actorId est obligatoire et ne peut pas etre Guid.Empty.", nameof(actorId));
+
             _repository.Add(new HistoriqueStatut
             {
                 SignalementId   = signalementId,

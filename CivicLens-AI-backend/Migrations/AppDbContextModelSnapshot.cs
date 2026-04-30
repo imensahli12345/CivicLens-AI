@@ -229,6 +229,9 @@ namespace CivicLens_AI.Migrations
                     b.Property<string>("Priorite")
                         .HasColumnType("text");
 
+                    b.Property<string>("RapportPath")
+                        .HasColumnType("text");
+
                     b.Property<double?>("ScoreAI")
                         .HasColumnType("double precision");
 

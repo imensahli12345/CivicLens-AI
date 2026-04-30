@@ -1,0 +1,139 @@
+<div class="services-card">
+  <header class="services-card__header">
+    <div>
+     <h2>{{ tableTitle }}</h2>
+<p>{{ tableSubtitle }}</p>
+    </div>
+    <span class="services-card__badge">{{ filteredServices.length }} services</span>
+  </header>
+
+  <p *ngIf="error" class="services-card__error">{{ error }}</p>
+
+  <div class="services-table-wrapper" *ngIf="!loading; else loadingTpl">
+    <table class="services-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Domaine</th>
+          <th>Email</th>
+          <th>Statut</th>
+          <th *ngIf="shouldShowActionsColumn" class="services-table__actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let service of filteredServices; trackBy: trackById">
+          <td class="services-table__name">{{ service.nom }}</td>
+          <td><span class="domain-chip">{{ service.domaine }}</span></td>
+          <td class="services-table__email">{{ service.email }}</td>
+          <td>
+            <span class="status-pill"
+                  [class.status-pill--active]="service.statut === 'ACTIF'"
+                  [class.status-pill--inactive]="service.statut === 'INACTIF'">
+              <span class="status-dot"></span>
+              {{ service.statut === 'ACTIF' ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td *ngIf="shouldShowActionsColumn">
+            <div class="row-actions">
+              <button
+                type="button"
+                class="icon-btn"
+                [class.icon-btn--activate]="config.actionType === 'activate'"
+                [class.icon-btn--deactivate]="config.actionType === 'deactivate'"
+                (click)="onActionClick(service)"
+                [title]="getActionTitle()"
+                [attr.aria-label]="getActionTitle()">
+                <svg *ngIf="config.actionType === 'activate'" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v10"></path>
+                  <path d="M5.5 6.5a8 8 0 1 0 13 0"></path>
+                </svg>
+
+                <svg *ngIf="config.actionType === 'deactivate'" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <line x1="5.6" y1="5.6" x2="18.4" y2="18.4"></line>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredServices.length === 0">
+          <td [attr.colspan]="shouldShowActionsColumn ? 5 : 4" class="services-table__empty">
+            Aucun service trouve.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="services-card__loading">Chargement des services...</div>
+  </ng-template>
+</div>
+
+<div class="modal-backdrop" *ngIf="confirmMode" (click)="closeModal()">
+  <div class="modal-card"
+       [class.modal-card--activate]="confirmMode === 'activate'"
+       [class.modal-card--deactivate]="confirmMode === 'deactivate'"
+       (click)="$event.stopPropagation()"
+       role="dialog"
+       aria-modal="true">
+
+    <div class="modal-icon">
+      <ng-container *ngIf="confirmMode === 'activate'">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+      </ng-container>
+      <ng-container *ngIf="confirmMode === 'deactivate'">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 9v4"></path>
+          <path d="M12 17h.01"></path>
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        </svg>
+      </ng-container>
+    </div>
+
+    <h3 class="modal-title">
+      {{ confirmMode === 'activate' ? 'Activer ce service ?' : 'Desactiver ce service ?' }}
+    </h3>
+
+    <p class="modal-text">
+      <ng-container *ngIf="confirmMode === 'activate'">
+        Confirmez-vous l'activation du service
+        " {{ selectedService?.nom }} " ?
+      </ng-container>
+      <ng-container *ngIf="confirmMode === 'deactivate'">
+        Confirmez-vous la desactivation du service
+        " {{ selectedService?.nom }} " ? Il ne recevra plus de nouveaux signalements.
+      </ng-container>
+    </p>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn--ghost" (click)="closeModal()" [disabled]="processing">
+        Annuler
+      </button>
+      <button type="button"
+              class="btn"
+              [class.btn--primary]="confirmMode === 'activate'"
+              [class.btn--danger]="confirmMode === 'deactivate'"
+              [disabled]="processing"
+              (click)="confirm()">
+        {{ processing
+            ? 'Veuillez patienter...'
+            : (confirmMode === 'activate' ? 'Oui, activer' : 'Oui, desactiver') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-simple-alert
+  [open]="showAlert"
+  [type]="alertType"
+  [message]="alertMessage"
+  (close)="closeAlert()"
+></app-simple-alert>

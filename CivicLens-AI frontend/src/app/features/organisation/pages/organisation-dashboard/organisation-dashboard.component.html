@@ -1,0 +1,47 @@
+<div class="dashboard-page" id="top">
+  <app-actor-dashboard-topbar
+    [userName]="userName"
+    subtitle="Tableau de bord Organisation"
+    homeRoute="/organisation-dashboard"
+    [showServicesMenu]="false"
+    [showAssignSignalementAction]="false"
+    [showProfile]="false"
+    [showCarteSignalements]="true"
+    (signalementAction)="onSignalementAction($event)"
+  />
+
+  <div class="tables-stack" id="signalements-section" *ngIf="!loading; else loadingState">
+    <app-signalements
+      source="organisation"
+      title="Signalements organisation"
+      subtitle="Ouvrez les signalements, ajoutez le rapport PDF et finalisez la résolution depuis cette vue.">
+    </app-signalements>
+  </div>
+
+  <div class="signalements-modal-backdrop" *ngIf="showSignalementsModal" (click)="closeSignalementsModal()">
+    <section class="signalements-modal-card" (click)="$event.stopPropagation()">
+      <button type="button" class="signalements-modal-close" (click)="closeSignalementsModal()" aria-label="Fermer">×</button>
+
+      <div class="signalements-modal-body">
+        <app-signalements
+          source="organisation"
+          title="Signalements organisation"
+          subtitle="Ouvrez les signalements, ajoutez le rapport PDF et finalisez la résolution depuis cette vue.">
+        </app-signalements>
+      </div>
+    </section>
+  </div>
+
+  <app-simple-alert
+    [open]="showAlert"
+    [type]="alertType"
+    [message]="alertMessage"
+    (close)="closeAlert()"
+  ></app-simple-alert>
+
+  <app-about-footer></app-about-footer>
+
+  <ng-template #loadingState>
+    <div class="loading-state">Chargement du tableau de bord...</div>
+  </ng-template>
+</div>

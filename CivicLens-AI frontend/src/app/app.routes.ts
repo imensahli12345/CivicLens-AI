@@ -3,6 +3,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,30 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () =>
       import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
+  {
+    path: 'service',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/service/service.routes').then(m => m.SERVICE_ROUTES)
+  },
+  {
+    path: 'organisation-dashboard',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ORGANISATION'] },
+    loadComponent: () =>
+      import('./features/organisation/pages/organisation-dashboard/organisation-dashboard.component').then(
+        m => m.OrganisationDashboardComponent
+      )
+  },
+  {
+    path: 'dashboard-bureau-et-service',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['BUREAUDECONTROLE'] },
+    loadComponent: () =>
+      import('./features/admin/pages/dashboard-bureau-et-service/dashboard-bureau-et-service.component').then(
+        m => m.DashboardBureauEtServiceComponent
+      )
   },
   { path: '**', redirectTo: '' }
 ];

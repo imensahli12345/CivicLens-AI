@@ -9,6 +9,7 @@ namespace CivicLens.API.Models.Entities
     {
         public long Id { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string? RapportPath { get; set; }
         /// <summary>Description supplémentaire ajoutée par le Service/Bureau lors de l'envoi à une organisation.</summary>
         public string? DescriptionService { get; set; }
         public DateTime DateCreation { get; set; } = DateTime.UtcNow;

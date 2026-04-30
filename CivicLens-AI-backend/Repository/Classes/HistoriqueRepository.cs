@@ -52,6 +52,11 @@ namespace CivicLens.API.Repository.Classes
                 .Where(s => modifierIds.Contains(s.Id))
                 .ToDictionaryAsync(s => s.Id, s => s.Nom, ct);
 
+            var organisationsById = await _context.Organisations
+                .AsNoTracking()
+                .Where(o => modifierIds.Contains(o.Id))
+                .ToDictionaryAsync(o => o.Id, o => o.NomOrganisation, ct);
+
             var result = new List<HistoriqueEntryDto>();
             foreach (var h in historiques)
             {
@@ -69,14 +74,14 @@ namespace CivicLens.API.Repository.Classes
                             modificateur = matricule;
                         else if (servicesById.TryGetValue(modifierId.Value, out var serviceNom))
                             modificateur = serviceNom;
+                        else if (organisationsById.TryGetValue(modifierId.Value, out var organisationNom))
+                            modificateur = organisationNom;
                     }
 
                     result.Add(new HistoriqueEntryDto
                     {
-                        Id = h.Id,
                         DateChangement = h.DateChangement,
                         Statut = h.Statuts[i].ToString(),
-                        ModificateurId = modifierId,
                         Modificateur = modificateur
                     });
                 }
@@ -86,31 +91,29 @@ namespace CivicLens.API.Repository.Classes
         }
 
         public void Add(HistoriqueStatut historique)
-        {
-            var existing = _context.HistoriquesStatut
-                .FirstOrDefault(h => h.SignalementId == historique.SignalementId);
+{
+    var existing = _context.HistoriquesStatut
+        .FirstOrDefault(h => h.SignalementId == historique.SignalementId);
 
-            if (existing is null)
-            {
-                _context.HistoriquesStatut.Add(historique);
-                return;
-            }
+    if (existing is null)
+    {
+        _context.HistoriquesStatut.Add(historique);
+        return;
+    }
 
-            if (historique.Statuts.Count > 0)
-                existing.Statuts = [..existing.Statuts, ..historique.Statuts];
+    // ✅ Append both together in one block — they can never diverge
+    if (historique.Statuts.Count > 0)
+    {
+        existing.Statuts = [..existing.Statuts, ..historique.Statuts];
+        existing.IdModificateurs = [..existing.IdModificateurs, ..historique.IdModificateurs];
+    }
 
-            if (historique.IdModificateurs.Count > 0)
-                existing.IdModificateurs = [..existing.IdModificateurs, ..historique.IdModificateurs];
+    existing.DateChangement = DateTime.UtcNow;
 
-            existing.DateChangement = DateTime.UtcNow;
-
-            // EF Core cannot detect changes to value-converted jsonb properties automatically.
-            // Explicitly mark them as modified so the serialized JSON is always persisted.
-            var entry = _context.Entry(existing);
-            entry.Property(h => h.Statuts).IsModified = true;
-            entry.Property(h => h.IdModificateurs).IsModified = true;
-        }
-
+    var entry = _context.Entry(existing);
+    entry.Property(h => h.Statuts).IsModified = true;
+    entry.Property(h => h.IdModificateurs).IsModified = true;
+}
         public async Task<bool> SaveAsync(CancellationToken ct)
             => await _context.SaveChangesAsync(ct) > 0;
     }

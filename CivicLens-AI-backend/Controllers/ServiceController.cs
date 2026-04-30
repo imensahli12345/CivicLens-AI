@@ -1,260 +1,215 @@
-using CivicLens.API.Data;
 using CivicLens.API.Models.DTOs;
-using CivicLens.API.Models.Entities;
-using CivicLens.API.Models.Enums;
 using CivicLens.API.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using CivicLens.API.Models.Entities;
 
 namespace CivicLens.API.Controllers
 {
     [Route("api/service")]
     [ApiController]
-    [Authorize(Roles = "SERVICE")]
     public class ServiceController : ControllerBase
     {
-        private readonly AppDbContext _db;
-        private readonly ISignalementService _signalementService;
+        private readonly IServiceAccountService _serviceAccountService;
+        private readonly ISignalementManagementService _signalementManagementService;
         private readonly IHistoriqueService _historiqueService;
         private readonly IOrganisationService _organisationService;
-        private readonly INotificationService _notificationService;
+        private readonly IWebHostEnvironment _env;
 
         public ServiceController(
-            AppDbContext db,
-            ISignalementService signalementService,
+            IServiceAccountService serviceAccountService,
+            ISignalementManagementService signalementManagementService,
             IHistoriqueService historiqueService,
             IOrganisationService organisationService,
-            INotificationService notificationService)
+            IWebHostEnvironment env)
         {
-            _db                  = db;
-            _signalementService  = signalementService;
-            _historiqueService   = historiqueService;
+            _serviceAccountService = serviceAccountService;
+            _signalementManagementService = signalementManagementService;
+            _historiqueService = historiqueService;
             _organisationService = organisationService;
-            _notificationService = notificationService;
+            _env = env;
         }
-
-        // ── Résolution de l'acteur ─────────────────────────────────────────
 
         private Guid? GetCurrentUserId()
         {
-            var str = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
-            return Guid.TryParse(str, out var id) ? id : null;
+            var value = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirst("nameid")?.Value;
+
+            return Guid.TryParse(value, out var id) ? id : null;
         }
 
-        private async Task<Service?> GetCurrentServiceAsync(CancellationToken ct)
+        private async Task<CivicLens.API.Models.Entities.Service?> GetCurrentServiceAsync(CancellationToken ct)
         {
             var userId = GetCurrentUserId();
-            if (userId == null) return null;
-            return await _db.Services.AsNoTracking().FirstOrDefaultAsync(s => s.Id == userId.Value, ct);
+
+            if (userId == null)
+            {
+                if (!_env.IsDevelopment())
+                    return null;
+
+                return await _serviceAccountService.GetFirstAsync(ct);
+            }
+
+            return await _serviceAccountService.GetByIdAsync(userId.Value, ct);
         }
 
-        // ── GET /api/service/signalements ──────────────────────────────────
+        // =========================
+        // GET ALL SIGNALMENTS
+        // =========================
+        [HttpGet("signalements/tous")]
+        public async Task<IActionResult> GetAllSignalements(CancellationToken ct)
+        {
+            var service = await GetCurrentServiceAsync(ct);
+            if (service == null)
+                return Unauthorized();
 
+            var result = await _signalementManagementService
+                .GetAllSignalementsAsync(service.Domaine, service.Delegation, ct);
+
+            return Ok(result);
+        }
+
+        // =========================
+        // FILTER SIGNALMENTS
+        // =========================
         [HttpGet("signalements")]
-        public async Task<IActionResult> GetSignalements(CancellationToken ct)
+        public async Task<IActionResult> GetSignalements([FromQuery] SignalementFilterDto filter, CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var signalements = await _signalementService.GetListAsync(service.Domaine, service.Delegation, ct);
-
-            return Ok(signalements.Select(s => new
+            try
             {
-                id               = s.Id,
-                titre            = $"Signalement #{s.Id}",
-                description      = s.Description,
-                descriptionService = s.DescriptionService,
-                createdAt        = s.DateCreation,
-                statut           = s.Statut.ToString(),
-                gravite          = s.Gravite.ToString(),
-                priorite         = s.Priorite.ToString(),
-                domaine          = s.Domaine.ToString(),
-                scoreAI          = s.ScoreAI,
-                adresse          = s.Adresse,
-                latitude         = s.Latitude,
-                longitude        = s.Longitude,
-                votes            = s.Votes.Count,
-                organisationId   = s.OrganisationId,
-                imageUrl         = s.Images.FirstOrDefault()?.UrlImage
-            }));
+                var result = await _signalementManagementService
+                    .GetSignalementsAsync(service.Domaine, service.Delegation, filter, ct);
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // ── GET /api/service/signalements/{id} ─────────────────────────────
-
+        // =========================
+        // GET BY ID
+        // =========================
         [HttpGet("signalements/{id:long}")]
-        public async Task<IActionResult> GetSignalementById([FromRoute] long id, CancellationToken ct)
+        public async Task<IActionResult> GetSignalementById(long id, CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var signalement = await _signalementService.GetByIdAsync(id, service.Domaine, service.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre domaine/délégation.");
+            var result = await _signalementManagementService
+                .GetSignalementByIdAsync(id, service.Domaine, service.Delegation, ct);
 
-            var historiques = await _historiqueService.GetExpandedBySignalementIdAsync(id, ct);
+            if (result == null)
+                return NotFound();
 
-            return Ok(new
-            {
-                signalement = new
-                {
-                    id               = signalement.Id,
-                    titre            = $"Signalement #{signalement.Id}",
-                    description      = signalement.Description,
-                    descriptionService = signalement.DescriptionService,
-                    createdAt        = signalement.DateCreation,
-                    dateResolution   = signalement.DateResolution,
-                    statut           = signalement.Statut.ToString(),
-                    gravite          = signalement.Gravite.ToString(),
-                    priorite         = signalement.Priorite.ToString(),
-                    domaine          = signalement.Domaine.ToString(),
-                    scoreAI          = signalement.ScoreAI,
-                    adresse          = signalement.Adresse,
-                    citoyenId        = signalement.CitoyenId,
-                    organisationId   = signalement.OrganisationId,
-                    votes            = signalement.Votes.Count
-                },
-                images = signalement.Images.Select(i => i.UrlImage).ToList(),
-                historiques
-            });
+            return Ok(result);
         }
 
-        // ── PUT /api/service/signalements/{id}/ouvrir ──────────────────────
+        // =========================
+        // HISTORIQUE
+        // =========================
+        [HttpGet("signalements/{id:long}/historique")]
+        public async Task<IActionResult> GetHistorique(long id, CancellationToken ct)
+        {
+            var service = await GetCurrentServiceAsync(ct);
+            if (service == null)
+                return Unauthorized();
 
+            var result = await _historiqueService.GetExpandedBySignalementIdAsync(id, ct);
+            return Ok(result);
+        }
+
+        // =========================
+        // OUVRIR
+        // =========================
         [HttpPut("signalements/{id:long}/ouvrir")]
-        public async Task<IActionResult> OuvrirSignalement([FromRoute] long id, CancellationToken ct)
+        public async Task<IActionResult> Ouvrir(long id, CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var signalement = await _signalementService.GetByIdAsync(id, service.Domaine, service.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre domaine/délégation.");
+            var result = await _signalementManagementService
+                .OuvrirSignalementAsync(id, service.Domaine, service.Delegation, service.Id, ct);
 
-            if (signalement.Statut != StatutSignalement.EN_ATTENTE)
-                return BadRequest($"Impossible d'ouvrir (statut actuel : {signalement.Statut}). Seuls les signalements EN_ATTENTE peuvent être ouverts.");
-
-            signalement.Statut = StatutSignalement.OUVERTE;
-            _historiqueService.Add(signalement.Id, StatutSignalement.OUVERTE, service.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_OUVERTE",
-                $"Votre signalement #{signalement.Id} a été pris en charge et est maintenant à l'état OUVERT.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new { message = "Signalement ouvert avec succès.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            return Ok(result);
         }
 
-        // ── PUT /api/service/signalements/{id}/envoyer ─────────────────────
-
+        // =========================
+        // ENVOYER
+        // =========================
         [HttpPut("signalements/{id:long}/envoyer")]
-        public async Task<IActionResult> EnvoyerSignalement(
-            [FromRoute] long id, [FromBody] SendSignalementDto dto, CancellationToken ct)
+        public async Task<IActionResult> Envoyer(long id, [FromBody] SendSignalementDto dto, CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var signalement = await _signalementService.GetByIdAsync(id, service.Domaine, service.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre domaine/délégation.");
+            var result = await _signalementManagementService
+                .EnvoyerSignalementAsync(
+                    id,
+                    service.Domaine,
+                    service.Delegation,
+                    service.Id,
+                    dto.OrganisationId,
+                    dto.DescriptionSupplementaire,
+                    ct);
 
-            if (signalement.Statut != StatutSignalement.OUVERTE)
-                return BadRequest($"Impossible d'envoyer (statut actuel : {signalement.Statut}). Seuls les signalements OUVERTS peuvent être envoyés.");
-
-            var organisation = await _organisationService.GetByIdAsync(dto.OrganisationId, ct);
-            if (organisation == null)
-                return NotFound("Organisation introuvable.");
-
-            if (signalement.Domaine.HasValue && organisation.DomaineOrganisation != signalement.Domaine.Value)
-                return BadRequest($"L'organisation sélectionnée ({organisation.DomaineOrganisation}) ne correspond pas au domaine du signalement ({signalement.Domaine}).");
-
-            signalement.Statut         = StatutSignalement.ENVOYEE;
-            signalement.OrganisationId = organisation.Id;
-            if (!string.IsNullOrWhiteSpace(dto.DescriptionSupplementaire))
-                signalement.DescriptionService = dto.DescriptionSupplementaire.Trim();
-
-            _historiqueService.Add(signalement.Id, StatutSignalement.ENVOYEE, service.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_ENVOYEE",
-                $"Votre signalement #{signalement.Id} a été transmis à l'organisation compétente ({organisation.NomOrganisation}) pour traitement.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new
-            {
-                message         = "Signalement envoyé avec succès à l'organisation.",
-                signalementId   = signalement.Id,
-                statut          = signalement.Statut.ToString(),
-                organisationId  = signalement.OrganisationId,
-                organisationNom = organisation.NomOrganisation
-            });
+            return Ok(result);
         }
 
-        // ── PUT /api/service/signalements/{id}/rejeter ─────────────────────
-
+        // =========================
+        // REJETER
+        // =========================
         [HttpPut("signalements/{id:long}/rejeter")]
-        public async Task<IActionResult> RejeterSignalement([FromRoute] long id, CancellationToken ct)
+        public async Task<IActionResult> Rejeter(long id, CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var signalement = await _signalementService.GetByIdAsync(id, service.Domaine, service.Delegation, ct);
-            if (signalement == null)
-                return NotFound("Signalement introuvable ou hors de votre domaine/délégation.");
+            var result = await _signalementManagementService
+                .RejeterSignalementAsync(id, service.Domaine, service.Delegation, service.Id, ct);
 
-            if (signalement.Statut != StatutSignalement.OUVERTE)
-                return BadRequest($"Impossible de rejeter (statut actuel : {signalement.Statut}). Seuls les signalements OUVERTS peuvent être rejetés.");
-
-            signalement.Statut = StatutSignalement.REJETE;
-            _historiqueService.Add(signalement.Id, StatutSignalement.REJETE, service.Id);
-            _notificationService.PrepareSignalementNotification(
-                signalement.CitoyenId, signalement.Id,
-                "STATUT_REJETE",
-                $"Votre signalement #{signalement.Id} a été examiné mais n'a pas pu être transmis à une organisation. Il a été rejeté.");
-
-            if (!await _historiqueService.SaveAsync(ct))
-                return StatusCode(500, "Erreur lors de la sauvegarde.");
-
-            return Ok(new { message = "Signalement rejeté.", signalementId = signalement.Id, statut = signalement.Statut.ToString() });
+            return Ok(result);
         }
 
-        // ── GET /api/service/stats ─────────────────────────────────────────
-
+        // =========================
+        // STATS
+        // =========================
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var stats = await _signalementService.GetStatsAsync(service.Domaine, service.Delegation, ct);
-            return Ok(stats);
+            var result = await _signalementManagementService
+                .GetStatsAsync(service.Domaine, service.Delegation, ct);
+
+            return Ok(result);
         }
 
-        // ── GET /api/service/organisations ─────────────────────────────────
-
-        [HttpGet("organisations")]
-        public async Task<IActionResult> GetOrganisations(CancellationToken ct)
+        // =========================
+        // ORGANISATIONS
+        // =========================
+      //*  [HttpGet("organisations")]
+        /*public async Task<IActionResult> GetOrganisations(CancellationToken ct)
         {
             var service = await GetCurrentServiceAsync(ct);
-            if (service == null) return Unauthorized("Service introuvable pour ce token.");
+            if (service == null)
+                return Unauthorized();
 
-            var organisations = await _organisationService.GetListAsync(service.Domaine, ct);
+            var result = await _organisationService
+                .GetListAsync(service.Domaine, ct);
 
-            return Ok(organisations.Select(o => new
-            {
-                id                  = o.Id,
-                nomOrganisation     = o.NomOrganisation,
-                domaineOrganisation = o.DomaineOrganisation.ToString(),
-                typeOrganisation    = o.TypeOrganisation.ToString(),
-                region              = o.Region,
-                delegation          = o.Delegation,
-                email               = o.Email
-            }));
-        }
+            return Ok(result);
+        }*/
     }
 }

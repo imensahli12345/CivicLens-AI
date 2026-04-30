@@ -21,16 +21,35 @@ namespace CivicLens.API.Repository.Classes
                 .FirstOrDefaultAsync(o => o.Id == id, ct);
         }
 
+        public async Task<Organisation?> GetFirstAsync(CancellationToken ct)
+        {
+            return await _context.Organisations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task<List<Organisation>> GetListAsync(Domaine? domaine, CancellationToken ct)
         {
-            var q = _context.Organisations
-                .Where(o => o.StatutCompte == StatutCompte.ACTIF)
-                .AsQueryable();
+            // Fix any legacy French-accented values in memory by filtering safely
+            var all = await _context.Organisations
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            var filtered = all.Where(o => o.StatutCompte == StatutCompte.ACTIF);
 
             if (domaine.HasValue)
-                q = q.Where(o => o.DomaineOrganisation == domaine.Value);
+                filtered = filtered.Where(o => o.DomaineOrganisation == domaine.Value);
 
-            return await q.ToListAsync(ct);
+            return filtered.ToList();
+        }
+
+        public async Task<string?> GetNameByIdAsync(Guid id, CancellationToken ct)
+        {
+            return await _context.Organisations
+                .AsNoTracking()
+                .Where(o => o.Id == id)
+                .Select(o => o.NomOrganisation)
+                .FirstOrDefaultAsync(ct);
         }
     }
 }

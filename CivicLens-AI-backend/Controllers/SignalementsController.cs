@@ -156,7 +156,7 @@ namespace CivicLens.API.Controllers
                 {
                     SignalementId = signalement.Id,
                     Statuts = new List<StatutSignalement> { StatutSignalement.EN_ATTENTE },
-                    IdModificateurs = new List<Guid>(),
+                    IdModificateurs = new List<Guid> { citoyenId },
                     DateChangement = signalement.DateCreation
                 });
 

@@ -1,0 +1,44 @@
+<app-base-modal
+  [visible]="visible"
+  [ariaLabel]="title"
+  closeAriaLabel="Close profile modal"
+  maxWidth="720px"
+  [zIndex]="950"
+  (close)="requestClose()"
+>
+  <div modal-title class="profile-modal-title">
+    <p class="profile-modal-eyebrow">{{ profileType | titlecase }}</p>
+    <h2>{{ title }}</h2>
+    <p>{{ subtitle }}</p>
+  </div>
+
+  <div modal-body class="profile-card">
+    <div *ngIf="loading" class="profile-state">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading profile...</p>
+    </div>
+
+    <div *ngIf="!loading && errorMessage" class="profile-state error-state">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="!loading && !errorMessage" class="profile-grid">
+      <article *ngFor="let field of fieldConfigs; trackBy: trackByKey" class="profile-item-card">
+        <div class="profile-item-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="getIconPath(field.icon)" />
+          </svg>
+        </div>
+
+        <div class="profile-item-content">
+          <span class="profile-item-label">{{ field.label }}</span>
+          <span class="profile-item-value" [innerHTML]="getFormattedFieldValue(field)"></span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div modal-footer>
+    <button type="button" class="close-button" (click)="requestClose()">Close</button>
+  </div>
+</app-base-modal>

@@ -26,6 +26,8 @@ builder.Services.AddHttpClient<IAIService, AIService>(client =>
 
 builder.Services.AddScoped<IBureauDeControleRepository, BureauDeControleRepository>();
 builder.Services.AddScoped<IBureauDeControleService, BureauDeControleService>();
+builder.Services.AddScoped<IServiceAccountRepository, ServiceAccountRepository>();
+builder.Services.AddScoped<IServiceAccountService, ServiceAccountService>();
 
 // Notification
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -38,6 +40,7 @@ builder.Services.AddScoped<IOrganisationRepository, OrganisationRepository>();
 
 // Service/Bureau dashboard — Services
 builder.Services.AddScoped<ISignalementService, SignalementService>();
+builder.Services.AddScoped<ISignalementManagementService, SignalementManagementService>();
 builder.Services.AddScoped<IHistoriqueService, HistoriqueService>();
 builder.Services.AddScoped<IOrganisationService, OrganisationService>();
 
@@ -131,6 +134,7 @@ app.UseCors("Frontend");
 var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
 Directory.CreateDirectory(uploadsRoot);
 Directory.CreateDirectory(Path.Combine(uploadsRoot, "signalements"));
+Directory.CreateDirectory(Path.Combine(uploadsRoot, "rapports"));
 
 app.UseStaticFiles(new StaticFileOptions
 {

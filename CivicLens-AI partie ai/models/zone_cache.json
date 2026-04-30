@@ -263,5 +263,71 @@
       "country": "Tunisie"
     },
     "from_cache": false
+  },
+  "36.679,10.29": {
+    "zone_score": 1.6,
+    "zone_type": "HAUTE",
+    "zone_details": [
+      "Arrêt bus : مقهي رويال مرناق",
+      "Arrêt bus : محطة الحافلات مرناق",
+      "Arrêt bus : حي السنيت مرناق",
+      "Arrêt bus : الحرس الوطني مرناق"
+    ],
+    "road_type": "",
+    "address": {
+      "city": "Mornag",
+      "county": "Mornag",
+      "postcode": "2090",
+      "country": "Tunisie",
+      "state": "Gouvernorat Ben Arous"
+    },
+    "region": {
+      "suburb": "Mornag",
+      "county": "Délégation de Mornag",
+      "state": "Gouvernorat Ben Arous",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.675,10.275": {
+    "zone_score": 1.15,
+    "zone_type": "NORMALE",
+    "zone_details": [
+      "Arrêt bus : مزرعة البحري"
+    ],
+    "road_type": "",
+    "address": {
+      "county": "Mornag Ouest",
+      "postcode": "2090",
+      "country": "Tunisie",
+      "state": "Gouvernorat Ben Arous"
+    },
+    "region": {
+      "suburb": null,
+      "county": "Délégation de Mornag Ouest",
+      "state": "Gouvernorat Ben Arous",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.657,10.334": {
+    "zone_score": 1.0,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "RR 34 طج",
+    "address": {
+      "city": "Crétéville",
+      "county": "Errisala",
+      "postcode": "2090",
+      "country": "Tunisie",
+      "state": "Gouvernorat Ben Arous"
+    },
+    "region": {
+      "suburb": "Crétéville",
+      "county": "Délégation de Errisala",
+      "state": "Gouvernorat Ben Arous",
+      "country": "Tunisie"
+    },
+    "from_cache": false
   }
 }

@@ -1,0 +1,39 @@
+<header class="dashboard-topbar">
+  <div class="brand-wrap">
+    <div class="brand-mark">CL</div>
+    <div class="brand-block">
+      <p class="brand-title">CivicLens</p>
+      <p class="brand-subtitle">Dashboard Bureau et Service</p>
+    </div>
+  </div>
+
+  <nav class="main-nav" aria-label="Dashboard Navigation">
+    <a class="nav-link" [routerLink]="['/dashboard-bureau-et-service']">Home</a>
+
+    <div class="nav-item has-menu">
+      <button class="nav-link nav-button" type="button">Services</button>
+      <div class="dropdown-menu">
+        <button type="button" (click)="onServiceAction('activate')">Activate service</button>
+        <button type="button" (click)="onServiceAction('deactivate')">Deactivate service</button>
+        <button type="button" (click)="onServiceAction('view')">View services</button>
+      </div>
+    </div>
+
+    <div class="nav-item has-menu">
+      <button class="nav-link nav-button" type="button">Signalements</button>
+      <div class="dropdown-menu">
+        <button type="button" (click)="onSignalementAction('view')">View signalements</button>
+      </div>
+    </div>
+
+    <button class="nav-link nav-button" type="button" (click)="onProfileClick()">Profile</button>
+  </nav>
+
+  <div class="profile-chip">
+    <div class="avatar">{{ initials }}</div>
+    <div class="profile-meta">
+      <p class="profile-name">{{ userName }}</p>
+      <p class="profile-role">Connected user</p>
+    </div>
+  </div>
+</header>

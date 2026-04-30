@@ -15,7 +15,7 @@ namespace CivicLens.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "CITOYEN")]
+    //[Authorize(Roles = "CITOYEN")]
     public class NotificationsController : ControllerBase
     {
         private readonly AppDbContext _db;

@@ -1,0 +1,34 @@
+<div class="history-overlay" [class.active]="open" (click)="onClose()">
+  <section class="history-card" (click)="$event.stopPropagation()">
+    <header class="history-head">
+      <h3>{{ title }}</h3>
+      <button type="button" class="history-close" (click)="onClose()" aria-label="Fermer">x</button>
+    </header>
+
+    <div class="history-body">
+      <div class="history-loading" *ngIf="loading">Chargement de l historique...</div>
+      <div class="history-error" *ngIf="!loading && error">{{ error }}</div>
+
+      <table class="history-table" *ngIf="!loading && !error && entries.length > 0">
+        <thead>
+          <tr>
+            <th>Date changement</th>
+            <th>Statut</th>
+            <th>Modificateur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of entries">
+            <td>{{ formatDate(item.dateChangement) }}</td>
+            <td>{{ item.statut }}</td>
+            <td>{{ item.modificateur || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="history-empty" *ngIf="!loading && !error && entries.length === 0">
+        Aucun historique disponible pour ce signalement.
+      </div>
+    </div>
+  </section>
+</div>

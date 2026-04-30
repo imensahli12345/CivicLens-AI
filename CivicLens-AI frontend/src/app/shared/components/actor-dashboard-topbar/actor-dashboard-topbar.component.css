@@ -1,0 +1,196 @@
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 22px;
+  border: 1px solid #dbe4f2;
+  border-radius: 16px;
+  background: #f8fbff;
+  box-shadow: 0 10px 30px rgba(12, 32, 71, 0.08);
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1d4ed8 0%, #0284c7 100%);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+.brand-block {
+  display: grid;
+  gap: 4px;
+}
+
+.brand-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+  color: #0b1533;
+}
+
+.brand-subtitle {
+  margin: 0;
+  color: #5b6f8f;
+  font-size: 12px;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: #152449;
+  font-size: 17px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-button {
+  border: none;
+  background: transparent;
+  font: inherit;
+}
+
+.nav-link:hover,
+.has-menu:hover .nav-link,
+.has-menu:focus-within .nav-link {
+  background: #e8f1ff;
+  color: #0b58d0;
+}
+
+.nav-static {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: #0b58d0;
+  font-size: 14px;
+  font-weight: 600;
+  background: #eef4ff;
+  border: 1px solid #c7d9f9;
+  cursor: default;
+  letter-spacing: 0.01em;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 250px;
+  border-radius: 12px;
+  border: 1px solid #d6e3f4;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(12, 32, 71, 0.16);
+  padding: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.has-menu:hover .dropdown-menu,
+.has-menu:focus-within .dropdown-menu {
+  display: grid;
+  gap: 4px;
+}
+
+.dropdown-menu button {
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  color: #1e2d4f;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.dropdown-menu button:hover {
+  background: #eff6ff;
+  color: #0b58d0;
+}
+
+/* ── Account zone (updated) ── */
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.logout-button:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.logout-button:active {
+  background: #fee2e2;
+}
+
+.logout-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+}
+
+.logout-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
+
+.logout-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 820px) {
+  .dashboard-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .main-nav {
+    flex-wrap: wrap;
+  }
+
+  .account-zone {
+    align-self: flex-start;
+  }
+}

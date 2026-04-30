@@ -1,0 +1,30 @@
+<section class="calendar-card">
+  <header class="calendar-header">
+    <button class="icon-btn" type="button" aria-label="Previous month" (click)="previousMonth()">
+      &#8249;
+    </button>
+    <h3>{{ monthLabel }}</h3>
+    <button class="icon-btn" type="button" aria-label="Next month" (click)="nextMonth()">
+      &#8250;
+    </button>
+  </header>
+
+  <div class="weekdays">
+    <span *ngFor="let day of weekDays">{{ day }}</span>
+  </div>
+
+  <div class="dates-grid">
+    <button
+      *ngFor="let cell of cells"
+      type="button"
+      class="date-cell"
+      [class.empty]="cell.day === null"
+      [class.active]="isSelected(cell.day)"
+      [disabled]="cell.day === null"
+      (click)="cell.day !== null && selectDay(cell.day)"
+    >
+      <span *ngIf="cell.day !== null">{{ cell.day }}</span>
+      <i *ngIf="isSelected(cell.day)"></i>
+    </button>
+  </div>
+</section>

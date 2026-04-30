@@ -1,0 +1,118 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.about-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  padding: 40px 24px 28px;
+  border-top: 1px solid rgba(37, 99, 235, 0.14);
+  background: transparent;
+}
+
+.about-footer__badge {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+}
+
+.about-footer__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 22px;
+}
+
+.about-footer__stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.about-footer__stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.about-footer__stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.about-footer__divider {
+  color: #cbd5e1;
+  font-weight: 400;
+  font-size: 18px;
+  user-select: none;
+}
+
+.about-footer__tagline {
+  margin: 0;
+  max-width: 60ch;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.about-footer__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 22px;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-footer__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(37, 99, 235, 0.34);
+}
+
+.about-footer__copy {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .about-footer {
+    padding: 32px 16px 24px;
+  }
+
+  .about-footer__divider {
+    display: none;
+  }
+
+  .about-footer__stats {
+    gap: 10px 18px;
+  }
+}
