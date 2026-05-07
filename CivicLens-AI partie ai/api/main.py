@@ -547,6 +547,8 @@ async def analyze_report(
         "zone_type":          zone_info["zone_type"],
         "zone_score":         zone_info["zone_score"],
         "zone_details":       zone_info["zone_details"],
+        "traffic_score":      zone_info.get("traffic_score", 0.0),
+        "traffic_details":    zone_info.get("traffic_details", []),
         "has_image":          has_image,
         "images_count":       len(images_pil),
         "warnings":           warnings,
