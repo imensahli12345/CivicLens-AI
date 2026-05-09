@@ -1,0 +1,21 @@
+# .NET Core
+[Bb]in/
+[Oo]bj/
+_build_check/
+
+# Uploads
+uploads/
+
+# Node
+node_modules/
+
+# Environments
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.user
+
+CivicLens-AI partie ai/models/zone_cache.json
