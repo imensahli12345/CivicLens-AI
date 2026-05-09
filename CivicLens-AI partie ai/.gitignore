@@ -10,8 +10,7 @@ Thumbs.db
 *.log
 .env
 .env.*
-data/raw/
-data/processed/
+data/
 models/*.pkl
 models/*.pth
 .ipynb_checkpoints/
@@ -23,3 +22,4 @@ models/*.pth
 .coverage
 htmlcov/
 *.sqlite3
+

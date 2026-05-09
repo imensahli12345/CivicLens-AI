@@ -239,5 +239,59 @@
       "country": "Tunisie"
     },
     "from_cache": false
+  },
+  "36.8,10.185": {
+    "zone_score": 2.0,
+    "zone_type": "CRITIQUE",
+    "zone_details": [
+      "Arrêt bus : محطة الحبيب بورقيبه",
+      "Arrêt bus : وزارة السياحة (إياب)",
+      "Arrêt bus : وزارة السياحة",
+      "Arrêt bus : سعد زغلول",
+      "Arrêt bus : جون جوراس (ذهاب)",
+      "Arrêt bus : نهج تركيا"
+    ],
+    "road_type": "Rue Pierre de Coubertin",
+    "traffic_score": 1.0,
+    "traffic_details": [
+      "routes: motorway=4, trunk=0, primary=26, secondary=7, tertiary=21",
+      "signaux=2, ronds-points=2"
+    ],
+    "address": {
+      "city": "Tunis",
+      "postcode": "1017",
+      "country": "Tunisie",
+      "state": "Gouvernorat Tunis"
+    },
+    "region": {
+      "suburb": "Habib Thameur",
+      "county": null,
+      "state": "Gouvernorat Tunis",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.0,10.0": {
+    "zone_score": 1.01,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.04,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "county": "El Friouet",
+      "country": "Tunisie",
+      "state": "Gouvernorat Kairouan"
+    },
+    "region": {
+      "suburb": null,
+      "county": "Délégation de El Friouet",
+      "state": "Gouvernorat Kairouan",
+      "country": "Tunisie"
+    },
+    "from_cache": false
   }
 }

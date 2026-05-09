@@ -93,11 +93,13 @@ def get_zone_score(lat: float, lon: float) -> dict:
 
     if cache_key in cache:
         cached = cache[cache_key]
-        print(f"[ZoneCache] Cache hit pour {cache_key} → {cached['zone_type']} (score={cached['zone_score']})")
-        cached["from_cache"] = True
-        cached.setdefault("address", {})
-        cached.setdefault("region", _extract_region(cached.get("address", {})))
-        return cached
+        if "traffic_score" in cached and "traffic_details" in cached:
+            print(f"[ZoneCache] Cache hit pour {cache_key} -> {cached['zone_type']} (score={cached['zone_score']})")
+            cached["from_cache"] = True
+            cached.setdefault("address", {})
+            cached.setdefault("region", _extract_region(cached.get("address", {})))
+            return cached
+        cache.pop(cache_key, None)
 
     # ── Résultat par défaut ───────────────────────────────────────
     zone_info = {
@@ -105,6 +107,8 @@ def get_zone_score(lat: float, lon: float) -> dict:
         "zone_type":    "NORMALE",
         "zone_details": [],
         "road_type":    "unknown",
+        "traffic_score": 0.0,
+        "traffic_details": [],
         "address":      {},
         "region":       {"suburb": None, "county": None, "state": None, "country": None},
         "from_cache":   False
@@ -150,6 +154,9 @@ def get_zone_score(lat: float, lon: float) -> dict:
           node["highway"="bus_stop"](around:300,{lat},{lon});
           node["shop"](around:300,{lat},{lon});
           node["office"](around:300,{lat},{lon});
+          way["highway"~"motorway|trunk|primary|secondary|tertiary|residential|unclassified|service|living_street"](around:500,{lat},{lon});
+          node["highway"="traffic_signals"](around:300,{lat},{lon});
+          way["junction"="roundabout"](around:300,{lat},{lon});
         );
         out body;
         """
@@ -158,41 +165,88 @@ def get_zone_score(lat: float, lon: float) -> dict:
 
         score   = 1.0
         details = []
-        seen    = set()
+        seen_poi = set()
+
+        road_counts = {
+            "motorway": 0,
+            "trunk": 0,
+            "primary": 0,
+            "secondary": 0,
+            "tertiary": 0,
+            "residential": 0,
+            "unclassified": 0,
+            "service": 0,
+            "living_street": 0,
+        }
+        traffic_signals = 0
+        roundabouts = 0
 
         for el in elements:
+            el_type = el.get("type", "")
             tags    = el.get("tags", {})
             amenity = tags.get("amenity", "")
             shop    = tags.get("shop", "")
             name    = tags.get("name", amenity or shop or "")
 
-            if name in seen:
-                continue
-            seen.add(name)
+            if el_type == "node":
+                if name and name in seen_poi:
+                    continue
+                if name:
+                    seen_poi.add(name)
 
-            if amenity == "school":
-                score += 0.4
-                details.append(f"École : {name}")
-            elif amenity == "hospital":
-                score += 0.5
-                details.append(f"Hôpital : {name}")
-            elif amenity == "clinic":
-                score += 0.3
-                details.append(f"Clinique : {name}")
-            elif amenity == "university":
-                score += 0.3
-                details.append(f"Université : {name}")
-            elif amenity == "kindergarten":
-                score += 0.4
-                details.append(f"Maternelle : {name}")
-            elif amenity == "marketplace":
-                score += 0.2
-                details.append(f"Marché : {name}")
-            elif amenity in ("bus_station", "bus_stop") or tags.get("highway") == "bus_stop":
-                score += 0.15
-                details.append(f"Arrêt bus : {name}")
-            elif shop:
-                score += 0.05
+                if amenity == "school":
+                    score += 0.4
+                    details.append(f"École : {name}")
+                elif amenity == "hospital":
+                    score += 0.5
+                    details.append(f"Hôpital : {name}")
+                elif amenity == "clinic":
+                    score += 0.3
+                    details.append(f"Clinique : {name}")
+                elif amenity == "university":
+                    score += 0.3
+                    details.append(f"Université : {name}")
+                elif amenity == "kindergarten":
+                    score += 0.4
+                    details.append(f"Maternelle : {name}")
+                elif amenity == "marketplace":
+                    score += 0.2
+                    details.append(f"Marché : {name}")
+                elif amenity in ("bus_station", "bus_stop") or tags.get("highway") == "bus_stop":
+                    score += 0.15
+                    details.append(f"Arrêt bus : {name}")
+                elif shop:
+                    score += 0.05
+
+                if tags.get("highway") == "traffic_signals":
+                    traffic_signals += 1
+            elif el_type == "way":
+                highway = tags.get("highway", "")
+                if highway in road_counts:
+                    road_counts[highway] += 1
+                if tags.get("junction") == "roundabout":
+                    roundabouts += 1
+
+        weighted_roads = (
+            1.2 * (road_counts["motorway"] + road_counts["trunk"])
+            + 1.0 * road_counts["primary"]
+            + 0.7 * road_counts["secondary"]
+            + 0.5 * road_counts["tertiary"]
+            + 0.25
+            * (
+                road_counts["residential"]
+                + road_counts["unclassified"]
+                + road_counts["service"]
+                + road_counts["living_street"]
+            )
+        )
+        traffic_complexity = 0.06 * min(traffic_signals, 10) + 0.04 * min(roundabouts, 10)
+        traffic_score = max(0.0, min(0.05 * weighted_roads + traffic_complexity, 1.0))
+        zone_info["traffic_score"] = round(traffic_score, 2)
+        zone_info["traffic_details"] = [
+            f"routes: motorway={road_counts['motorway']}, trunk={road_counts['trunk']}, primary={road_counts['primary']}, secondary={road_counts['secondary']}, tertiary={road_counts['tertiary']}",
+            f"signaux={traffic_signals}, ronds-points={roundabouts}",
+        ]
 
         # ── 3. Bonus selon type de route ──────────────────────────
         road_lower = road.lower()
@@ -209,6 +263,7 @@ def get_zone_score(lat: float, lon: float) -> dict:
             score -= 0.3
             details.append("Route isolée / piste")
 
+        score *= 1.0 + 0.25 * traffic_score
         score = max(0.5, min(score, 2.0))
 
         if score >= 1.8:
@@ -232,13 +287,15 @@ def get_zone_score(lat: float, lon: float) -> dict:
             "zone_type":    zone_info["zone_type"],
             "zone_details": zone_info["zone_details"],
             "road_type":    zone_info["road_type"],
+            "traffic_score": zone_info["traffic_score"],
+            "traffic_details": zone_info["traffic_details"],
             "address":      zone_info["address"],
             "region":       zone_info["region"],
             "from_cache":   False
         }
         cache[cache_key] = cache_entry
         _save_cache(cache)
-        print(f"[ZoneCache] Sauvegardé : {cache_key} → {zone_type}")
+        print(f"[ZoneCache] Sauvegardé : {cache_key} -> {zone_type}")
 
     except Exception as e:
         print(f"[ZoneAnalyzer] Erreur réseau (score par défaut 1.0) : {e}")
