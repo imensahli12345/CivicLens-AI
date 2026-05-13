@@ -1,0 +1,47 @@
+<div class="cal-card">
+
+  <!-- Navigation -->
+  <div class="cal-nav">
+    <button class="nav-btn" (click)="prevMonth()" aria-label="Mois précédent">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <span class="cal-month-label">{{ monthLabel }}</span>
+    <button class="nav-btn" (click)="nextMonth()" aria-label="Mois suivant">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Grid: headers + days -->
+  <div class="cal-grid">
+
+    <!-- Day-of-week headers -->
+    <span class="day-header" *ngFor="let d of DAY_LABELS">{{ d }}</span>
+
+    <!-- Day cells -->
+    <div
+      class="day-cell"
+      *ngFor="let day of calendarDays"
+      [class.today]="day.isToday && !isSelected(day)"
+      [class.selected]="isSelected(day)"
+      [class.empty]="!day.date"
+      (click)="toggleDay(day)"
+    >
+      <span class="day-num" *ngIf="day.date">{{ day.date }}</span>
+      <span class="today-dot" *ngIf="day.isToday && !isSelected(day)"></span>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="cal-footer">
+    <button class="btn-cancel"  (click)="cancel()">Cancel</button>
+    <button class="btn-confirm" (click)="confirm()">Select Dates</button>
+  </div>
+
+</div>

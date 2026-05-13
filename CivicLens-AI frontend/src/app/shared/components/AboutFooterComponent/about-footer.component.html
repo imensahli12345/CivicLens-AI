@@ -1,0 +1,23 @@
+﻿<footer class="about-footer">
+  <p class="about-footer__badge">En chiffres</p>
+
+  <div class="about-footer__stats" role="list">
+    <ng-container *ngFor="let stat of stats; let last = last">
+      <div class="about-footer__stat" role="listitem">
+        <span class="about-footer__stat-value">{{ stat.value }}</span>
+        <span class="about-footer__stat-label">{{ stat.label }}</span>
+      </div>
+      <span *ngIf="!last" class="about-footer__divider" aria-hidden="true">|</span>
+    </ng-container>
+  </div>
+
+  <p class="about-footer__tagline">
+    Ameliorer la communication entre citoyens et services publics.
+  </p>
+
+  <a class="about-footer__cta" href="#top" (click)="scrollToTop($event)">
+    Commencer la gestion des signalements
+  </a>
+
+  <p class="about-footer__copy">© {{ currentYear }} CivicLens AI</p>
+</footer>

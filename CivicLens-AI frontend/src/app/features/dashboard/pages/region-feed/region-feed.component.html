@@ -27,9 +27,21 @@
       </button>
     </div>
 
-    <div class="cat-select-wrap">
+    <div class="filters-wrap">
       <select class="form-control cat-select" [ngModel]="filterCat()" (ngModelChange)="filterCat.set($event)">
         <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+      </select>
+
+      <select class="form-control cat-select" [ngModel]="filterStatut()" (ngModelChange)="filterStatut.set($event)">
+        <option *ngFor="let s of statutOptions" [value]="s.value">{{ s.label }}</option>
+      </select>
+
+      <select class="form-control cat-select" [ngModel]="filterGravite()" (ngModelChange)="filterGravite.set($event)">
+        <option *ngFor="let g of graviteOptions" [value]="g.value">{{ g.label }}</option>
+      </select>
+
+      <select class="form-control cat-select" [ngModel]="filterPriorite()" (ngModelChange)="filterPriorite.set($event)">
+        <option *ngFor="let p of prioriteOptions" [value]="p.value">{{ p.label }}</option>
       </select>
     </div>
   </div>

@@ -1,19 +1,13 @@
-<div class="dashboard-shell" [class.sidebar-collapsed]="!sidebarOpen()">
-  <app-sidebar
-    [links]="config()?.sidebarLinks || []"
+<div class="dashboard-shell">
+  <app-dashboard-header
     [user]="user()"
-    [isOpen]="sidebarOpen()"
-    (toggleSidebar)="toggleSidebar()"
+    [links]="config()?.sidebarLinks || []"
   />
-  <div class="dashboard-main">
-    <app-dashboard-header
-      [user]="user()"
-      (toggleSidebar)="toggleSidebar()"
-    />
-    
+  
+  <div class="dashboard-top">
     <!-- Notification pour numéro de téléphone manquant -->
-    <div 
-      *ngIf="showNotification()" 
+    <div
+      *ngIf="showNotification()"
       class="phone-notification"
       role="alert"
     >
@@ -48,9 +42,9 @@
         </div>
       </div>
     </div>
-
-    <main class="dashboard-content">
-      <router-outlet />
-    </main>
   </div>
+
+  <main class="dashboard-content">
+    <router-outlet />
+  </main>
 </div>

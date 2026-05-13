@@ -164,4 +164,47 @@ export class AuthService {
   getUserRole(): string {
     return this.getCurrentUser()?.role || 'CITOYEN';
   }
+
+  getHomeRouteByRole(role?: string): string {
+    const normalized = this.normalizeRole(role ?? this.getUserRole());
+
+    if (normalized === 'SUPERADMIN' || normalized === 'ADMIN') {
+      return '/admin';
+    }
+
+    if (this.isBureauRole(normalized)) {
+      return '/dashboard-bureau-et-service';
+    }
+
+    if (this.isServiceRole(normalized)) {
+      return '/service/dashboard';
+    }
+
+    if (this.isOrganisationRole(normalized)) {
+      return '/organisation-dashboard';
+    }
+
+    return '/dashboard';
+  }
+
+  normalizeRole(role: string | null | undefined): string {
+    return (role ?? '')
+      .toUpperCase()
+      .replace(/[\s_-]+/g, '');
+  }
+
+  isBureauRole(role: string | null | undefined): boolean {
+    const normalized = this.normalizeRole(role);
+    return normalized === 'BUREAUDECONTROLE';
+  }
+
+  isServiceRole(role: string | null | undefined): boolean {
+    const normalized = this.normalizeRole(role);
+    return normalized === 'SERVICE';
+  }
+
+  isOrganisationRole(role: string | null | undefined): boolean {
+    const normalized = this.normalizeRole(role);
+    return normalized === 'ORGANISATION';
+  }
 }

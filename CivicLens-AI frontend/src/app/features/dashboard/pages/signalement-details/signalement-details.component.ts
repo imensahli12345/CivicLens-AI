@@ -19,6 +19,10 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
   loading = signal(true);
   error = signal<string | null>(null);
   backLink = signal<string>('/dashboard/region');
+  lightboxOpen = signal(false);
+  lightboxUrl = signal<string | null>(null);
+  voteAlert = signal(false);
+  private voteAlertTimeoutId: ReturnType<typeof setTimeout> | null = null;
   
   private map: L.Map | undefined;
   // Use custom marker to avoid webpack issues
@@ -130,9 +134,47 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
     return `${baseUrl}/${url}`;
   }
 
-  onVote(): void {
+  openLightbox(rawUrl: string, e?: Event): void {
+    e?.stopPropagation();
+    this.lightboxUrl.set(this.getImageUrl(rawUrl));
+    this.lightboxOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(e?: Event): void {
+    e?.stopPropagation();
+    this.lightboxOpen.set(false);
+    this.lightboxUrl.set(null);
+    document.body.style.overflow = '';
+  }
+
+  private isOwner(sig: Signalement): boolean {
+    const userId =
+      this.authService.getCurrentUserFromStorage()?.id ||
+      this.authService.getCurrentUser()?.id ||
+      null;
+    if (!userId || !sig.citoyenId) return false;
+    return String(userId).toLowerCase() === String(sig.citoyenId).toLowerCase();
+  }
+
+  private showVoteAlert(): void {
+    this.voteAlert.set(true);
+    if (this.voteAlertTimeoutId) clearTimeout(this.voteAlertTimeoutId);
+    this.voteAlertTimeoutId = setTimeout(() => {
+      this.voteAlert.set(false);
+      this.voteAlertTimeoutId = null;
+    }, 2200);
+  }
+
+  onVote(e?: Event): void {
+    e?.stopPropagation();
     const sig = this.signalement();
     if (!sig) return;
+
+    if (this.isOwner(sig)) {
+      this.showVoteAlert();
+      return;
+    }
     
     this.signalementService.voterSignalement(sig.id).subscribe({
       next: () => {

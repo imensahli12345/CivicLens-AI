@@ -1,0 +1,44 @@
+<div class="modal-overlay" [class.active]="open" (click)="onCancel()">
+  <div class="modal-box assign-modal" (click)="$event.stopPropagation()" *ngIf="signalement">
+
+    <div class="assign-head">
+      <h3>Assigner un signalement</h3>
+      <button class="btn-close" (click)="onCancel()" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <p class="assign-subtitle">Choisissez l'organisation pour: {{ signalement.titre }}</p>
+
+    <label class="assign-label">Organisation</label>
+    <select class="assign-select" [(ngModel)]="selectedOrganisation">
+      <option [ngValue]="null" disabled>Choisir une organisation</option>
+      <option *ngFor="let org of organisations" [ngValue]="org.id">{{ org.nomOrganisation }}</option>
+    </select>
+
+    <label class="assign-label">Description supplementaire (optionnel)</label>
+    <textarea
+      class="assign-textarea"
+      rows="3"
+      [(ngModel)]="descriptionSupplementaire"
+      placeholder="Ajouter un contexte pour l organisation"></textarea>
+
+    <app-validation-error
+      *ngIf="validationMessage"
+      [message]="validationMessage">
+    </app-validation-error>
+
+    <div class="assign-actions">
+      <button class="btn-secondary" type="button" (click)="onCancel()" [disabled]="isAssigning">
+        Annuler
+      </button>
+      <button class="btn-primary" type="button" [disabled]="isAssigning" (click)="onConfirm()">
+        {{ isAssigning ? 'Envoi...' : 'Assigner' }}
+      </button>
+    </div>
+
+  </div>
+</div>

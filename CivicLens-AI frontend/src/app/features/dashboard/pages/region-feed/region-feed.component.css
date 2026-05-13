@@ -28,11 +28,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   padding: 0.875rem 1.125rem;
   background: white;
   border: 1px solid var(--border);
   border-radius: 12px;
+  overflow-x: auto;
   animation: slideInScale 0.4s ease-out;
   animation-delay: 0.3s;
   animation-fill-mode: both;
@@ -40,6 +41,8 @@
   position: relative;
   z-index: 2;
 }
+
+.toolbar::-webkit-scrollbar { display: none; }
 
 .toolbar:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -124,8 +127,13 @@
 .sort-btn:nth-child(3) { animation-delay: 0.6s; }
 .sort-btn:nth-child(4) { animation-delay: 0.7s; }
 
-.cat-select-wrap { 
-  min-width: 200px; 
+.filters-wrap { 
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
   animation: fadeInUp 0.4s ease-out;
   animation-delay: 0.8s;
   animation-fill-mode: both;
@@ -134,6 +142,8 @@
 }
 
 .cat-select {
+  width: auto;
+  min-width: 140px;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Signalement } from '../../../../shared/models/signalement.model';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-signalement-card',
@@ -19,6 +20,10 @@ export class SignalementCardComponent {
 
   @Output() onDelete = new EventEmitter<string>();
   @Output() onVote   = new EventEmitter<string>();
+
+  lightboxOpen = false;
+  private voteWarningTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  showVoteWarning = false;
 
   statusLabels: Record<string, string> = {
     EN_ATTENTE: 'En attente',
@@ -61,6 +66,14 @@ export class SignalementCardComponent {
     });
   }
 
+  constructor(private authService: AuthService) {}
+
+  isOwner(): boolean {
+    const userId = this.authService.getCurrentUserFromStorage()?.id;
+    if (!userId || !this.signalement?.citoyenId) return false;
+    return String(userId).toLowerCase() === String(this.signalement.citoyenId).toLowerCase();
+  }
+
   delete(e: Event) {
     e.stopPropagation();
     this.onDelete.emit(this.signalement.id);
@@ -68,7 +81,37 @@ export class SignalementCardComponent {
 
   vote(e: Event) {
     e.stopPropagation();
+    if (this.isOwner()) {
+      this.showVoteWarningPopup();
+      return;
+    }
     this.onVote.emit(this.signalement.id);
+  }
+
+  voteInfo(e: Event) {
+    e.stopPropagation();
+    if (this.isOwner()) this.showVoteWarningPopup();
+  }
+
+  private showVoteWarningPopup(): void {
+    this.showVoteWarning = true;
+    if (this.voteWarningTimeoutId) clearTimeout(this.voteWarningTimeoutId);
+    this.voteWarningTimeoutId = setTimeout(() => {
+      this.showVoteWarning = false;
+      this.voteWarningTimeoutId = null;
+    }, 2000);
+  }
+
+  openLightbox(e: Event): void {
+    e.stopPropagation();
+    this.lightboxOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(e?: Event): void {
+    e?.stopPropagation();
+    this.lightboxOpen = false;
+    document.body.style.overflow = '';
   }
 
   getImageUrl(): string | null {

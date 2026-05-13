@@ -5,9 +5,11 @@ import { SignalementCardComponent } from '../../components/signalement-card/sign
 import { SignalementService } from '../../../../core/services/signalement.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
-import { Signalement, SignalementCategorie } from '../../../../shared/models/signalement.model';
+import { Signalement, SignalementCategorie, SignalementStatut } from '../../../../shared/models/signalement.model';
 
 type SortOption = 'recent' | 'votes';
+type FilterValue = 'TOUTES' | string;
+type FilterStatut = SignalementStatut | 'TOUS' | 'EN_COURS';
 
 @Component({
   selector: 'app-region-feed',
@@ -22,6 +24,9 @@ export class RegionFeedComponent implements OnInit {
   error = signal<string | null>(null);
   sortBy = signal<SortOption>('recent');
   filterCat = signal<SignalementCategorie | 'TOUTES'>('TOUTES');
+  filterGravite = signal<FilterValue>('TOUTES');
+  filterPriorite = signal<FilterValue>('TOUTES');
+  filterStatut = signal<FilterStatut>('TOUS');
   userDelegation = signal<string>('');
   private currentUserId = signal<string | null>(null);
 
@@ -30,17 +35,60 @@ export class RegionFeedComponent implements OnInit {
     { value: 'ROUTE',          label: '🛣️ Route' },
     { value: 'ECLAIRAGE',      label: '💡 Éclairage' },
     { value: 'EAU',            label: '💧 Eau' },
-    { value: 'TRANSPORT',      label: '🚌 Transport' },
     { value: 'ELECTRICITE',    label: '⚡ Électricité' },
     { value: 'INFRASTRUCTURE', label: '🏗️ Infrastructure' },
     { value: 'DECHETS',        label: '🗑️ Déchets' },
     { value: 'AUTRE',          label: '📌 Autre' },
   ];
 
+  statutOptions: { value: FilterStatut; label: string }[] = [
+    { value: 'TOUS', label: 'Tous statuts' },
+    { value: 'EN_ATTENTE', label: 'En attente' },
+    { value: 'EN_COURS', label: 'En cours' },
+    { value: 'RESOLU', label: 'Résolu' },
+    { value: 'REJETE', label: 'Rejeté' },
+  ];
+
+  graviteOptions: { value: FilterValue; label: string }[] = [
+    { value: 'TOUTES', label: 'Toutes gravités' },
+    { value: 'NON_DEFINIE', label: 'Non définie' },
+    { value: 'FAIBLE', label: 'FAIBLE' },
+    { value: 'MOYEN', label: 'MOYEN' },
+    { value: 'ELEVE', label: 'ELEVE' },
+    { value: 'CRITIQUE', label: 'CRITIQUE' },
+  ];
+
+  prioriteOptions: { value: FilterValue; label: string }[] = [
+    { value: 'TOUTES', label: 'Toutes priorités' },
+    { value: 'NON_DEFINIE', label: 'Non définie' },
+    { value: 'BASSE', label: 'BASSE' },
+    { value: 'MOYENNE', label: 'MOYENNE' },
+    { value: 'HAUTE', label: 'HAUTE' },
+    { value: 'URGENTE', label: 'URGENTE' },
+  ];
+
   filtered = computed(() => {
     let list = [...this.signalements()];
     const cat = this.filterCat();
     if (cat !== 'TOUTES') list = list.filter(s => s.categorie === cat);
+    const st = this.filterStatut();
+    if (st !== 'TOUS') {
+      if (st === 'EN_COURS') {
+        list = list.filter(s => ['EN_COURS', 'OUVERTE', 'ENVOYEE', 'EN_COURS_DETUDE'].includes(s.statut as any));
+      } else {
+        list = list.filter(s => s.statut === st);
+      }
+    }
+    const g = this.filterGravite();
+    if (g !== 'TOUTES') {
+      if (g === 'NON_DEFINIE') list = list.filter(s => !s.gravite || !String(s.gravite).trim());
+      else list = list.filter(s => (s.gravite || '').toString() === g);
+    }
+    const p = this.filterPriorite();
+    if (p !== 'TOUTES') {
+      if (p === 'NON_DEFINIE') list = list.filter(s => !s.priorite || !String(s.priorite).trim());
+      else list = list.filter(s => (s.priorite || '').toString() === p);
+    }
     if (this.sortBy() === 'votes') {
       list.sort((a, b) => b.votes - a.votes);
     } else {

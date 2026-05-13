@@ -293,5 +293,203 @@
       "country": "Tunisie"
     },
     "from_cache": false
+  },
+  "36.874,11.076": {
+    "zone_score": 1.01,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.05,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "county": "Kelibia Est",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": null,
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.864,11.081": {
+    "zone_score": 1.05,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.2,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Kelibia",
+      "county": "Kelibia Est",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Kelibia",
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.86,11.07": {
+    "zone_score": 1.01,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.04,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "county": "Kelibia Est",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": null,
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.863,11.07": {
+    "zone_score": 1.01,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.06,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=1, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Azmour",
+      "county": "Kelibia Est",
+      "postcode": "8065",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Azmour",
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.848,11.072": {
+    "zone_score": 1.12,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.5,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=2",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Oued El Khatef",
+      "county": "Kelibia Ouest",
+      "postcode": "8065",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Oued El Khatef",
+      "county": "Délégation de Kelibia Ouest",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.855,11.116": {
+    "zone_score": 1.07,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.29,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=2",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Kelibia",
+      "county": "Kelibia Est",
+      "postcode": "8090",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Kelibia",
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.84,11.12": {
+    "zone_score": 1.16,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.65,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=1",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Kelibia",
+      "county": "Kelibia Est",
+      "postcode": "8090",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Kelibia",
+      "county": "Délégation de Kelibia Est",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.889,11.112": {
+    "zone_score": 1.03,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.11,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=1, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Hammam El Ghezaz",
+      "county": "Hammam El Ghezaz",
+      "postcode": "8096",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Hammam El Ghezaz",
+      "county": "Délégation de Hammam El Ghezaz",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
   }
 }

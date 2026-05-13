@@ -3,6 +3,7 @@ export interface Notification {
   type: string;
   message: string;
   relatedEvenementId?: string | null;
+  relatedSignalementId?: number | null;
   createdAt: Date;
   isRead: boolean;
 }

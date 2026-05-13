@@ -13,6 +13,7 @@ import { NouveauEvenementComponent } from './pages/nouveau-evenement/nouveau-eve
 import { EvenementDetailsComponent } from './pages/evenement-details/evenement-details.component';
 import { EvenementParticipantsComponent } from './pages/evenement-participants/evenement-participants.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -30,6 +31,7 @@ export const DASHBOARD_ROUTES: Routes = [
       { path: 'notifications', component: NotificationsComponent },
       { path: 'profil/modifier', component: ProfilEditComponent },
       { path: 'profil', component: ProfilComponent },
+      { path: 'settings', component: SettingsComponent },
       { path: 'about', component: AboutComponent },
       { path: 'signalement/:id', component: SignalementDetailsComponent }
     ]

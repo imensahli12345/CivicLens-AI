@@ -84,8 +84,16 @@ export class HomePageComponent implements OnInit {
     this.signalementService.getSignalementsDelegation(delegation).subscribe({
       next: (list) => {
         const myId = this.user()?.id;
-        const filtered = myId ? list.filter(s => s.citoyenId !== myId) : list;
-        this.delegationSignalements.set(filtered.slice(0, 3));
+        const norm = (v: any) => (v ?? '').toString().trim().toLowerCase();
+        const getOwnerId = (s: any) => s?.citoyenId ?? s?.CitoyenId ?? s?.citoyenID ?? s?.citoyen_id;
+        const filtered = myId ? list.filter(s => norm(getOwnerId(s)) !== norm(myId)) : list;
+        const getCreatedAtTs = (s: any): number => {
+          const d = s?.createdAt ?? s?.dateCreation ?? s?.DateCreation ?? s?.created_at ?? s?.CreatedAt;
+          const ts = new Date(d).getTime();
+          return Number.isFinite(ts) ? ts : 0;
+        };
+        const sorted = [...filtered].sort((a, b) => getCreatedAtTs(b) - getCreatedAtTs(a));
+        this.delegationSignalements.set(sorted.slice(0, 3));
         this.loadingDelegation.set(false);
       },
       error: () => this.loadingDelegation.set(false)

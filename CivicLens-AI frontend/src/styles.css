@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+/* Removed remote @import to avoid production build failures when font inlining cannot fetch external URLs. */
 
 /* ─── Design Tokens ─── */
 :root {
@@ -61,6 +61,10 @@ html, body {
   font-size: 15px;
   line-height: 1.6;
 }
+html {
+  scroll-behavior: smooth;
+}
+
 
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: inherit; }

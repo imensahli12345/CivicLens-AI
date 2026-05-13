@@ -1,0 +1,49 @@
+<section class="table-card">
+  <div class="table-head">
+    <h2>{{ title }}</h2>
+    <p>{{ subtitle }}</p>
+  </div>
+
+  <div class="table-scroll" *ngIf="rows.length > 0; else emptyState">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th *ngFor="let col of columns">{{ col.label }}</th>
+          <th *ngIf="showActions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td *ngFor="let col of columns">
+            <span *ngIf="col.type === 'status'; else textCell" class="status-pill" [class]="asStatusClass(row[col.key])">
+              {{ row[col.key] }}
+            </span>
+            <ng-template #textCell>{{ row[col.key] }}</ng-template>
+          </td>
+          <td *ngIf="showActions" class="actions-cell">
+            <button
+              type="button"
+              class="btn btn-primary"
+              *ngIf="canActivate(row)"
+              (click)="onActivate(row)"
+            >
+              Activate
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              *ngIf="canDeactivate(row)"
+              (click)="onDeactivate(row)"
+            >
+              Deactivate
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">{{ emptyMessage }}</div>
+  </ng-template>
+</section>

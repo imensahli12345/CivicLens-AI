@@ -1,0 +1,137 @@
+.profile-modal-eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0284c7;
+}
+
+.profile-modal-title h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.profile-modal-title p:last-child {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.profile-item-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-card {
+  padding: 0;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-item-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid #dbeafe;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 12px 24px rgba(14, 116, 144, 0.08);
+}
+
+.profile-item-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  color: #0369a1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-item-content {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.profile-item-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.profile-item-value {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #0f172a;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.profile-state {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  color: #475569;
+  text-align: center;
+}
+
+.error-state {
+  color: #b91c1c;
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid #dbeafe;
+  border-top-color: #0284c7;
+  animation: spin 0.85s linear infinite;
+}
+
+.close-button {
+  min-width: 120px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.close-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(30, 58, 138, 0.22);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}

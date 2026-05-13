@@ -1,25 +1,23 @@
 import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { Router, RouterOutlet } from '@angular/router';
 import { DashboardHeaderComponent } from './components/dashboard-header/dashboard-header.component'
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../shared/models/user.model';
 import { getDashboardConfig, DashboardConfig } from './config/dashboard.config';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, DashboardHeaderComponent, CommonModule],
+  imports: [RouterOutlet, DashboardHeaderComponent, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   user = signal<User | null>(null);
   config = signal<DashboardConfig | null>(null);
-  sidebarOpen = signal(true);
   private checkInterval: any;
+  private phoneNotificationDismissed = signal(sessionStorage.getItem('phone-notification-dismissed') === 'true');
 
   // Vérifier si le numéro de téléphone est manquant
   missingPhone = computed(() => {
@@ -29,7 +27,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Vérifier si la notification doit être affichée
   showNotification = computed(() => {
-    return this.missingPhone() && !this.isNotificationDismissed();
+    return this.missingPhone() && !this.phoneNotificationDismissed();
   });
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -103,10 +101,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }, 30000); // Augmenté à 30 secondes pour une meilleure stabilité et moins de charge serveur
   }
 
-  toggleSidebar(): void {
-    this.sidebarOpen.update(v => !v);
-  }
-
   // Rediriger vers la page de modification du profil
   completeProfile(): void {
     this.router.navigate(['/dashboard/profil/modifier']);
@@ -114,8 +108,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Fermer la notification
   dismissNotification(): void {
-    // Sauvegarder en localStorage que l'utilisateur a dismissé
-    localStorage.setItem('phone-notification-dismissed', 'true');
+    sessionStorage.setItem('phone-notification-dismissed', 'true');
+    this.phoneNotificationDismissed.set(true);
   }
 
   // Vérifier si la notification a déjà été dismissée
@@ -125,7 +119,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Réinitialiser la notification si le profil est mis à jour
   resetNotification(): void {
-    localStorage.removeItem('phone-notification-dismissed');
+    sessionStorage.removeItem('phone-notification-dismissed');
+    this.phoneNotificationDismissed.set(false);
   }
 
   // Mettre à jour l'utilisateur et vérifier si le profil est complet

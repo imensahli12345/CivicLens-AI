@@ -1,0 +1,40 @@
+<div
+  *ngIf="isRendered"
+  class="base-modal-backdrop"
+  [class.is-closing]="isClosing"
+  [style.z-index]="zIndex"
+  (click)="requestClose()"
+>
+  <section
+    class="base-modal-shell"
+    [class.is-closing]="isClosing"
+    [style.--base-modal-max-width]="maxWidth"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="ariaLabel"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      type="button"
+      class="base-modal-close"
+      (click)="requestClose()"
+      [attr.aria-label]="closeAriaLabel"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6 18 18M18 6 6 18"></path>
+      </svg>
+    </button>
+
+    <header class="base-modal-header">
+      <ng-content select="[modal-title]"></ng-content>
+    </header>
+
+    <div class="base-modal-body">
+      <ng-content select="[modal-body]"></ng-content>
+    </div>
+
+    <footer class="base-modal-footer">
+      <ng-content select="[modal-footer]"></ng-content>
+    </footer>
+  </section>
+</div>

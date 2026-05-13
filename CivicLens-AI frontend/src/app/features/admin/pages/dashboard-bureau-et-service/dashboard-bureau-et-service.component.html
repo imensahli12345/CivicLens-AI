@@ -1,0 +1,182 @@
+<div class="dashboard-page" id="top">
+  <app-actor-dashboard-topbar
+    [userName]="userName"
+    subtitle="Dashboard Bureau de controle"
+    homeRoute="/dashboard-bureau-et-service"
+    (serviceAction)="onServiceAction($event)"
+    (signalementAction)="onSignalementAction($event)"
+    (profileClick)="openProfileModal()"
+  ></app-actor-dashboard-topbar>
+
+  <section class="hero-card">
+    <div class="hero-content">
+      <p class="hero-badge">Plateforme de pilotage CivicLens</p>
+      <h1>Services publics et gestion des signalements en un seul espace</h1>
+      <p>
+        Activez les services, suivez les signalements citoyens et coordonnez les actions
+        du bureau de controle et des organisations.
+      </p>
+    </div>
+    <div class="hero-media">
+      <div class="hero-carousel" aria-label="Equipes du bureau de controle et des services en intervention">
+        <div
+          class="hero-track"
+          [style.transform]="'translateX(-' + currentHeroSlide * 100 + '%)'"
+        >
+          <img
+            *ngFor="let slide of heroSlides"
+            [src]="slide.src"
+            [alt]="slide.alt"
+          />
+        </div>
+
+        <button
+          class="hero-nav hero-nav--left"
+          type="button"
+          aria-label="Image precedente"
+          (click)="prevHeroSlide()"
+        >
+          &#8249;
+        </button>
+        <button
+          class="hero-nav hero-nav--right"
+          type="button"
+          aria-label="Image suivante"
+          (click)="nextHeroSlide()"
+        >
+          &#8250;
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <p *ngIf="message" class="feedback">{{ message }}</p>
+
+  <section class="insights-row">
+    <div class="chart-section">
+      <app-reclamations-chart [stats]="reclamationsStats"></app-reclamations-chart>
+    </div>
+    <div class="calendar-section">
+      <app-dashboard-calendar></app-dashboard-calendar>
+    </div>
+  </section>
+
+  <app-quick-actions
+    class="quick-actions-section"
+    heading="Filtres rapides des signalements"
+    [actions]="quickFilterActions"
+    (actionSelected)="onQuickAction($event)"
+  ></app-quick-actions>
+
+  <div class="tables-stack" id="signalements-section" *ngIf="!loading; else loadingState">
+    <app-signalements></app-signalements>
+  </div>
+
+  <div class="services-modal-backdrop" *ngIf="showServicesModal" (click)="closeServicesModal()">
+    <section class="services-modal-card" (click)="$event.stopPropagation()">
+      <button type="button" class="services-modal-close" (click)="closeServicesModal()" aria-label="Fermer">x</button>
+
+      <div class="services-modal-body">
+        <app-bureau-services-table [config]="servicesTableConfig"></app-bureau-services-table>
+      </div>
+    </section>
+  </div>
+
+  <div class="signalements-modal-backdrop" *ngIf="showSignalementsModal" (click)="closeSignalementsModal()">
+    <section class="signalements-modal-card" (click)="$event.stopPropagation()">
+      <button type="button" class="signalements-modal-close" (click)="closeSignalementsModal()" aria-label="Fermer">x</button>
+
+      <div class="signalements-modal-body">
+        <app-signalements
+          [title]="filteredSignalementsTitle"
+          [subtitle]="filteredSignalementsSubtitle"
+          [filters]="filteredSignalementQuery"
+          [emptyStateMessage]="filteredSignalementsEmptyMessage"
+          [refreshToken]="filteredSignalementsRefreshToken"
+          (filteredEmpty)="onFilteredSignalementsEmpty($event)"
+          (filteredRequestError)="onFilteredSignalementsError($event)"
+        ></app-signalements>
+      </div>
+    </section>
+  </div>
+
+  <app-base-modal
+    [visible]="showQuickFilterModal"
+    ariaLabel="Filtrer les signalements"
+    closeAriaLabel="Fermer la fenetre de filtre"
+    maxWidth="560px"
+    [zIndex]="920"
+    (close)="closeQuickFilterModal()"
+  >
+    <div modal-title class="filter-modal-title">
+      <p class="filter-modal-badge">Filtre</p>
+      <h2>{{ quickFilterModalTitle }}</h2>
+      <p>{{ quickFilterModalSubtitle }}</p>
+    </div>
+
+    <div modal-body class="filter-modal-body">
+      <label class="filter-field" *ngIf="selectedQuickFilter === 'statut'">
+        <span>Statut</span>
+        <select [(ngModel)]="selectedStatut">
+          <option value="">Choisir un statut</option>
+          <option *ngFor="let statut of statutOptions" [value]="statut">{{ statut }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field" *ngIf="selectedQuickFilter === 'gravite'">
+        <span>Gravite</span>
+        <select [(ngModel)]="selectedGravite">
+          <option value="">Choisir une gravite</option>
+          <option *ngFor="let gravite of graviteOptions" [value]="gravite">{{ gravite }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field" *ngIf="selectedQuickFilter === 'priorite'">
+        <span>Priorite</span>
+        <select [(ngModel)]="selectedPriorite">
+          <option value="">Choisir une priorite</option>
+          <option *ngFor="let priorite of prioriteOptions" [value]="priorite">{{ priorite }}</option>
+        </select>
+      </label>
+
+      <div class="filter-date-grid" *ngIf="selectedQuickFilter === 'date'">
+        <label class="filter-field">
+          <span>Date de debut</span>
+          <input type="date" [(ngModel)]="selectedDateFrom" />
+        </label>
+
+        <label class="filter-field">
+          <span>Date de fin</span>
+          <input type="date" [(ngModel)]="selectedDateTo" />
+        </label>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <button type="button" class="filter-btn filter-btn--ghost" (click)="closeQuickFilterModal()">Annuler</button>
+      <button type="button" class="filter-btn filter-btn--primary" (click)="applyQuickFilter()">Afficher les resultats</button>
+    </div>
+  </app-base-modal>
+
+  <app-profile-modal
+    [visible]="showProfileModal"
+    profileType="bureau"
+    title="Bureau profile"
+    subtitle="Account information for the connected bureau de controle."
+    [fieldConfigs]="bureauProfileFields"
+    (close)="closeProfileModal()"
+  ></app-profile-modal>
+
+  <app-simple-alert
+    [open]="showAlert"
+    [type]="alertType"
+    [message]="alertMessage"
+    (close)="closeAlert()"
+  ></app-simple-alert>
+
+  <app-about-footer></app-about-footer>
+
+  <ng-template #loadingState>
+    <div class="loading-state">Chargement du dashboard...</div>
+  </ng-template>
+</div>

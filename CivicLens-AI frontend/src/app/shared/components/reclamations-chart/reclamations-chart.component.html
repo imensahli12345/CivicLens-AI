@@ -1,0 +1,43 @@
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title-group">
+      <div class="chart-title">{{ title }}</div>
+      <div class="chart-subtitle" *ngIf="stats.delegation">
+        Delegation : {{ stats.delegation }}
+      </div>
+    </div>
+    <div class="chart-total-badge">Total : {{ stats.total }}</div>
+  </div>
+
+  <div class="chart-body">
+    <div class="y-axis">
+      <span class="y-tick" *ngFor="let tick of yTicks">{{ tick }}</span>
+    </div>
+
+    <div class="bars-wrapper">
+      <div class="bars-area">
+        <div
+          class="grid-line"
+          *ngFor="let pct of gridLines"
+          [style.bottom.%]="pct"
+        ></div>
+
+        <div class="bar-col" *ngFor="let bar of bars">
+          <span class="bar-label" [class.bar-label--zero]="bar.value === 0">
+            {{ bar.value }}
+          </span>
+          <div
+            class="bar"
+            [style.height]="bar.heightPct > 0 ? bar.heightPct + '%' : '4px'"
+            [style.background]="bar.value === 0 ? '#e5e7eb' : bar.color"
+            [class.bar--zero]="bar.value === 0"
+          ></div>
+        </div>
+      </div>
+
+      <div class="x-axis">
+        <div class="x-label" *ngFor="let bar of bars">{{ bar.label }}</div>
+      </div>
+    </div>
+  </div>
+</div>

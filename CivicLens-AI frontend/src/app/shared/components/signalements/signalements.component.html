@@ -1,0 +1,478 @@
+﻿<!-- ===== SIGNALEMENTS TABLE ===== -->
+<div class="signals-page" *ngIf="shouldShowContainer()">
+  <header class="signals-head">
+    <div>
+      <h2>{{ title }}</h2>
+      <p>{{ subtitle }}</p>
+    </div>
+    <button class="signals-refresh" type="button" (click)="fetchSignalements()" [disabled]="isLoading">
+      Actualiser
+    </button>
+  </header>
+
+  <div class="signals-loading" *ngIf="isLoading">Chargement des signalements...</div>
+  <div class="signals-error" *ngIf="error && !isLoading">{{ error }}</div>
+
+  <div class="signals-table-wrap" *ngIf="shouldShowTable()">
+    <table class="signals-table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Statut</th>
+          <th>Gravite</th>
+          <th>Priorite</th>
+          <th>Domaine</th>
+          <th>Date</th>
+          <th>Historique</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sig of signalements">
+          <td>
+            <button
+              *ngIf="!shouldShowInlineViewAction()"
+              class="signals-title-button"
+              type="button"
+              (click)="openDetail(sig)">
+              {{ sig.titre }}
+            </button>
+            <ng-container *ngIf="shouldShowInlineViewAction()">
+              {{ sig.titre }}
+            </ng-container>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatutClass(sig.statut)">
+              {{ sig.statut | titlecase }}
+            </span>
+          </td>
+          <td>
+            <span class="pill-gravite" [ngClass]="getGraviteClass(sig.gravite)">
+              {{ sig.gravite }}
+            </span>
+          </td>
+          <td>
+            <span class="pill-priorite" [ngClass]="getPrioriteClass(sig.priorite)">
+              {{ sig.priorite }}
+            </span>
+          </td>
+          <td>
+            <span class="signals-domain">{{ getDomaineIcon(sig.domaine) }} {{ getDomaineLabel(sig.domaine) }}</span>
+          </td>
+          <td>{{ formatDate(sig.dateCreation) }}</td>
+          <td>
+            <button
+              *ngIf="shouldShowHistoryActions()"
+              class="signals-btn signals-btn--history signals-btn--icon"
+              type="button"
+              (click)="openHistorique(sig)"
+              title="Voir historique"
+              aria-label="Voir historique">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+            <span *ngIf="!shouldShowHistoryActions()" class="signals-history-placeholder">-</span>
+          </td>
+          <td>
+            <div class="signals-actions">
+              <button
+                *ngIf="shouldShowInlineViewAction()"
+                class="signals-btn signals-btn--view"
+                type="button"
+                (click)="openDetail(sig)">
+                Voir
+              </button>
+              <button
+                *ngIf="shouldShowOpenActions()"
+                class="signals-btn signals-btn--open"
+                type="button"
+                [disabled]="isOpening(sig.id)"
+                (click)="onOuvrir(sig)">
+                {{ isOpening(sig.id) ? 'Ouverture...' : 'Ouvrir' }}
+              </button>
+              <button
+                *ngIf="shouldShowAssignActions()"
+                class="signals-btn signals-btn--assign"
+                type="button"
+                (click)="openAssign(sig)">
+                Assigner
+              </button>
+              <button
+                *ngIf="shouldShowResolveActions()"
+                class="signals-btn signals-btn--resolve"
+                type="button"
+                [disabled]="isResolving(sig.id)"
+                (click)="onResoudre(sig)">
+                {{ isResolving(sig.id) ? 'Resolution...' : 'Resoudre' }}
+              </button>
+              <button
+                *ngIf="shouldShowRapportActions()"
+                class="signals-btn signals-btn--rapport"
+                type="button"
+                [disabled]="isUploadingRapport(sig.id)"
+                (click)="openRapportPicker(sig, rapportInput)">
+                {{ isUploadingRapport(sig.id) ? 'Envoi...' : 'Ajouter rapport' }}
+              </button>
+              <button
+                *ngIf="shouldShowRejectActions()"
+                class="signals-btn signals-btn--reject"
+                type="button"
+                [disabled]="isRejecting(sig.id)"
+                (click)="onRejeter(sig)">
+                {{ isRejecting(sig.id) ? 'Rejet...' : 'Rejeter' }}
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="signalements.length === 0">
+          <td colspan="8" class="signals-empty">{{ emptyStateMessage }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="modal-overlay" [class.active]="showDetailModal" (click)="closeDetail()">
+  <div class="modal-box detail-modal" (click)="$event.stopPropagation()" *ngIf="selectedSignalement">
+
+    <!-- HEADER -->
+    <header class="detail-header">
+      <div class="detail-header__main">
+        <div class="detail-header__icon">
+          <!-- Lucide: file-text -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <div class="detail-header__text">
+          <h2 class="detail-title">{{ selectedSignalement.titre }}</h2>
+          <p class="detail-meta">
+            <span class="meta-id">#{{ selectedSignalement.id }}</span>
+            <span class="meta-sep">•</span>
+            <span class="meta-domaine">{{ selectedSignalement.domaine }}</span>
+            <span class="meta-sep">•</span>
+            <span class="meta-org">{{ selectedSignalement.organisationNom }}</span>
+          </p>
+        </div>
+      </div>
+      <button class="btn-close" (click)="closeDetail()" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- STATUS STRIP -->
+    <div class="detail-strip">
+      <div class="strip-item">
+        <span class="strip-label">Statut</span>
+        <span class="badge" [ngClass]="getStatutClass(selectedSignalement.statut)">
+          {{ selectedSignalement.statut | titlecase }}
+        </span>
+      </div>
+      <div class="strip-divider"></div>
+      <div class="strip-item">
+        <span class="strip-label">Gravite</span>
+        <span class="pill-gravite" [ngClass]="getGraviteClass(selectedSignalement.gravite)">
+          {{ selectedSignalement.gravite }}
+        </span>
+      </div>
+      <div class="strip-divider"></div>
+      <div class="strip-item">
+        <span class="strip-label">Priorite</span>
+        <span class="pill-priorite" [ngClass]="getPrioriteClass(selectedSignalement.priorite)">
+          {{ selectedSignalement.priorite }}
+        </span>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="detail-body">
+
+      <!-- INFO CARDS GRID -->
+      <section class="info-cards">
+        <div class="info-card">
+          <div class="info-card__icon">
+            <!-- Lucide: user -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <span class="info-card__label">Citoyen (CIN)</span>
+            <span class="info-card__value cin-mono">{{ selectedSignalement.cinCitoyen }}</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card__icon">
+            <!-- Lucide: building-2 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+              <path d="M6 12H4a2 2 0 0 0-2 2v8h4"/>
+              <path d="M18 9h2a2 2 0 0 1 2 2v11h-4"/>
+              <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+            </svg>
+          </div>
+          <div>
+            <span class="info-card__label">Organisation</span>
+            <span class="info-card__value">{{ selectedSignalement.organisationNom }}</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card__icon">
+            <!-- Lucide: calendar-plus -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="12" y1="14" x2="12" y2="18"/>
+              <line x1="10" y1="16" x2="14" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <span class="info-card__label">Date de creation</span>
+            <span class="info-card__value">{{ formatDate(selectedSignalement.dateCreation) }}</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card__icon">
+            <!-- Lucide: calendar-check -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <path d="m9 16 2 2 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <span class="info-card__label">Date de resolution</span>
+            <span class="info-card__value">
+              {{ selectedSignalement.dateResolution ? formatDate(selectedSignalement.dateResolution) : 'Non resolue' }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADRESSE -->
+      <section class="detail-section" *ngIf="parsedAdresse">
+        <div class="section-head">
+          <span class="section-icon">
+            <!-- Lucide: map-pin -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </span>
+          <h3 class="section-title">Adresse</h3>
+        </div>
+        <div class="section-content adresse-block">
+          <span *ngIf="parsedAdresse.county">{{ parsedAdresse.county }}</span>
+          <span *ngIf="parsedAdresse.state">, {{ parsedAdresse.state }}</span>
+          <span *ngIf="parsedAdresse.postcode"> - {{ parsedAdresse.postcode }}</span>
+          <span *ngIf="parsedAdresse.country">, {{ parsedAdresse.country }}</span>
+        </div>
+      </section>
+
+      <!-- DESCRIPTION -->
+      <section class="detail-section">
+        <div class="section-head">
+          <span class="section-icon">
+            <!-- Lucide: align-left -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="17" y1="10" x2="3" y2="10"/>
+              <line x1="21" y1="6" x2="3" y2="6"/>
+              <line x1="21" y1="14" x2="3" y2="14"/>
+              <line x1="17" y1="18" x2="3" y2="18"/>
+            </svg>
+          </span>
+          <h3 class="section-title">Description</h3>
+        </div>
+        <p class="section-content desc-block">{{ selectedSignalement.description }}</p>
+      </section>
+
+      <!-- DESCRIPTION SERVICE -->
+      <section class="detail-section"
+               *ngIf="selectedSignalement.descriptionService && selectedSignalement.descriptionService !== 'string'">
+        <div class="section-head">
+          <span class="section-icon">
+            <!-- Lucide: message-square -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
+          <h3 class="section-title">Note du service</h3>
+        </div>
+        <p class="section-content desc-block">{{ selectedSignalement.descriptionService }}</p>
+      </section>
+
+      <!-- IMAGES -->
+      <section class="detail-section"
+               *ngIf="selectedSignalement.images && selectedSignalement.images.length > 0">
+        <div class="section-head">
+          <span class="section-icon">
+            <!-- Lucide: image -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </span>
+          <h3 class="section-title">Photos</h3>
+          <span class="section-count">{{ selectedSignalement.images.length }}</span>
+        </div>
+
+        <div class="images-grid">
+          <button type="button"
+                  class="img-thumb"
+                  *ngFor="let img of selectedSignalement.images; let i = index"
+                  (click)="openLightbox(i)"
+                  [attr.aria-label]="'Ouvrir l\'image ' + (i + 1)">
+            <img [src]="getImageUrl(img)" alt="Photo signalement"
+                 (error)="$any($event.target).style.display='none'">
+            <span class="img-thumb__overlay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h6v6"/><path d="M9 21H3v-6"/>
+                <path d="M21 3l-7 7"/><path d="M3 21l7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="detail-footer">
+      <button class="btn-secondary" (click)="closeDetail()">Fermer</button>
+      <button
+        *ngIf="shouldShowOpenActions()"
+        class="btn-secondary"
+        [disabled]="isOpening(selectedSignalement.id)"
+        (click)="onOuvrir(selectedSignalement)">
+        {{ isOpening(selectedSignalement.id) ? 'Ouverture...' : 'Ouvrir' }}
+      </button>
+      <button
+        *ngIf="shouldShowRapportActions()"
+        class="btn-secondary"
+        [disabled]="isUploadingRapport(selectedSignalement.id)"
+        (click)="openRapportPicker(selectedSignalement, rapportInput)">
+        {{ isUploadingRapport(selectedSignalement.id) ? 'Envoi...' : 'Ajouter rapport' }}
+      </button>
+      <button
+        *ngIf="shouldShowResolveActions()"
+        class="btn-primary"
+        [disabled]="isResolving(selectedSignalement.id)"
+        (click)="onResoudre(selectedSignalement)">
+        {{ isResolving(selectedSignalement.id) ? 'Resolution...' : 'Resoudre' }}
+      </button>
+      <button class="btn-primary" *ngIf="shouldShowAssignActions()" (click)="openAssignFromDetail()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Assigner ce signalement
+      </button>
+    </footer>
+
+  </div>
+</div>
+
+<input
+  #rapportInput
+  type="file"
+  accept="application/pdf,.pdf"
+  class="signals-file-input"
+  (change)="onRapportSelected($event)">
+
+<!-- ===== ASSIGN MODAL (shared component) ===== -->
+<app-assign-signalement
+  *ngIf="shouldShowAssignActions()"
+  [open]="showAssignModal"
+  [signalement]="selectedForAssign"
+  [organisations]="organisations"
+  [isAssigning]="isAssigning"
+  (cancel)="closeAssign()"
+  (confirm)="onAssignConfirm($event)">
+</app-assign-signalement>
+
+<app-signalement-historique
+  [open]="showHistoriqueModal"
+  [title]="historiqueTitle"
+  [loading]="historiqueLoading"
+  [error]="historiqueError"
+  [entries]="historiqueEntries"
+  (close)="closeHistorique()">
+</app-signalement-historique>
+
+<!-- ===== TOAST ===== -->
+<app-simple-alert
+  [open]="showToast"
+  [type]="toastType"
+  [message]="toastMessage"
+  (close)="showToast = false"
+></app-simple-alert>
+
+<!-- ===== LIGHTBOX ===== -->
+<div class="lightbox" *ngIf="lightboxOpen && selectedSignalement" (click)="closeLightbox()">
+  <button class="lightbox-close" (click)="closeLightbox()" aria-label="Fermer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <button class="lightbox-nav lightbox-nav--prev"
+          *ngIf="selectedSignalement.images.length > 1"
+          (click)="prevImage($event)" aria-label="Image precedente">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+
+  <figure class="lightbox-figure" (click)="$event.stopPropagation()">
+    <img [src]="getImageUrl(selectedSignalement.images[lightboxIndex])"
+         alt="Photo signalement agrandie">
+    <figcaption class="lightbox-caption">
+      {{ lightboxIndex + 1 }} / {{ selectedSignalement.images.length }}
+    </figcaption>
+  </figure>
+
+  <button class="lightbox-nav lightbox-nav--next"
+          *ngIf="selectedSignalement.images.length > 1"
+          (click)="nextImage($event)" aria-label="Image suivante">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
+</div>

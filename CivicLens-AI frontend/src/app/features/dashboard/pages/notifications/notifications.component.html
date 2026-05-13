@@ -9,7 +9,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Notifications</h1>
-      <p class="page-subtitle">Dernières mises à jour des événements auxquels vous participez</p>
+      <p class="page-subtitle">Dernières mises à jour de vos événements et de vos signalements</p>
     </div>
   </div>
 
@@ -26,15 +26,15 @@
   <div *ngIf="!loading() && !errorMsg() && notifications().length === 0" class="empty-state">
     <div class="empty-state-icon">🔔</div>
     <h3>Aucune notification</h3>
-    <p>Vous serez informé lorsqu’un événement auquel vous participez est modifié.</p>
+    <p>Vous serez informé en cas de mise à jour (événements, signalements, statut...).</p>
   </div>
 
   <div *ngIf="!loading() && !errorMsg() && notifications().length > 0" class="notif-list">
     <button
       *ngFor="let n of notifications()"
       class="notif-row"
-      (click)="goToEvent(n)"
-      [disabled]="!n.relatedEvenementId"
+      (click)="open(n)"
+      [disabled]="!canOpen(n)"
     >
       <span class="notif-row-dot" *ngIf="!n.isRead"></span>
       <div class="notif-row-content">

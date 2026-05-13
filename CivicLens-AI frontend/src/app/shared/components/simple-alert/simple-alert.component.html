@@ -1,0 +1,9 @@
+<div
+  class="simple-alert"
+  *ngIf="open"
+  [class.simple-alert--success]="type === 'success'"
+  [class.simple-alert--error]="type === 'error'"
+>
+  <span>{{ message }}</span>
+  <button type="button" (click)="onClose()" aria-label="Fermer">x</button>
+</div>

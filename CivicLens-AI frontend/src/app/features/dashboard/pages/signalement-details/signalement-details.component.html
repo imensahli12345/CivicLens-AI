@@ -61,7 +61,7 @@
           </div>
           <div class="photos-gallery">
             <div class="photo-wrapper" *ngFor="let url of sig.imagesUrl">
-              <img [src]="getImageUrl(url)" alt="Photo incident" class="sig-photo" />
+              <img [src]="getImageUrl(url)" alt="Photo incident" class="sig-photo" (click)="openLightbox(url, $event)" />
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@
             <h2>Engagement citoyen</h2>
           </div>
           
-          <div style="display: flex; flex-direction: column; gap: 0.25rem; align-items: center; text-align: center;">
+          <div class="vote-box">
             <div style="font-size: 2rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ sig.votes }}</div>
             <div style="color: #64748b; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Votes de la communauté</div>
             
@@ -120,13 +120,15 @@
               class="btn" 
               [ngClass]="sig.aVote ? 'btn-ghost' : 'btn-primary'" 
               style="width: 100%; border-radius: 99px; padding: 0.6rem; font-size: 0.9rem; font-weight: 600; display: flex; justify-content: center; gap: 0.5rem; transition: all 0.2s;"
-              (click)="onVote()"
+              (click)="onVote($event)"
               [disabled]="sig.aVote">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="sig.aVote ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
               </svg>
               {{ sig.aVote ? 'Vous avez déjà voté' : 'Soutenir ce signalement' }}
             </button>
+
+            <div class="vote-alert" *ngIf="voteAlert()">Vous ne pouvez pas voter pour votre propre signalement.</div>
           </div>
         </div>
       </div>
@@ -145,4 +147,9 @@
       <div style="clear: both;"></div>
     </div>
   </div>
+</div>
+
+<div class="lightbox-backdrop" *ngIf="lightboxOpen() && !!lightboxUrl()" (click)="closeLightbox()">
+  <button class="lightbox-close" type="button" (click)="closeLightbox($event)" aria-label="Fermer">×</button>
+  <img class="lightbox-image" [src]="lightboxUrl()!" alt="Image du signalement" (click)="$event.stopPropagation()" />
 </div>

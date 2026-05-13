@@ -1,40 +1,138 @@
 .dashboard-header {
-  height: var(--header-height);
+  min-height: var(--header-height);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem 0 1.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0.35rem 0.45rem;
   flex-shrink: 0;
-  gap: 1rem;
+  gap: 0.4rem;
 }
 
-.header-left {
+.header-top {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   min-width: 0;
 }
 
-.mobile-toggle {
-  display: none;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  flex-shrink: 0;
 }
 
-.header-greeting h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  color: white;
+}
+
+.brand-text {
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
-.header-greeting h1 span {
+
+.brand-text em {
   color: var(--accent);
+  font-style: normal;
+  font-weight: 800;
 }
-.header-date {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: capitalize;
-  margin-top: 1px;
+
+.header-greeting-inline {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-greeting-inline .greet {
+  color: #1d4ed8;
+}
+
+.header-greeting-inline strong {
+  color: var(--text-primary);
+  font-weight: 900;
+}
+
+.header-greeting-inline .sep {
+  color: var(--border);
+}
+
+.header-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.header-nav::-webkit-scrollbar { display: none; }
+
+.header-nav .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.header-nav .nav-link:hover {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.06);
+  color: var(--text-primary);
+}
+
+.header-nav .nav-link.active {
+  background: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #1d4ed8;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
 }
 
 .header-right {
@@ -42,6 +140,8 @@
   align-items: center;
   gap: 0.625rem;
   flex-shrink: 0;
+  flex: 0 0 auto;
+  position: relative;
 }
 
 .country-badge {
@@ -189,9 +289,61 @@
   object-fit: cover;
 }
 
+.profile-trigger {
+  border: none;
+  cursor: pointer;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 180px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.18);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.profile-item {
+  display: flex;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-primary);
+  background: white;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-item:hover {
+  background: #f8fafc;
+}
+
+.profile-item.danger {
+  color: #b91c1c;
+}
+
 @media (max-width: 768px) {
-  .mobile-toggle { display: flex; }
-  .header-greeting h1 { font-size: 0.9375rem; }
-  .header-date { display: none; }
   .country-badge { display: none; }
+  .brand-text { display: none; }
+  .header-bottom { gap: 0.5rem; }
+  .header-nav { justify-content: flex-start; }
+  .header-greeting-inline { display: none; }
+}
+
+@media (max-width: 1100px) {
+  .header-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-nav {
+    width: 100%;
+    justify-content: center;
+  }
 }

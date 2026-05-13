@@ -41,16 +41,11 @@ export class LoginComponent implements OnInit {
     this.successMessage = '';
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
+      next: () => {
         this.successMessage = 'Connexion réussie !';
         this.isLoading = false;
         setTimeout(() => {
-          const role = this.authService.getUserRole();
-          if (role === 'SUPERADMIN' || role === 'ADMIN') {
-            this.router.navigate(['/admin']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+          this.router.navigate([this.authService.getHomeRouteByRole()]);
         }, 1500);
       },
       error: (error) => {

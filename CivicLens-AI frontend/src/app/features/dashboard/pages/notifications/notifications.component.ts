@@ -76,9 +76,18 @@ export class NotificationsComponent implements OnInit {
     });
   }
 
-  goToEvent(n: Notification): void {
-    if (!n.relatedEvenementId) return;
-    this.router.navigate(['/dashboard/evenements', n.relatedEvenementId]);
+  canOpen(n: Notification): boolean {
+    return !!n.relatedEvenementId || n.relatedSignalementId != null;
+  }
+
+  open(n: Notification): void {
+    if (n.relatedEvenementId) {
+      this.router.navigate(['/dashboard/evenements', n.relatedEvenementId]);
+      return;
+    }
+    if (n.relatedSignalementId != null) {
+      this.router.navigate(['/dashboard/signalement', n.relatedSignalementId]);
+    }
   }
 }
 

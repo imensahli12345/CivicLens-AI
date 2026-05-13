@@ -33,7 +33,6 @@ export const DASHBOARD_CONFIGS: Record<string, DashboardConfig> = {
       { label: 'Nouveau signalement', icon: 'plus-circle', route: '/dashboard/nouveau' },
       { label: 'Ma région', icon: 'map-pin', route: '/dashboard/region' },
       { label: 'Événements', icon: 'calendar', route: '/dashboard/evenements' },
-      { label: 'Mon profil', icon: 'user', route: '/dashboard/profil' },
       { label: 'À propos', icon: 'info', route: '/dashboard/about' },
     ]
   }

@@ -1,0 +1,55 @@
+<header class="dashboard-topbar">
+  <div class="brand-wrap">
+    <div class="brand-mark">CL</div>
+    <div class="brand-block">
+      <p class="brand-title">CivicLens</p>
+      <p class="brand-subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+
+  <nav class="main-nav" aria-label="Navigation du tableau de bord">
+    <a class="nav-link" [routerLink]="[homeRoute]">Accueil</a>
+
+    <div class="nav-item has-menu" *ngIf="showServicesMenu">
+      <button class="nav-link nav-button" type="button">Services</button>
+      <div class="dropdown-menu">
+        <button type="button" (click)="onServiceAction('activate')">Activer un service</button>
+        <button type="button" (click)="onServiceAction('deactivate')">Désactiver un service</button>
+        <button type="button" (click)="onServiceAction('view')">Voir les services</button>
+      </div>
+    </div>
+
+    <div class="nav-item has-menu">
+      <button class="nav-link nav-button" type="button">Signalements</button>
+      <div class="dropdown-menu">
+        <button type="button" (click)="onSignalementAction('view')">Voir les signalements</button>
+      </div>
+    </div>
+
+    <button class="nav-link nav-button" type="button" *ngIf="showProfile" (click)="onProfileClick()">Profil</button>
+
+    <span class="nav-link nav-static" *ngIf="showCarteSignalements" aria-label="Vue cartographique">
+      Carte des signalements
+    </span>
+  </nav>
+
+  <div class="account-zone" aria-label="Actions du compte">
+    <button
+      class="logout-button"
+      type="button"
+      (click)="onLogout()"
+      aria-label="Se déconnecter"
+      title="Se déconnecter"
+    >
+      <span class="logout-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </span>
+      <span class="logout-label">Déconnexion</span>
+    </button>
+  </div>
+</header>
