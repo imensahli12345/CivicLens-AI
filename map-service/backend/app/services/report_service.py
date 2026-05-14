@@ -132,7 +132,7 @@ class ReportService:
 
         return [_to_marker(r) for r in rows], total
 
-    async def get_detail(self, db: AsyncSession, report_id: int) -> Optional[ReportDetailDTO]:
+    async def get_detail(self, db: AsyncSession, report_id: int, domaine: Optional[str] = None) -> Optional[ReportDetailDTO]:
         q = (
             select(Signalement)
             .options(
@@ -141,6 +141,8 @@ class ReportService:
             )
             .where(Signalement.Id == report_id)
         )
+        if domaine:
+            q = q.where(Signalement.Domaine == domaine)
         result = await db.execute(q)
         row = result.scalar_one_or_none()
         if not row:
@@ -191,12 +193,14 @@ class ReportService:
 
         return GeoJSONCollection(features=features, total=len(features))
 
-    async def get_stats(self, db: AsyncSession) -> MapStatsDTO:
+    async def get_stats(self, db: AsyncSession, domaine: Optional[str] = None) -> MapStatsDTO:
         # Total with coords
         total_q = select(func.count()).where(
             Signalement.Latitude.isnot(None),
             Signalement.Longitude.isnot(None),
         )
+        if domaine:
+            total_q = total_q.where(Signalement.Domaine == domaine)
         total = (await db.execute(total_q)).scalar_one()
 
         # By statut
@@ -205,6 +209,8 @@ class ReportService:
             .where(Signalement.Latitude.isnot(None))
             .group_by(Signalement.Statut)
         )
+        if domaine:
+            statut_q = statut_q.where(Signalement.Domaine == domaine)
         by_statut = {row[0]: row[1] for row in (await db.execute(statut_q)).all()}
 
         # By priorité
@@ -213,6 +219,8 @@ class ReportService:
             .where(Signalement.Latitude.isnot(None))
             .group_by(Signalement.Priorite)
         )
+        if domaine:
+            priorite_q = priorite_q.where(Signalement.Domaine == domaine)
         by_priorite = {str(row[0]): row[1] for row in (await db.execute(priorite_q)).all()}
 
         # By domaine
@@ -221,6 +229,8 @@ class ReportService:
             .where(Signalement.Latitude.isnot(None))
             .group_by(Signalement.Domaine)
         )
+        if domaine:
+            domaine_q = domaine_q.where(Signalement.Domaine == domaine)
         by_domaine = {str(row[0]): row[1] for row in (await db.execute(domaine_q)).all()}
 
         # Avg score AI
@@ -228,6 +238,8 @@ class ReportService:
             Signalement.Latitude.isnot(None),
             Signalement.ScoreAI.isnot(None),
         )
+        if domaine:
+            avg_q = avg_q.where(Signalement.Domaine == domaine)
         avg_score = (await db.execute(avg_q)).scalar_one_or_none()
 
         return MapStatsDTO(
@@ -243,6 +255,7 @@ class ReportService:
         db: AsyncSession,
         priorite: Optional[str] = None,
         statut: Optional[str] = None,
+        domaine: Optional[str] = None,
     ) -> List[dict]:
         """Returns lightweight lat/lon/intensity for heatmap layer."""
         base_q = select(
@@ -259,6 +272,8 @@ class ReportService:
             base_q = base_q.where(Signalement.Priorite == priorite)
         if statut:
             base_q = base_q.where(Signalement.Statut == statut)
+        if domaine:
+            base_q = base_q.where(Signalement.Domaine == domaine)
 
         result = await db.execute(base_q)
         rows = result.all()

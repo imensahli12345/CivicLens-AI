@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-actor-dashboard-topbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './actor-dashboard-topbar.component.html',
   styleUrl: './actor-dashboard-topbar.component.css'
 })
@@ -14,6 +14,8 @@ export class ActorDashboardTopbarComponent {
   @Input() userName = 'CivicLens User';
   @Input() subtitle = 'Dashboard Bureau et Service';
   @Input() homeRoute = '/dashboard-bureau-et-service';
+  @Input() signalementsRoute: string | null = null;
+  @Input() carteRoute: string | null = null;
   @Input() showServicesMenu = true;
   @Input() showAssignSignalementAction = true;
   @Input() showProfile = true;

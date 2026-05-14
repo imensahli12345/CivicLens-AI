@@ -3,41 +3,98 @@
     [userName]="userName"
     subtitle="Tableau de bord Organisation"
     homeRoute="/organisation-dashboard"
+    signalementsRoute="/organisation-signalements"
+    carteRoute="/organisation-map"
     [showServicesMenu]="false"
     [showAssignSignalementAction]="false"
     [showProfile]="false"
     [showCarteSignalements]="true"
-    (signalementAction)="onSignalementAction($event)"
   />
 
-  <div class="tables-stack" id="signalements-section" *ngIf="!loading; else loadingState">
-    <app-signalements
-      source="organisation"
-      title="Signalements organisation"
-      subtitle="Ouvrez les signalements, ajoutez le rapport PDF et finalisez la résolution depuis cette vue.">
-    </app-signalements>
-  </div>
+  <div class="org-home" *ngIf="!loading; else loadingState">
+    <header class="org-hero">
+      <div class="org-hero__text">
+        <h1>Bienvenue, {{ userName }}</h1>
+        <p>
+          Suivez vos signalements, priorisez le traitement et finalisez les resolutions avec un processus clair.
+        </p>
+      </div>
+      <div class="org-hero__actions">
+        <a class="primary-link" routerLink="/organisation-signalements">Gerer les signalements</a>
+        <a class="secondary-link" routerLink="/organisation-map">Voir la carte</a>
+      </div>
+    </header>
 
-  <div class="signalements-modal-backdrop" *ngIf="showSignalementsModal" (click)="closeSignalementsModal()">
-    <section class="signalements-modal-card" (click)="$event.stopPropagation()">
-      <button type="button" class="signalements-modal-close" (click)="closeSignalementsModal()" aria-label="Fermer">×</button>
+    <div class="org-error" *ngIf="error">{{ error }}</div>
 
-      <div class="signalements-modal-body">
-        <app-signalements
-          source="organisation"
-          title="Signalements organisation"
-          subtitle="Ouvrez les signalements, ajoutez le rapport PDF et finalisez la résolution depuis cette vue.">
-        </app-signalements>
+    <section class="kpi-grid" *ngIf="!error">
+      <div class="kpi-card">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value">{{ totalSignalements }}</div>
+        <div class="kpi-hint">Tous les signalements assigns</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">A traiter</div>
+        <div class="kpi-value">{{ aTraiter }}</div>
+        <div class="kpi-hint">Envoyes / ouverts</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">En cours</div>
+        <div class="kpi-value">{{ enCoursEtude }}</div>
+        <div class="kpi-hint">En cours d etude / en cours</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Resolus</div>
+        <div class="kpi-value">{{ resolus }}</div>
+        <div class="kpi-hint">Clotures avec succes</div>
+      </div>
+    </section>
+
+    <section class="org-panel" *ngIf="!error">
+      <header class="org-panel__head">
+        <h2>Derniers signalements</h2>
+        <a class="panel-link" routerLink="/organisation-signalements">Voir tout</a>
+      </header>
+
+      <div class="recent-empty" *ngIf="derniersSignalements.length === 0">
+        Aucun signalement a afficher pour le moment.
+      </div>
+
+      <div class="recent-list" *ngIf="derniersSignalements.length > 0">
+        <div class="recent-item" *ngFor="let s of derniersSignalements">
+          <div class="recent-main">
+            <div class="recent-title">{{ s.titre }}</div>
+            <div class="recent-meta">
+              <span class="badge" [ngClass]="getStatutClass(s.statut)">{{ s.statut | titlecase }}</span>
+              <span class="meta-sep">•</span>
+              <span>{{ formatDate(s.dateCreation) }}</span>
+            </div>
+          </div>
+          <a class="recent-action" routerLink="/organisation-signalements">Ouvrir</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="org-panel" *ngIf="!error">
+      <header class="org-panel__head">
+        <h2>Bonnes pratiques</h2>
+      </header>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="tip-title">Prioriser</div>
+          <div class="tip-text">Commencez par les signalements critiques et urgents.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-title">Documenter</div>
+          <div class="tip-text">Ajoutez le rapport PDF avant de marquer une resolution.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-title">Suivre</div>
+          <div class="tip-text">Utilisez la carte pour identifier les zones les plus impactees.</div>
+        </div>
       </div>
     </section>
   </div>
-
-  <app-simple-alert
-    [open]="showAlert"
-    [type]="alertType"
-    [message]="alertMessage"
-    (close)="closeAlert()"
-  ></app-simple-alert>
 
   <ng-template #loadingState>
     <div class="loading-state">Chargement du tableau de bord...</div>

@@ -1,0 +1,154 @@
+<div class="dashboard-page" id="top">
+  <app-actor-dashboard-topbar
+    [userName]="userName"
+    subtitle="Tableau de bord Organisation"
+    homeRoute="/organisation-dashboard"
+    signalementsRoute="/organisation-signalements"
+    carteRoute="/organisation-map"
+    [showServicesMenu]="false"
+    [showAssignSignalementAction]="false"
+    [showProfile]="false"
+    [showCarteSignalements]="true"
+  />
+
+  <div class="map-layout" *ngIf="!loading; else loadingState">
+    <aside class="map-sidebar">
+      <div class="sidebar-head">
+        <div>
+          <h2>Carte des signalements</h2>
+          <p>Filtrez et explorez les signalements géolocalisés.</p>
+        </div>
+        <button class="sidebar-refresh" type="button" (click)="refresh()" [disabled]="isLoadingMarkers">
+          Actualiser
+        </button>
+      </div>
+
+      <div class="sidebar-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ markerSummary.returned }}</div>
+          <div class="stat-label">Affichés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ markerSummary.total }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+
+      <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+        <h3>Filtres</h3>
+
+        <label class="filter-field">
+          <span>Statut</span>
+          <select formControlName="statut">
+            <option *ngFor="let opt of statutOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Priorité</span>
+          <select formControlName="priorite">
+            <option *ngFor="let opt of prioriteOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Gravité</span>
+          <select formControlName="gravite">
+            <option *ngFor="let opt of graviteOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+
+        <div class="filter-grid">
+          <label class="filter-field">
+            <span>Date début</span>
+            <input type="date" formControlName="date_from" />
+          </label>
+          <label class="filter-field">
+            <span>Date fin</span>
+            <input type="date" formControlName="date_to" />
+          </label>
+        </div>
+
+        <label class="filter-check">
+          <input type="checkbox" formControlName="onlyVisible" />
+          <span>Limiter à la zone visible</span>
+        </label>
+
+        <label class="filter-field">
+          <span>Limite</span>
+          <input type="number" min="1" max="2000" step="50" formControlName="limit" />
+        </label>
+
+        <div class="filter-actions">
+          <button class="btn-primary" type="submit" [disabled]="isLoadingMarkers">Appliquer</button>
+          <button class="btn-ghost" type="button" (click)="resetFilters()" [disabled]="isLoadingMarkers">Réinitialiser</button>
+        </div>
+      </form>
+
+      <div class="sidebar-state" *ngIf="isLoadingMarkers">Chargement des signalements...</div>
+      <div class="sidebar-error" *ngIf="error && !isLoadingMarkers">{{ error }}</div>
+
+      <section class="detail" *ngIf="selectedDetail">
+        <div class="detail-head">
+          <h3>Signalement #{{ selectedDetail.id }}</h3>
+          <button class="detail-close" type="button" (click)="closeDetail()" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-key">Statut</span>
+          <span class="detail-val">{{ selectedDetail.statut || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Priorité</span>
+          <span class="detail-val">{{ selectedDetail.priorite || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Gravité</span>
+          <span class="detail-val">{{ selectedDetail.gravite || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Domaine</span>
+          <span class="detail-val">{{ selectedDetail.domaine || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Score IA</span>
+          <span class="detail-val">{{ selectedDetail.score_ai ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Votes</span>
+          <span class="detail-val">{{ selectedDetail.vote_count }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Date</span>
+          <span class="detail-val">{{ selectedDetail.date_creation | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Coordonnées</span>
+          <span class="detail-val">
+            {{ selectedDetail.latitude ?? '—' }}, {{ selectedDetail.longitude ?? '—' }}
+          </span>
+        </div>
+
+        <div class="detail-desc">
+          <div class="detail-key">Description</div>
+          <div class="detail-desc-text">{{ selectedDetail.description }}</div>
+        </div>
+
+        <div class="detail-images" *ngIf="selectedDetail.images?.length">
+          <div class="detail-key">Images ({{ selectedDetail.images.length }})</div>
+          <div class="detail-images-grid">
+            <img *ngFor="let img of selectedDetail.images" [src]="img.url || ''" (error)="hideBrokenImage($event)" />
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-stage">
+      <div id="org-map" class="map-canvas" aria-label="Carte des signalements"></div>
+    </section>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="loading-state">Chargement...</div>
+  </ng-template>
+</div>

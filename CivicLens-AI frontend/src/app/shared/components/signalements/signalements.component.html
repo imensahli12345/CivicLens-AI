@@ -1,4 +1,4 @@
-﻿<!-- ===== SIGNALEMENTS TABLE ===== -->
+<!-- ===== SIGNALEMENTS TABLE ===== -->
 <div class="signals-page" *ngIf="shouldShowContainer()">
   <header class="signals-head">
     <div>
@@ -89,14 +89,15 @@
                 *ngIf="shouldShowOpenActions()"
                 class="signals-btn signals-btn--open"
                 type="button"
-                [disabled]="isOpening(sig.id)"
-                (click)="onOuvrir(sig)">
+                [disabled]="isOpening(sig.id) || !canOuvrir(sig)"
+                (click)="openOpenConfirm(sig)">
                 {{ isOpening(sig.id) ? 'Ouverture...' : 'Ouvrir' }}
               </button>
               <button
                 *ngIf="shouldShowAssignActions()"
                 class="signals-btn signals-btn--assign"
                 type="button"
+                [disabled]="!canMutate(sig)"
                 (click)="openAssign(sig)">
                 Assigner
               </button>
@@ -104,7 +105,7 @@
                 *ngIf="shouldShowResolveActions()"
                 class="signals-btn signals-btn--resolve"
                 type="button"
-                [disabled]="isResolving(sig.id)"
+                [disabled]="isResolving(sig.id) || !canMutate(sig)"
                 (click)="onResoudre(sig)">
                 {{ isResolving(sig.id) ? 'Resolution...' : 'Resoudre' }}
               </button>
@@ -112,7 +113,7 @@
                 *ngIf="shouldShowRapportActions()"
                 class="signals-btn signals-btn--rapport"
                 type="button"
-                [disabled]="isUploadingRapport(sig.id)"
+                [disabled]="isUploadingRapport(sig.id) || !canMutate(sig)"
                 (click)="openRapportPicker(sig, rapportInput)">
                 {{ isUploadingRapport(sig.id) ? 'Envoi...' : 'Ajouter rapport' }}
               </button>
@@ -120,7 +121,7 @@
                 *ngIf="shouldShowRejectActions()"
                 class="signals-btn signals-btn--reject"
                 type="button"
-                [disabled]="isRejecting(sig.id)"
+                [disabled]="isRejecting(sig.id) || !canMutate(sig)"
                 (click)="onRejeter(sig)">
                 {{ isRejecting(sig.id) ? 'Rejet...' : 'Rejeter' }}
               </button>
@@ -373,25 +374,29 @@
       <button
         *ngIf="shouldShowOpenActions()"
         class="btn-secondary"
-        [disabled]="isOpening(selectedSignalement.id)"
-        (click)="onOuvrir(selectedSignalement)">
+        [disabled]="isOpening(selectedSignalement.id) || !canOuvrir(selectedSignalement)"
+        (click)="openOpenConfirm(selectedSignalement)">
         {{ isOpening(selectedSignalement.id) ? 'Ouverture...' : 'Ouvrir' }}
       </button>
       <button
         *ngIf="shouldShowRapportActions()"
         class="btn-secondary"
-        [disabled]="isUploadingRapport(selectedSignalement.id)"
+        [disabled]="isUploadingRapport(selectedSignalement.id) || !canMutate(selectedSignalement)"
         (click)="openRapportPicker(selectedSignalement, rapportInput)">
         {{ isUploadingRapport(selectedSignalement.id) ? 'Envoi...' : 'Ajouter rapport' }}
       </button>
       <button
         *ngIf="shouldShowResolveActions()"
         class="btn-primary"
-        [disabled]="isResolving(selectedSignalement.id)"
+        [disabled]="isResolving(selectedSignalement.id) || !canMutate(selectedSignalement)"
         (click)="onResoudre(selectedSignalement)">
         {{ isResolving(selectedSignalement.id) ? 'Resolution...' : 'Resoudre' }}
       </button>
-      <button class="btn-primary" *ngIf="shouldShowAssignActions()" (click)="openAssignFromDetail()">
+      <button
+        class="btn-primary"
+        *ngIf="shouldShowAssignActions()"
+        [disabled]="!canMutate(selectedSignalement)"
+        (click)="openAssignFromDetail()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -403,6 +408,75 @@
       </button>
     </footer>
 
+  </div>
+</div>
+
+<!-- ===== OPEN CONFIRM MODAL ===== -->
+<div class="modal-overlay" [class.active]="showOpenConfirmModal" (click)="closeOpenConfirm()">
+  <div class="modal-box open-confirm-modal" (click)="$event.stopPropagation()" *ngIf="confirmSignalement">
+    <header class="open-confirm-head">
+      <div>
+        <h3>Ouvrir le signalement</h3>
+        <p>Verifiez les informations avant de confirmer.</p>
+      </div>
+      <button class="btn-close" (click)="closeOpenConfirm()" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="open-confirm-body">
+      <div class="open-confirm-loading" *ngIf="confirmLoading">Chargement des details...</div>
+
+      <div class="open-confirm-main" *ngIf="!confirmLoading">
+        <div class="open-confirm-title">
+          <div class="open-confirm-title__name">{{ confirmSignalement.titre }}</div>
+          <div class="open-confirm-title__meta">#{{ confirmSignalement.id }} • {{ formatDate(confirmSignalement.dateCreation) }}</div>
+        </div>
+
+        <div class="detail-strip">
+          <div class="strip-item">
+            <span class="strip-label">Statut</span>
+            <span class="badge" [ngClass]="getStatutClass(confirmSignalement.statut)">
+              {{ confirmSignalement.statut | titlecase }}
+            </span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-item">
+            <span class="strip-label">Gravite</span>
+            <span class="pill-gravite" [ngClass]="getGraviteClass(confirmSignalement.gravite)">
+              {{ confirmSignalement.gravite }}
+            </span>
+          </div>
+          <div class="strip-divider"></div>
+          <div class="strip-item">
+            <span class="strip-label">Priorite</span>
+            <span class="pill-priorite" [ngClass]="getPrioriteClass(confirmSignalement.priorite)">
+              {{ confirmSignalement.priorite }}
+            </span>
+          </div>
+        </div>
+
+        <div class="open-confirm-desc">
+          <div class="open-confirm-desc__label">Description</div>
+          <div class="open-confirm-desc__text">{{ confirmSignalement.description || '-' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="open-confirm-footer">
+      <button class="btn-secondary" type="button" (click)="closeOpenConfirm()">Annuler</button>
+      <button
+        class="btn-primary"
+        type="button"
+        [disabled]="isOpening(confirmSignalement.id) || !canOuvrir(confirmSignalement)"
+        (click)="confirmOpen()">
+        Confirmer ouverture
+      </button>
+    </footer>
   </div>
 </div>
 

@@ -1,0 +1,82 @@
+<div class="dashboard-page" id="top">
+  <app-actor-dashboard-topbar
+    [userName]="userName"
+    subtitle="Tableau de bord Organisation"
+    homeRoute="/organisation-dashboard"
+    signalementsRoute="/organisation-signalements"
+    carteRoute="/organisation-map"
+    [showServicesMenu]="false"
+    [showAssignSignalementAction]="false"
+    [showProfile]="false"
+    [showCarteSignalements]="true"
+  />
+
+  <div class="signals-container" *ngIf="!loading; else loadingState">
+    <section class="filters-card" aria-label="Filtres">
+      <div class="filters-card__left">
+        <div class="filter-field">
+          <label for="statutSelect">Statut</label>
+          <select
+            id="statutSelect"
+            name="statutSelect"
+            [(ngModel)]="filterStatut"
+            (ngModelChange)="onFiltersChanged()">
+            <option value="">Tous</option>
+            <option value="ENVOYEE">Envoyee</option>
+            <option value="OUVERTE">Ouverte</option>
+            <option value="EN_COURS">En cours</option>
+            <option value="RESOLU">Resolu</option>
+            <option value="REJETEE">Rejetee</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="graviteSelect">Gravite</label>
+          <select
+            id="graviteSelect"
+            name="graviteSelect"
+            [(ngModel)]="filterGravite"
+            (ngModelChange)="onFiltersChanged()">
+            <option value="">Toutes</option>
+            <option value="FAIBLE">Faible</option>
+            <option value="MOYENNE">Moyenne</option>
+            <option value="ELEVEE">Elevee</option>
+            <option value="CRITIQUE">Critique</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="prioriteSelect">Priorite</label>
+          <select
+            id="prioriteSelect"
+            name="prioriteSelect"
+            [(ngModel)]="filterPriorite"
+            (ngModelChange)="onFiltersChanged()">
+            <option value="">Toutes</option>
+            <option value="BASSE">Basse</option>
+            <option value="MOYENNE">Moyenne</option>
+            <option value="HAUTE">Haute</option>
+            <option value="URGENTE">Urgente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-card__right">
+        <button class="filters-reset" type="button" (click)="resetFilters()" [disabled]="!activeFilters">
+          Reinitialiser
+        </button>
+      </div>
+    </section>
+
+    <app-signalements
+      source="organisation"
+      [filters]="activeFilters"
+      title="Signalements organisation"
+      subtitle="Ouvrez les signalements, ajoutez le rapport PDF et finalisez la résolution depuis cette vue.">
+    </app-signalements>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="loading-state">Chargement...</div>
+  </ng-template>
+</div>

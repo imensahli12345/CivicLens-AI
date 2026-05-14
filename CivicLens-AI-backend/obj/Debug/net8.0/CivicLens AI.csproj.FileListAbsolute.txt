@@ -1,5 +1,4 @@
 C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\CivicLens AI.csproj.AssemblyReference.cache
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\rpswa.dswa.cache.json
 C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\CivicLens AI.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\CivicLens AI.AssemblyInfoInputs.cache
 C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\CivicLens AI.AssemblyInfo.cs
@@ -9,7 +8,6 @@ C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\
 C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\Debug\net8.0\CivicLens AI.sourcelink.json
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\appsettings.Development.json
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\appsettings.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\CivicLens AI.staticwebassets.endpoints.json
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\CivicLens AI.exe
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\CivicLens AI.deps.json
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\CivicLens AI.runtimeconfig.json
@@ -137,18 +135,17 @@ c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\rjimswa.dswa.cache.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\scopedcss\bundle\CivicLens AI.styles.css
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets.build.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets.build.json.cache
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets.development.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\swae.build.ex.cache
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\CivicLen.4A91E34C.Up2Date
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\CivicLens AI.dll
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\refint\CivicLens AI.dll
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\CivicLens AI.pdb
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\CivicLens AI.genruntimeconfig.cache
 c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\ref\CivicLens AI.dll
+c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets\msbuild.CivicLens AI.Microsoft.AspNetCore.StaticWebAssets.props
+c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets\msbuild.build.CivicLens AI.props
+c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.CivicLens AI.props
+c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.CivicLens AI.props
+c:\Users\HaninSahli\Desktop\Projet Dev CivicLens\civiclens-ai-backend\obj\Debug\net8.0\staticwebassets.pack.json

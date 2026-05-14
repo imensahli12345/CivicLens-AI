@@ -43,6 +43,24 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'organisation-signalements',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ORGANISATION'] },
+    loadComponent: () =>
+      import('./features/organisation/pages/organisation-signalements/organisation-signalements.component').then(
+        m => m.OrganisationSignalementsComponent
+      )
+  },
+  {
+    path: 'organisation-map',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ORGANISATION'] },
+    loadComponent: () =>
+      import('./features/organisation/pages/organisation-map/organisation-map.component').then(
+        m => m.OrganisationMapComponent
+      )
+  },
+  {
     path: 'dashboard-bureau-et-service',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['BUREAUDECONTROLE'] },

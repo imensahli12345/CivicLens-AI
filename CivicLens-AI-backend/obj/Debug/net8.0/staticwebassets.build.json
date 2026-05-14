@@ -1,1 +1,11 @@
-{"Version":1,"Hash":"sRmiwA4qCGvA5ImikUbkugJTUxcn81o11gbtYbmU1n0=","Source":"CivicLens AI","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
+{
+  "Version": 1,
+  "Hash": "bT1jLj1NP0MDyezYkRL9I0nsVBaqk/uTP6dhHCmzbxw=",
+  "Source": "CivicLens AI",
+  "BasePath": "_content/CivicLens AI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

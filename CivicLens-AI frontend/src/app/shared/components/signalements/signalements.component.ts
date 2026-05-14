@@ -69,6 +69,10 @@ export class SignalementsComponent implements OnInit, OnChanges {
   historiqueEntries: HistoriqueEntry[] = [];
   historiqueTitle = 'Historique du signalement';
 
+  showOpenConfirmModal = false;
+  confirmSignalement: BureauSignalement | null = null;
+  confirmLoading = false;
+
   showToast = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
@@ -134,6 +138,52 @@ export class SignalementsComponent implements OnInit, OnChanges {
     });
   }
 
+  canOuvrir(signalement: BureauSignalement | null | undefined): boolean {
+    const statut = this.normalizeStatutForUi(signalement?.statut);
+    if (!statut) return false;
+    if (this.isTerminalStatut(statut)) return false;
+    return statut === 'ENVOYEE';
+  }
+
+  canMutate(signalement: BureauSignalement | null | undefined): boolean {
+    const statut = this.normalizeStatutForUi(signalement?.statut);
+    if (!statut) return false;
+    return !this.isTerminalStatut(statut);
+  }
+
+  openOpenConfirm(signalement: BureauSignalement): void {
+    if (!this.canOuvrir(signalement)) return;
+    this.confirmSignalement = signalement;
+    this.showOpenConfirmModal = true;
+    this.confirmLoading = true;
+    document.body.style.overflow = 'hidden';
+
+    this.activeSignalementsService.getSignalementById(signalement.id).subscribe({
+      next: (detail) => {
+        this.confirmSignalement = detail;
+        this.confirmLoading = false;
+      },
+      error: () => {
+        this.confirmLoading = false;
+      }
+    });
+  }
+
+  closeOpenConfirm(): void {
+    this.showOpenConfirmModal = false;
+    this.confirmSignalement = null;
+    this.confirmLoading = false;
+    document.body.style.overflow = '';
+  }
+
+  confirmOpen(): void {
+    if (!this.confirmSignalement) return;
+    if (!this.canOuvrir(this.confirmSignalement)) return;
+    const current = this.confirmSignalement;
+    this.closeOpenConfirm();
+    this.onOuvrir(current);
+  }
+
   openDetail(s: BureauSignalement): void {
     this.selectedSignalement = s;
     this.showDetailModal = true;
@@ -189,6 +239,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
   onOuvrir(signalement: BureauSignalement): void {
     if (this.openingSignalementIds.has(signalement.id)) return;
+    if (!this.canOuvrir(signalement)) return;
 
     this.openingSignalementIds.add(signalement.id);
     const nextStatut = this.isOrganisationSource() ? 'EN_COURS_DETUDE' : 'OUVERTE';
@@ -217,6 +268,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
   onRejeter(signalement: BureauSignalement): void {
     if (this.rejectingSignalementIds.has(signalement.id)) return;
+    if (!this.canMutate(signalement)) return;
 
     this.rejectingSignalementIds.add(signalement.id);
     this.rejeterSignalementRequest(signalement.id).subscribe({
@@ -284,6 +336,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
   onAssignConfirm(form: AssignSignalementFormValue): void {
     if (!this.selectedForAssign) return;
+    if (!this.canMutate(this.selectedForAssign)) return;
 
     const signalementId = this.selectedForAssign.id;
     const signalementTitle = this.selectedForAssign.titre;
@@ -326,6 +379,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
   onResoudre(signalement: BureauSignalement): void {
     if (!this.isOrganisationSource() || this.resolvingSignalementIds.has(signalement.id)) return;
+    if (!this.canMutate(signalement)) return;
 
     this.resolvingSignalementIds.add(signalement.id);
     this.organisationSignalements.resoudreSignalement(signalement.id).subscribe({
@@ -353,6 +407,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
   openRapportPicker(signalement: BureauSignalement, fileInput: HTMLInputElement): void {
     if (!this.isOrganisationSource()) return;
+    if (!this.canMutate(signalement)) return;
 
     this.selectedSignalement = this.selectedSignalement?.id === signalement.id ? this.selectedSignalement : signalement;
     fileInput.value = '';
@@ -671,5 +726,16 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
     if (error?.message && error.message.trim()) return error.message.trim();
     return fallback;
+  }
+
+  private normalizeStatutForUi(statut: string | null | undefined): string {
+    const value = (statut ?? '').trim();
+    if (value === 'RESOLUE') return 'RESOLU';
+    if (value === 'REJETE') return 'REJETEE';
+    return value;
+  }
+
+  private isTerminalStatut(statut: string): boolean {
+    return statut === 'RESOLU' || statut === 'RESOLUE' || statut === 'REJETEE' || statut === 'REJETE';
   }
 }

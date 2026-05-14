@@ -93,8 +93,17 @@ export class OrganisationSignalementsService implements OrganisationSignalementA
   private normalizeSignalement(item: BureauSignalement): BureauSignalement {
     return {
       ...item,
-      domaine: item.domaine ?? ''
+      domaine: item.domaine ?? '',
+      statut: this.normalizeStatut(item.statut)
     };
+  }
+
+  private normalizeStatut(statut: string): string {
+    const value = (statut ?? '').trim();
+    if (value === 'RESOLUE') return 'RESOLU';
+    if (value === 'REJETE') return 'REJETEE';
+    if (value === 'EN_COURS_DETUDE') return 'EN_COURS';
+    return value;
   }
 
   private normalizeFilters(filters?: BureauSignalementFilters | null): Record<string, string> {

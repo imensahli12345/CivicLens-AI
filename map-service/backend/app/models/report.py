@@ -61,3 +61,10 @@ class Vote(Base):
     CitoyenId = Column(PG_UUID(as_uuid=True), nullable=False)
 
     Signalement = relationship("Signalement", back_populates="Votes")
+
+
+class Organisation(Base):
+    __tablename__ = "Organisations"
+
+    Id = Column(PG_UUID(as_uuid=True), primary_key=True)
+    DomaineOrganisation = Column(String, nullable=False)

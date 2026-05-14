@@ -6,7 +6,7 @@ import json
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/civiclens"
     APP_HOST: str = "0.0.0.0"
-    APP_PORT: int = 8001
+    APP_PORT: int = 8002
     CORS_ORIGINS: str = '["http://localhost:3000","http://localhost:4200","http://localhost:8080","http://127.0.0.1:5500"]'
     USE_REDIS: bool = False
     REDIS_URL: str = "redis://localhost:6379"

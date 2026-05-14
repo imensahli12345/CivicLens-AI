@@ -48,7 +48,7 @@ pip install -r requirements.txt
 
 ```bash
 cd backend
-uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
 ```
 
 ### 4. Ouvrir le frontend de test
@@ -68,9 +68,9 @@ python -m http.server 8080
 docker-compose up --build
 ```
 
-- Backend API : http://localhost:8001
+- Backend API : http://localhost:8002
 - Frontend test : http://localhost:8080
-- Swagger docs : http://localhost:8001/docs
+- Swagger docs : http://localhost:8002/docs
 
 ## Endpoints API
 
@@ -103,13 +103,13 @@ offset     = pagination
 
 ```bash
 # Tous les signalements critiques
-curl http://localhost:8001/map/reports?priorite=CRITIQUE
+curl http://localhost:8002/map/reports?priorite=CRITIQUE
 
 # GeoJSON des signalements non résolus en Tunisie
-curl "http://localhost:8001/map/geojson?bbox=30.2,7.5,37.5,11.6"
+curl "http://localhost:8002/map/geojson?bbox=30.2,7.5,37.5,11.6"
 
 # Stats globales
-curl http://localhost:8001/map/stats
+curl http://localhost:8002/map/stats
 ```
 
 ## Notes importantes
