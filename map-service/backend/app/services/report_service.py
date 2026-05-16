@@ -279,7 +279,14 @@ class ReportService:
         rows = result.all()
 
         # Map priority to intensity weight
-        priority_weight = {"CRITIQUE": 1.0, "HAUTE": 0.75, "MOYENNE": 0.5, "FAIBLE": 0.25}
+        priority_weight = {
+            "URGENTE": 1.0,
+            "CRITIQUE": 1.0,
+            "HAUTE": 0.75,
+            "MOYENNE": 0.5,
+            "BASSE": 0.25,
+            "FAIBLE": 0.25,
+        }
 
         return [
             {

@@ -52,7 +52,30 @@ async def _resolve_org_domaine(request: Request, db: AsyncSession) -> Optional[s
         q = select(Organisation.DomaineOrganisation).where(Organisation.Id == org_id)
         res = await db.execute(q)
         domaine = res.scalar_one_or_none()
+        if domaine and str(domaine).strip().upper() == "AUTRE":
+            return None
         return domaine
+    except Exception:
+        return None
+
+
+async def _resolve_org_domaine_raw(request: Request, db: AsyncSession) -> Optional[str]:
+    auth = request.headers.get("Authorization") or request.headers.get("authorization")
+    if not auth:
+        return None
+    token = auth.replace("Bearer ", "").strip()
+    if not token:
+        return None
+
+    user_id = _try_extract_user_id_from_jwt(token)
+    if not user_id:
+        return None
+
+    try:
+        org_id = uuid.UUID(str(user_id))
+        q = select(Organisation.DomaineOrganisation).where(Organisation.Id == org_id)
+        res = await db.execute(q)
+        return res.scalar_one_or_none()
     except Exception:
         return None
 
@@ -94,6 +117,13 @@ async def get_reports(
         "offset": offset,
         "data": [m.model_dump() for m in markers],
     }
+
+
+@router.get("/context")
+async def get_context(request: Request, db: AsyncSession = Depends(get_db)):
+    raw = await _resolve_org_domaine_raw(request, db)
+    locked = bool(raw) and str(raw).strip().upper() != "AUTRE"
+    return {"org_domaine": raw, "domaine_locked": locked}
 
 
 @router.get("/reports/{report_id}")
