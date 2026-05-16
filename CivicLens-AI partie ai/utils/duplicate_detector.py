@@ -117,6 +117,7 @@ def is_duplicate(
 
     return {
         "is_duplicate":          True,
+        "original_report_id":    best_match['id'],
         "similar_report_id":     best_match['id'],
         "text_similarity":       round(best_sim, 3),
         "distance_km":           round(best_distance, 3),
@@ -124,5 +125,6 @@ def is_duplicate(
         "domain":                domain,
         "action":                "increment_votes",
         "new_vote_count":        new_votes,
-        "message":               f"Signalement groupé avec #{best_match['id']} — votes: {new_votes}"
+        "similar_report_url_path": f"/dashboard/signalement/{best_match['id']}",
+        "message":               f"Un signalement similaire existe déjà (# {best_match['id']}). Vous pouvez le consulter et voter : /dashboard/signalement/{best_match['id']}"
     }

@@ -491,5 +491,105 @@
       "country": "Tunisie"
     },
     "from_cache": false
+  },
+  "36.865,11.108": {
+    "zone_score": 1.07,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "",
+    "traffic_score": 0.3,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=1",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Hammam El Ghezaz",
+      "county": "Hammam El Ghezaz",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Hammam El Ghezaz",
+      "county": "Délégation de Hammam El Ghezaz",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.874,11.135": {
+    "zone_score": 1.0,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "شارع الحبيب بورقيبة",
+    "traffic_score": 0.01,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Hammam El Ghezaz",
+      "county": "Hammam El Ghezaz",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Hammam El Ghezaz",
+      "county": "Délégation de Hammam El Ghezaz",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.875,11.136": {
+    "zone_score": 1.0,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "شارع الحبيب بورقيبة",
+    "traffic_score": 0.01,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Hammam El Ghezaz",
+      "county": "Hammam El Ghezaz",
+      "postcode": "8025",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Hammam El Ghezaz",
+      "county": "Délégation de Hammam El Ghezaz",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
+  },
+  "36.874,11.136": {
+    "zone_score": 1.0,
+    "zone_type": "NORMALE",
+    "zone_details": [],
+    "road_type": "شارع الحبيب بورقيبة",
+    "traffic_score": 0.01,
+    "traffic_details": [
+      "routes: motorway=0, trunk=0, primary=0, secondary=0, tertiary=0",
+      "signaux=0, ronds-points=0"
+    ],
+    "address": {
+      "city": "Hammam El Ghezaz",
+      "county": "Hammam El Ghezaz",
+      "postcode": "8096",
+      "country": "Tunisie",
+      "state": "Gouvernorat Nabeul"
+    },
+    "region": {
+      "suburb": "Hammam El Ghezaz",
+      "county": "Délégation de Hammam El Ghezaz",
+      "state": "Gouvernorat Nabeul",
+      "country": "Tunisie"
+    },
+    "from_cache": false
   }
 }
