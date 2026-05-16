@@ -17,6 +17,11 @@ export class RegisterComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
+  resetOpen = false;
+  resetForm!: FormGroup;
+  resetLoading = false;
+  resetError = '';
+  resetSuccess = '';
 
   constructor(
     private fb: FormBuilder,
@@ -46,6 +51,15 @@ export class RegisterComponent implements OnInit {
     }, {
       validators: this.passwordMatchValidator
     });
+
+    this.resetForm = this.fb.group({
+      cin: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
+      telephone: ['', [Validators.required, Validators.pattern('^[0-9+\\s\\-]{8,20}$')]],
+      nouveauMotDePasse: ['', [Validators.required, Validators.minLength(6)]],
+      confirmNouveauMotDePasse: ['', [Validators.required]]
+    }, {
+      validators: this.resetPasswordMatchValidator
+    });
   }
 
   // Validateur personnalisé pour vérifier que les mots de passe correspondent
@@ -56,6 +70,13 @@ export class RegisterComponent implements OnInit {
     if (password && confirmPassword && password !== confirmPassword) {
       return { passwordMismatch: true };
     }
+    return null;
+  }
+
+  resetPasswordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const pwd = group.get('nouveauMotDePasse')?.value;
+    const confirm = group.get('confirmNouveauMotDePasse')?.value;
+    if (pwd && confirm && pwd !== confirm) return { passwordMismatch: true };
     return null;
   }
 
@@ -164,4 +185,42 @@ export class RegisterComponent implements OnInit {
   get region() { return this.registerForm.get('region'); }
   get delegation() { return this.registerForm.get('delegation'); }
   get cin() { return this.registerForm.get('cin'); }
+
+  openResetModal(): void {
+    this.resetOpen = true;
+    this.resetError = '';
+    this.resetSuccess = '';
+  }
+
+  closeResetModal(): void {
+    if (this.resetLoading) return;
+    this.resetOpen = false;
+  }
+
+  submitReset(): void {
+    if (this.resetForm.invalid) {
+      this.resetForm.markAllAsTouched();
+      return;
+    }
+
+    const cin = String(this.resetForm.value.cin ?? '').trim();
+    const telephone = String(this.resetForm.value.telephone ?? '').trim();
+    const nouveauMotDePasse = String(this.resetForm.value.nouveauMotDePasse ?? '').trim();
+
+    this.resetLoading = true;
+    this.resetError = '';
+    this.resetSuccess = '';
+
+    this.authService.resetPasswordByCinTelephone({ cin, telephone, nouveauMotDePasse }).subscribe({
+      next: (res: any) => {
+        this.resetLoading = false;
+        this.resetSuccess = res?.message || 'Mot de passe mis à jour. Vous pouvez vous connecter.';
+        setTimeout(() => this.closeResetModal(), 1200);
+      },
+      error: (err: any) => {
+        this.resetLoading = false;
+        this.resetError = err?.message || 'Impossible de modifier le mot de passe.';
+      }
+    });
+  }
 }

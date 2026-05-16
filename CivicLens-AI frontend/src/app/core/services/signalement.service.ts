@@ -3,6 +3,7 @@ import { Observable, of } from 'rxjs';
 import { map as import_rxjs_map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 import {
   Signalement,
   CreateSignalementRequest,
@@ -13,7 +14,7 @@ import {
   providedIn: 'root'
 })
 export class SignalementService {
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private http: HttpClient) {}
 
   private prepareImages(s: Signalement): Signalement {
     const baseUrl = environment.apiUrl.replace('/api', '');
@@ -55,6 +56,12 @@ export class SignalementService {
         return this.prepareImages(s);
       })
     );
+  }
+
+  downloadSignalementPdf(id: string): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/signalements/${encodeURIComponent(id)}/pdf`, {
+      responseType: 'blob'
+    });
   }
 
   // Créer un signalement

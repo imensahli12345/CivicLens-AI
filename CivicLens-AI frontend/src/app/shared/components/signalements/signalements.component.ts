@@ -62,6 +62,7 @@ export class SignalementsComponent implements OnInit, OnChanges {
   rejectingSignalementIds = new Set<number>();
   resolvingSignalementIds = new Set<number>();
   uploadingRapportSignalementIds = new Set<number>();
+  downloadingPdfSignalementIds = new Set<number>();
 
   showHistoriqueModal = false;
   historiqueLoading = false;
@@ -142,7 +143,10 @@ export class SignalementsComponent implements OnInit, OnChanges {
     const statut = this.normalizeStatutForUi(signalement?.statut);
     if (!statut) return false;
     if (this.isTerminalStatut(statut)) return false;
-    return statut === 'ENVOYEE';
+    if (this.isOrganisationSource()) {
+      return statut === 'ENVOYEE';
+    }
+    return statut === 'EN_ATTENTE';
   }
 
   canMutate(signalement: BureauSignalement | null | undefined): boolean {
@@ -310,6 +314,14 @@ export class SignalementsComponent implements OnInit, OnChanges {
     return this.uploadingRapportSignalementIds.has(signalementId);
   }
 
+  isDownloadingPdf(signalementId: number): boolean {
+    return this.downloadingPdfSignalementIds.has(signalementId);
+  }
+
+  shouldShowPdfAction(): boolean {
+    return this.isBureauSource() || this.isOrganisationSource();
+  }
+
   openAssign(s: BureauSignalement): void {
     if (!this.canAssignSignalement()) return;
 
@@ -456,6 +468,39 @@ export class SignalementsComponent implements OnInit, OnChanges {
       error: (err: HttpErrorResponse) => {
         this.historiqueError = this.extractBackendMessage(err, 'Impossible de charger l historique.');
         this.historiqueLoading = false;
+      }
+    });
+  }
+
+  downloadPdf(signalement: BureauSignalement, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.shouldShowPdfAction()) return;
+    if (this.downloadingPdfSignalementIds.has(signalement.id)) return;
+
+    this.downloadingPdfSignalementIds.add(signalement.id);
+
+    const request =
+      this.isBureauSource()
+        ? this.bureauSignalements.downloadSignalementPdf(signalement.id)
+        : this.organisationSignalements.downloadSignalementPdf(signalement.id);
+
+    request.subscribe({
+      next: (blob) => {
+        const fileName = `signalement_${signalement.id}_rapport.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        this.downloadingPdfSignalementIds.delete(signalement.id);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.downloadingPdfSignalementIds.delete(signalement.id);
+        this.triggerToast(this.extractBackendMessage(err, 'Impossible de telecharger le PDF.'), 'error');
       }
     });
   }
@@ -700,7 +745,10 @@ export class SignalementsComponent implements OnInit, OnChanges {
   }
 
   private getSuccessMessage(body: unknown, fallback: string): string {
-    if (typeof body === 'string' && body.trim()) return body.trim();
+    if (typeof body === 'string' && body.trim()) {
+      const extracted = this.tryExtractMessageFromText(body);
+      return extracted ?? body.trim();
+    }
     if (body && typeof body === 'object') {
       const message = (body as Record<string, unknown>)['message'];
       if (typeof message === 'string' && message.trim()) return message.trim();
@@ -712,7 +760,8 @@ export class SignalementsComponent implements OnInit, OnChanges {
     const payload = error?.error;
 
     if (typeof payload === 'string' && payload.trim()) {
-      return payload.trim();
+      const extracted = this.tryExtractMessageFromText(payload);
+      return extracted ?? payload.trim();
     }
 
     if (payload && typeof payload === 'object') {
@@ -726,6 +775,29 @@ export class SignalementsComponent implements OnInit, OnChanges {
 
     if (error?.message && error.message.trim()) return error.message.trim();
     return fallback;
+  }
+
+  private tryExtractMessageFromText(text: string): string | null {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) return null;
+
+    const looksJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+    if (!looksJson) return null;
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed === 'object') {
+        const record = parsed as Record<string, unknown>;
+        const candidates = ['message', 'Message', 'error', 'Error', 'title', 'Title', 'detail', 'Detail'];
+        for (const key of candidates) {
+          const value = record[key];
+          if (typeof value === 'string' && value.trim()) return value.trim();
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   private normalizeStatutForUi(statut: string | null | undefined): string {

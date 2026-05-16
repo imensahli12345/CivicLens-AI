@@ -18,14 +18,23 @@ export class OrganisationsComponent implements OnInit {
   success = '';
   showForm = false;
   submitting = false;
+  downloadingPdf = false;
   selectedDomaine = '';
   selectedType = '';
   searchQuery = '';
   selectedOrganisation: any | null = null;
   detailsOpen = false;
   togglingId: string | null = null;
+  editMode = false;
+  saving = false;
+  deleting = false;
+  showPassword = false;
+  confirmOpen = false;
+  confirmTitle = '';
+  confirmMessage = '';
 
   form: FormGroup;
+  editForm: FormGroup;
 
   typesOrganisation = ['MINISTERE', 'COLLECTIVITE_TERRITORIALE', 'ENTREPRISE_PUBLIQUE', 'ONG', 'AUTRE'];
   domaines = ['ROUTE', 'ECLAIRAGE', 'EAU', 'TRANSPORT', 'ELECTRICITE', 'INFRASTRUCTURE', 'DECHETS', 'AUTRE'];
@@ -44,6 +53,16 @@ export class OrganisationsComponent implements OnInit {
       typeOrganisation: ['', Validators.required],
       domaineOrganisation: ['', Validators.required],
       region: ['']
+    });
+
+    this.editForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      nomOrganisation: ['', Validators.required],
+      typeOrganisation: ['', Validators.required],
+      domaineOrganisation: ['', Validators.required],
+      region: [''],
+      nouveauMotDePasse: [''],
+      motDePasseAdmin: ['']
     });
   }
 
@@ -118,11 +137,17 @@ export class OrganisationsComponent implements OnInit {
   openDetails(org: any): void {
     this.selectedOrganisation = org;
     this.detailsOpen = true;
+    this.editMode = false;
+    this.showPassword = false;
   }
 
   closeDetails(): void {
     this.detailsOpen = false;
     this.selectedOrganisation = null;
+    this.editMode = false;
+    this.showPassword = false;
+    this.saving = false;
+    this.deleting = false;
   }
 
   toggleOrganisation(org: any): void {
@@ -139,6 +164,148 @@ export class OrganisationsComponent implements OnInit {
       error: () => {
         org.statut = prev;
         this.togglingId = null;
+      }
+    });
+  }
+
+  startEdit(): void {
+    const o = this.selectedOrganisation;
+    if (!o) return;
+
+    this.editMode = true;
+    this.showPassword = false;
+    this.error = '';
+    this.success = '';
+
+    this.editForm.reset({
+      email: o.email ?? '',
+      nomOrganisation: o.nomOrganisation ?? '',
+      typeOrganisation: o.typeOrganisation ?? '',
+      domaineOrganisation: o.domaineOrganisation ?? '',
+      region: o.region ?? '',
+      nouveauMotDePasse: '',
+      motDePasseAdmin: ''
+    });
+  }
+
+  cancelEdit(): void {
+    this.editMode = false;
+    this.showPassword = false;
+    this.editForm.reset();
+  }
+
+  saveEdit(): void {
+    if (!this.selectedOrganisation?.id) return;
+    if (this.editForm.invalid) return;
+    if (this.saving) return;
+
+    this.saving = true;
+    this.error = '';
+    this.success = '';
+
+    const payload = { ...this.editForm.value };
+    if (payload.nouveauMotDePasse) {
+      if (!payload.motDePasseAdmin) {
+        this.error = "Mot de passe admin requis pour changer le mot de passe.";
+        this.saving = false;
+        return;
+      }
+    } else {
+      delete payload.nouveauMotDePasse;
+      delete payload.motDePasseAdmin;
+    }
+
+    this.adminService.updateOrganisationDetails(this.selectedOrganisation.id, payload).subscribe({
+      next: (updated) => {
+        const idx = this.organisations.findIndex((x) => x.id === this.selectedOrganisation?.id);
+        if (idx >= 0) {
+          this.organisations[idx] = { ...this.organisations[idx], ...updated };
+        }
+        this.selectedOrganisation = idx >= 0 ? this.organisations[idx] : { ...this.selectedOrganisation, ...updated };
+        this.success = 'Organisation mise à jour avec succès.';
+        this.saving = false;
+        this.editMode = false;
+        this.showPassword = false;
+      },
+      error: (err) => {
+        this.error = typeof err?.error === 'string'
+          ? err.error
+          : (err?.error?.message ?? 'Erreur lors de la mise à jour.');
+        this.saving = false;
+      }
+    });
+  }
+
+  deleteSelected(): void {
+    const o = this.selectedOrganisation;
+    if (!o?.id) return;
+    if (this.deleting) return;
+    this.confirmTitle = 'Supprimer cette organisation ?';
+    this.confirmMessage = 'Cette action est définitive. Si elle est liée à des signalements, la suppression sera refusée.';
+    this.confirmOpen = true;
+  }
+
+  closeConfirm(): void {
+    if (this.deleting) return;
+    this.confirmOpen = false;
+  }
+
+  confirmDelete(): void {
+    const o = this.selectedOrganisation;
+    if (!o?.id) return;
+    if (this.deleting) return;
+
+    this.deleting = true;
+    this.error = '';
+    this.success = '';
+
+    this.adminService.deleteOrganisation(o.id).subscribe({
+      next: () => {
+        this.success = 'Organisation supprimée.';
+        this.deleting = false;
+        this.confirmOpen = false;
+        this.closeDetails();
+        this.loadOrganisations();
+      },
+      error: (err) => {
+        this.error = typeof err?.error === 'string'
+          ? err.error
+          : (err?.error?.message ?? 'Impossible de supprimer cette organisation.');
+        this.deleting = false;
+        this.confirmOpen = false;
+      }
+    });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  downloadReport(): void {
+    if (this.downloadingPdf) return;
+    this.downloadingPdf = true;
+    this.error = '';
+
+    this.adminService.downloadOrganisationsPdf({
+      domaine: this.selectedDomaine || undefined,
+      type: this.selectedType || undefined,
+      q: this.searchQuery?.trim() || undefined
+    }).subscribe({
+      next: (blob) => {
+        const fileName = `rapport_organisations_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '')}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.downloadingPdf = false;
+      },
+      error: () => {
+        this.error = 'Impossible de télécharger le rapport PDF.';
+        this.downloadingPdf = false;
       }
     });
   }

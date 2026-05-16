@@ -5,6 +5,7 @@
   />
   
   <div class="dashboard-top">
+    <div class="dashboard-inner">
     <!-- Notification pour numéro de téléphone manquant -->
     <div
       *ngIf="showNotification()"
@@ -42,9 +43,12 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 
   <main class="dashboard-content">
-    <router-outlet />
+    <div class="dashboard-inner">
+      <router-outlet />
+    </div>
   </main>
 </div>

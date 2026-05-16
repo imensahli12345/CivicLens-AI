@@ -3,6 +3,7 @@
     [userName]="userName"
     subtitle="Dashboard Bureau de controle"
     homeRoute="/dashboard-bureau-et-service"
+    [showServicePasswordAction]="true"
     (serviceAction)="onServiceAction($event)"
     (signalementAction)="onSignalementAction($event)"
     (profileClick)="openProfileModal()"

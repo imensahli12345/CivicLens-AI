@@ -20,8 +20,9 @@ export class ActorDashboardTopbarComponent {
   @Input() showAssignSignalementAction = true;
   @Input() showProfile = true;
   @Input() showCarteSignalements = false;
+  @Input() showServicePasswordAction = false;
 
-  @Output() serviceAction = new EventEmitter<'view' | 'activate' | 'deactivate'>();
+  @Output() serviceAction = new EventEmitter<'view' | 'activate' | 'deactivate' | 'password'>();
   @Output() signalementAction = new EventEmitter<'view' | 'assign'>();
   @Output() profileClick = new EventEmitter<void>();
 
@@ -30,7 +31,7 @@ export class ActorDashboardTopbarComponent {
     private router: Router
   ) {}
 
-  onServiceAction(value: 'view' | 'activate' | 'deactivate'): void {
+  onServiceAction(value: 'view' | 'activate' | 'deactivate' | 'password'): void {
     this.serviceAction.emit(value);
   }
 

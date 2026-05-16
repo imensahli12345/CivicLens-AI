@@ -158,8 +158,68 @@
         <span *ngIf="isLoading" class="spinner"></span>
       </button>
 
+      <div class="forgot-row">
+        <button type="button" class="forgot-link" (click)="openResetModal()">Mot de passe oublié ?</button>
+      </div>
+
       <div class="register-footer">
         <p>Déjà inscrit ? <a routerLink="/login">Se connecter</a></p>
       </div>
     </form>
+</div>
+
+<div *ngIf="resetOpen" class="reset-overlay" (click)="closeResetModal()">
+  <div class="reset-card" (click)="$event.stopPropagation()">
+    <div class="reset-head">
+      <div>
+        <div class="reset-title">Réinitialiser le mot de passe</div>
+        <div class="reset-subtitle">Entrez votre CIN et votre numéro de téléphone</div>
+      </div>
+      <button type="button" class="reset-close" (click)="closeResetModal()" aria-label="Fermer">×</button>
+    </div>
+
+    <form [formGroup]="resetForm" (ngSubmit)="submitReset()" class="reset-form">
+      <div class="reset-grid">
+        <div class="form-group">
+          <label class="form-label">CIN</label>
+          <div class="input-wrapper">
+            <input class="form-control" type="text" formControlName="cin" maxlength="8" inputmode="numeric" pattern="[0-9]*" placeholder="12345678" />
+          </div>
+          <div *ngIf="resetForm.get('cin')?.invalid && resetForm.get('cin')?.touched" class="error-message">CIN invalide</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Numéro de téléphone</label>
+          <div class="input-wrapper">
+            <input class="form-control" type="text" formControlName="telephone" inputmode="numeric" pattern="[0-9]*" placeholder="XXXXXXXX" />
+          </div>
+          <div *ngIf="resetForm.get('telephone')?.invalid && resetForm.get('telephone')?.touched" class="error-message">Numéro invalide</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nouveau mot de passe</label>
+        <div class="input-wrapper">
+          <input class="form-control" type="password" formControlName="nouveauMotDePasse" placeholder="••••••" />
+        </div>
+        <div *ngIf="resetForm.get('nouveauMotDePasse')?.invalid && resetForm.get('nouveauMotDePasse')?.touched" class="error-message">Minimum 6 caractères</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmer le nouveau mot de passe</label>
+        <div class="input-wrapper">
+          <input class="form-control" type="password" formControlName="confirmNouveauMotDePasse" placeholder="••••••" />
+        </div>
+        <div *ngIf="resetForm.hasError('passwordMismatch') && resetForm.get('confirmNouveauMotDePasse')?.touched" class="error-message">Les mots de passe ne correspondent pas</div>
+      </div>
+
+      <div *ngIf="resetError" class="alert alert-error">{{ resetError }}</div>
+      <div *ngIf="resetSuccess" class="alert alert-success">{{ resetSuccess }}</div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="resetLoading">
+        <span *ngIf="!resetLoading">Modifier le mot de passe</span>
+        <span *ngIf="resetLoading" class="spinner"></span>
+      </button>
+    </form>
+  </div>
 </div>

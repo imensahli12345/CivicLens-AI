@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import {
   BureauService,
   BureauServicesService
 } from '../../../core/services/bureau-services.service';
 import { SimpleAlertComponent } from '../simple-alert/simple-alert.component';
 
-type ConfirmMode = 'activate' | 'deactivate' | null;
-type ServicesActionType = 'activate' | 'deactivate';
+type ConfirmMode = 'activate' | 'deactivate' | 'password' | null;
+type ServicesActionType = 'activate' | 'deactivate' | 'password';
 type ServiceStatus = 'ACTIF' | 'INACTIF';
 
 export interface ServicesTableConfig {
@@ -20,7 +21,7 @@ export interface ServicesTableConfig {
 @Component({
   selector: 'app-bureau-services-table',
   standalone: true,
-  imports: [CommonModule, SimpleAlertComponent],
+  imports: [CommonModule, FormsModule, SimpleAlertComponent],
   templateUrl: './bureau-services-table.component.html',
   styleUrl: './bureau-services-table.component.css'
 })
@@ -34,6 +35,10 @@ export class BureauServicesTableComponent implements OnInit {
   confirmMode: ConfirmMode = null;
   selectedService: BureauService | null = null;
   processing = false;
+  passwordValue = '';
+  passwordConfirm = '';
+  bureauPassword = '';
+  passwordError = '';
 
   showAlert = false;
   alertType: 'success' | 'error' = 'success';
@@ -55,7 +60,8 @@ export class BureauServicesTableComponent implements OnInit {
   }
 
   get shouldShowActionsColumn(): boolean {
-    return this.config.showActions;
+    if (!this.config.showActions) return false;
+    return this.config.actionType !== 'password';
   }
 
   loadServices(): void {
@@ -74,13 +80,44 @@ export class BureauServicesTableComponent implements OnInit {
   }
 
   getActionTitle(): string {
-    return this.config.actionType === 'deactivate'
-      ? 'Desactiver le service'
-      : 'Activer le service';
+    if (this.config.actionType === 'deactivate') return 'Desactiver le service';
+    if (this.config.actionType === 'password') return 'Modifier le mot de passe';
+    return 'Activer le service';
+  }
+
+  canPerformAction(service: BureauService): boolean {
+    if (!this.config.showActions || !this.config.actionType) return false;
+    if (this.config.actionType === 'password') return true;
+    if (this.config.actionType === 'activate') return service.statut === 'INACTIF';
+    return service.statut === 'ACTIF';
+  }
+
+  getRowActionTitle(service: BureauService): string {
+    if (!this.config.showActions || !this.config.actionType) return '';
+    if (this.config.actionType === 'password') return 'Modifier mot de passe';
+    if (this.config.actionType === 'activate') {
+      return service.statut === 'ACTIF' ? 'Deja actif' : 'Activer le service';
+    }
+    return service.statut === 'INACTIF' ? 'Deja inactif' : 'Desactiver le service';
   }
 
   onActionClick(service: BureauService): void {
     if (!this.config.showActions || !this.config.actionType) return;
+
+    if (this.config.actionType === 'password') {
+      this.askPassword(service);
+      return;
+    }
+
+    if (!this.canPerformAction(service)) {
+      this.showSimpleAlert(
+        'error',
+        this.config.actionType === 'activate'
+          ? 'Ce service est deja actif.'
+          : 'Ce service est deja inactif.'
+      );
+      return;
+    }
 
     if (this.config.actionType === 'activate') {
       this.askActivate(service);
@@ -100,14 +137,28 @@ export class BureauServicesTableComponent implements OnInit {
     this.confirmMode = 'deactivate';
   }
 
+  askPassword(service: BureauService): void {
+    this.selectedService = service;
+    this.confirmMode = 'password';
+    this.passwordValue = '';
+    this.passwordConfirm = '';
+    this.bureauPassword = '';
+    this.passwordError = '';
+  }
+
   closeModal(): void {
     if (this.processing) return;
     this.confirmMode = null;
     this.selectedService = null;
+    this.passwordValue = '';
+    this.passwordConfirm = '';
+    this.bureauPassword = '';
+    this.passwordError = '';
   }
 
   confirm(): void {
     if (!this.selectedService || !this.confirmMode) return;
+    if (this.confirmMode === 'password') return;
     const id = this.selectedService.id;
     const mode = this.confirmMode;
     const nextStatus: BureauService['statut'] = mode === 'activate' ? 'ACTIF' : 'INACTIF';
@@ -168,6 +219,71 @@ export class BureauServicesTableComponent implements OnInit {
       }
     });
   }
+
+  confirmPassword(): void {
+    if (!this.selectedService || this.confirmMode !== 'password') return;
+    const id = this.selectedService.id;
+    const next = String(this.passwordValue ?? '').trim();
+    const confirm = String(this.passwordConfirm ?? '').trim();
+    const bureauPwd = String(this.bureauPassword ?? '').trim();
+
+    this.passwordError = '';
+    if (!next || next.length < 6) {
+      this.passwordError = 'Mot de passe invalide (min 6 caractères).';
+      return;
+    }
+    if (next !== confirm) {
+      this.passwordError = 'Les mots de passe ne correspondent pas.';
+      return;
+    }
+    if (!bureauPwd) {
+      this.passwordError = 'Mot de passe du bureau requis.';
+      return;
+    }
+
+    this.processing = true;
+    this.bureauServices.updatePassword(id, next, bureauPwd).subscribe({
+      next: () => {
+        this.processing = false;
+        this.confirmMode = null;
+        this.selectedService = null;
+        this.passwordValue = '';
+        this.passwordConfirm = '';
+        this.bureauPassword = '';
+        this.showSimpleAlert('success', 'Mot de passe du service mis à jour.');
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 200) {
+          this.processing = false;
+          this.confirmMode = null;
+          this.selectedService = null;
+          this.passwordValue = '';
+          this.passwordConfirm = '';
+          this.bureauPassword = '';
+          this.showSimpleAlert('success', 'Mot de passe du service mis à jour.');
+          return;
+        }
+
+        const apiError = err?.error;
+        this.processing = false;
+        this.passwordError =
+          (typeof apiError === 'string' && apiError.trim())
+            ? apiError
+            : 'Erreur lors de la mise à jour du mot de passe.';
+      }
+    });
+  }
+
+  onRowClick(service: BureauService): void {
+    if (this.config.actionType !== 'password') return;
+    this.askPassword(service);
+  }
+
+  displayServiceName(name: string): string {
+    const cleaned = String(name ?? '').trim();
+    if (!cleaned) return '';
+    return cleaned.replace(/^service\s+/i, '').trim();
+  }
   //new code getters for dynamic titles and subtitles based on config
   get tableTitle(): string {
   if (!this.config.showActions) {
@@ -182,6 +298,10 @@ export class BureauServicesTableComponent implements OnInit {
     return 'Desactiver les services';
   }
 
+  if (this.config.actionType === 'password') {
+    return 'Modifier les mots de passe';
+  }
+
   return 'Services';
 }
 
@@ -191,11 +311,15 @@ get tableSubtitle(): string {
   }
 
   if (this.config.actionType === 'activate') {
-    return 'Seuls les services inactifs sont affiches.';
+    return 'Cliquez sur un service inactif pour l activer.';
   }
 
   if (this.config.actionType === 'deactivate') {
-    return 'Seuls les services actifs sont affiches.';
+    return 'Cliquez sur un service actif pour le desactiver.';
+  }
+
+  if (this.config.actionType === 'password') {
+    return 'Cliquez sur un service pour definir un nouveau mot de passe.';
   }
 
   return '';

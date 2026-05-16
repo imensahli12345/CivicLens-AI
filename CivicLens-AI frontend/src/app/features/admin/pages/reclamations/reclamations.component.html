@@ -1,0 +1,85 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="title">Réclamations plateforme</div>
+      <div class="subtitle">Suivi des réclamations envoyées depuis l’application.</div>
+    </div>
+    <button class="btn" (click)="load()" [disabled]="loading">Rafraîchir</button>
+  </div>
+
+  <div class="filters">
+    <div class="field">
+      <label>Statut</label>
+      <select [(ngModel)]="status" (change)="load()">
+        <option value="TOUTES">Toutes</option>
+        <option value="NOUVELLE">Nouvelles</option>
+        <option value="TRAITEE">Traitées</option>
+      </select>
+    </div>
+    <div class="field grow">
+      <label>Recherche</label>
+      <input [(ngModel)]="search" placeholder="Sujet, email, message..." />
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div *ngIf="!loading && !error" class="table">
+    <div class="row header">
+      <div>Créée</div>
+      <div>Email</div>
+      <div>Sujet</div>
+      <div>Statut</div>
+      <div class="actions">Actions</div>
+    </div>
+    <div class="row" *ngFor="let r of filtered()">
+      <div class="muted">{{ formatDate(r.createdAt) }}</div>
+      <div class="mono">{{ r.fromEmail }}</div>
+      <div class="subject" (click)="open(r)">{{ r.subject }}</div>
+      <div>
+        <span class="badge" [class.badge-new]="r.status === 'NOUVELLE'" [class.badge-done]="r.status === 'TRAITEE'">
+          {{ r.status }}
+        </span>
+      </div>
+      <div class="actions">
+        <button class="btn link" (click)="open(r)">Détails</button>
+        <button class="btn primary" (click)="markTreated(r)" [disabled]="updatingId === r.id || r.status === 'TRAITEE'">
+          Marquer traitée
+        </button>
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="filtered().length === 0">Aucune réclamation.</div>
+  </div>
+</div>
+
+<div *ngIf="selected" class="modal-overlay" (click)="close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">{{ selected.subject }}</div>
+        <div class="modal-sub">{{ selected.fromEmail }} • {{ formatDate(selected.createdAt) }}</div>
+      </div>
+      <button class="btn icon" (click)="close()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="meta">
+        <div><span class="meta-k">Version</span> <span class="meta-v">{{ selected.appVersion || '—' }}</span></div>
+        <div><span class="meta-k">Contexte</span> <span class="meta-v">{{ selected.context || '—' }}</span></div>
+        <div><span class="meta-k">Statut</span> <span class="meta-v">{{ selected.status }}</span></div>
+      </div>
+      <div class="message">{{ selected.message }}</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" (click)="close()">Fermer</button>
+      <button class="btn primary" (click)="markTreated(selected)" [disabled]="updatingId === selected.id || selected.status === 'TRAITEE'">
+        Marquer traitée
+      </button>
+    </div>
+  </div>
+</div>
+

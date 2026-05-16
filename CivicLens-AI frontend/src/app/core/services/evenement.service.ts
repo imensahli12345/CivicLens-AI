@@ -49,4 +49,8 @@ export class EvenementService {
   annulerParticipation(id: string): Observable<any> {
     return this.api.delete<any>(`/evenements/${id}/participer`);
   }
+
+  updateParticipationCommentaire(id: string, data: { commentaire: string }): Observable<any> {
+    return this.api.put<any>(`/evenements/${id}/participation/commentaire`, data);
+  }
 }

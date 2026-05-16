@@ -175,6 +175,11 @@
   color: #b91c1c;
 }
 
+.signals-btn--pdf {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
 .signals-file-input {
   display: none;
 }

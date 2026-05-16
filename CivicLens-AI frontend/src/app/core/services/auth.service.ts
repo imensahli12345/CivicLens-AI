@@ -161,6 +161,22 @@ export class AuthService {
     );
   }
 
+  deleteMe(): Observable<any> {
+    return this.apiService.delete<any>('/auth/me');
+  }
+
+  sendReclamation(data: { email: string; subject: string; message: string; appVersion?: string | null; context?: string | null }): Observable<any> {
+    return this.apiService.post<any>('/auth/reclamation', data);
+  }
+
+  resetPasswordByCinTelephone(data: { cin: string; telephone: string; nouveauMotDePasse: string }): Observable<any> {
+    return this.apiService.post<any>('/auth/reset-password', data);
+  }
+
+  requestReactivation(data: { identifier: string }): Observable<any> {
+    return this.apiService.post<any>('/auth/reactivation-request', data);
+  }
+
   getUserRole(): string {
     return this.getCurrentUser()?.role || 'CITOYEN';
   }

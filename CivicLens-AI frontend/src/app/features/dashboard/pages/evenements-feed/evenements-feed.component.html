@@ -90,7 +90,7 @@
         <ng-container *ngIf="activeTab === 'region'">
           <button *ngIf="!hasParticipated(ev); else alreadyParticipatedBtn" 
                   class="btn btn-primary flex-1 ms-2" 
-                  (click)="participer(ev)" 
+                  (click)="openParticipation(ev)" 
                   [disabled]="participatingId === ev.id || isPast(ev.dateEvenement)">
             <span *ngIf="participatingId === ev.id" class="spinner small-spinner"></span>
             <span *ngIf="participatingId !== ev.id">Participer</span>
@@ -102,6 +102,29 @@
           </ng-template>
         </ng-container>
       </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="participationModalOpen" class="modal-overlay" (click)="closeParticipation()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">Participer</div>
+      <button type="button" class="modal-close" (click)="closeParticipation()" [disabled]="!!participatingId">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-subtitle">
+        {{ selectedEvenement?.titre }}
+      </div>
+      <label class="modal-label">Commentaire</label>
+      <textarea class="modal-textarea" [(ngModel)]="participationComment" placeholder="Ex: Je peux aider, apporter du matériel, etc."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="closeParticipation()" [disabled]="!!participatingId">Annuler</button>
+      <button class="btn btn-primary" (click)="submitParticipation()" [disabled]="!!participatingId">
+        <span *ngIf="!!participatingId" class="spinner small-spinner"></span>
+        <span *ngIf="!participatingId">Participer</span>
+      </button>
     </div>
   </div>
 </div>

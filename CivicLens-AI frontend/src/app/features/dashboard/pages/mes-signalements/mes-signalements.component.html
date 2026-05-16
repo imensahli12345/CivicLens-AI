@@ -35,6 +35,17 @@
         {{ f.label }}
       </button>
     </div>
+
+    <div class="domain-select">
+      <label class="domain-label" for="domainSelect">Domaine</label>
+      <select
+        id="domainSelect"
+        class="domain-input"
+        [ngModel]="filterDomaine()"
+        (ngModelChange)="setDomaine($event)">
+        <option *ngFor="let d of domaines" [value]="d.value">{{ d.label }}</option>
+      </select>
+    </div>
   </div>
 
   <!-- Count -->
@@ -58,9 +69,9 @@
   <div *ngIf="!loading() && filtered().length === 0 && !error()" class="empty-state">
     <div class="empty-state-icon">📋</div>
     <h3>Aucun signalement trouvé</h3>
-    <p *ngIf="filterStatut() === 'TOUS' && !searchQuery()">Vous n'avez pas encore soumis de signalement.</p>
-    <p *ngIf="filterStatut() !== 'TOUS' || searchQuery()">Essayez de modifier vos filtres.</p>
-    <a *ngIf="filterStatut() === 'TOUS' && !searchQuery()" routerLink="/dashboard/nouveau" class="btn btn-primary btn-sm" style="margin-top:0.5rem">
+    <p *ngIf="filterStatut() === 'TOUS' && filterDomaine() === 'TOUS' && !searchQuery()">Vous n'avez pas encore soumis de signalement.</p>
+    <p *ngIf="filterStatut() !== 'TOUS' || filterDomaine() !== 'TOUS' || searchQuery()">Essayez de modifier vos filtres.</p>
+    <a *ngIf="filterStatut() === 'TOUS' && filterDomaine() === 'TOUS' && !searchQuery()" routerLink="/dashboard/nouveau" class="btn btn-primary btn-sm" style="margin-top:0.5rem">
       Créer mon premier signalement
     </a>
   </div>

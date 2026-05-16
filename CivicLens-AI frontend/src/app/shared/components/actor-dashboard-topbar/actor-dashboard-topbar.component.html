@@ -22,6 +22,7 @@
       <div class="dropdown-menu">
         <button type="button" (click)="onServiceAction('activate')">Activer un service</button>
         <button type="button" (click)="onServiceAction('deactivate')">Désactiver un service</button>
+        <button *ngIf="showServicePasswordAction" type="button" (click)="onServiceAction('password')">Modifier mot de passe</button>
         <button type="button" (click)="onServiceAction('view')">Voir les services</button>
       </div>
     </div>

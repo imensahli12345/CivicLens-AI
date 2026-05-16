@@ -3,7 +3,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/co
 import { ActorDashboardTopbarComponent } from '../../../../shared/components/actor-dashboard-topbar/actor-dashboard-topbar.component';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import * as L from 'leaflet';
-import { MapReportDetail, MapReportMarker, MapSignalementsService } from '../../../../core/services/map-signalements.service';
+import { MapContext, MapReportDetail, MapReportMarker, MapSignalementsService } from '../../../../core/services/map-signalements.service';
 
 @Component({
   selector: 'app-organisation-map',
@@ -34,18 +34,30 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
 
   readonly prioriteOptions = [
     { value: '', label: 'Toutes les priorités' },
-    { value: 'CRITIQUE', label: 'Critique' },
+    { value: 'URGENTE', label: 'Urgente' },
     { value: 'HAUTE', label: 'Haute' },
     { value: 'MOYENNE', label: 'Moyenne' },
-    { value: 'FAIBLE', label: 'Faible' },
+    { value: 'BASSE', label: 'Basse' },
   ];
 
   readonly graviteOptions = [
     { value: '', label: 'Toutes les gravités' },
     { value: 'CRITIQUE', label: 'Critique' },
-    { value: 'GRAVE', label: 'Grave' },
-    { value: 'MODEREE', label: 'Modérée' },
+    { value: 'ELEVE', label: 'Élevée' },
+    { value: 'MOYEN', label: 'Moyenne' },
     { value: 'FAIBLE', label: 'Faible' },
+  ];
+
+  readonly domaineOptions = [
+    { value: '', label: 'Tous les domaines' },
+    { value: 'ROUTE', label: 'Route' },
+    { value: 'ECLAIRAGE', label: 'Éclairage' },
+    { value: 'EAU', label: 'Eau' },
+    { value: 'TRANSPORT', label: 'Transport' },
+    { value: 'ELECTRICITE', label: 'Électricité' },
+    { value: 'INFRASTRUCTURE', label: 'Infrastructure' },
+    { value: 'DECHETS', label: 'Déchets' },
+    { value: 'AUTRE', label: 'Autre' },
   ];
 
   private fb = inject(FormBuilder);
@@ -54,6 +66,7 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
     statut: [''],
     priorite: [''],
     gravite: [''],
+    domaine: [''],
     date_from: [''],
     date_to: [''],
     onlyVisible: [true],
@@ -77,9 +90,30 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
     private mapSignalementsService: MapSignalementsService
   ) {}
 
+  domaineLocked = true;
+  lockedDomaine: string | null = null;
+
   ngOnInit(): void {
     this.userName = this.resolveUserName();
     this.loading = false;
+
+    this.mapSignalementsService.getContext().subscribe({
+      next: (ctx: MapContext) => {
+        this.domaineLocked = !!ctx?.domaine_locked;
+        this.lockedDomaine = ctx?.org_domaine ? String(ctx.org_domaine) : null;
+        if (this.domaineLocked) {
+          this.filterForm.patchValue({ domaine: this.lockedDomaine ?? '' }, { emitEvent: false });
+          this.filterForm.get('domaine')?.disable({ emitEvent: false });
+        } else {
+          this.filterForm.get('domaine')?.enable({ emitEvent: false });
+        }
+      },
+      error: () => {
+        this.domaineLocked = false;
+        this.lockedDomaine = null;
+        this.filterForm.get('domaine')?.enable({ emitEvent: false });
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -115,6 +149,7 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
       statut: '',
       priorite: '',
       gravite: '',
+      domaine: this.domaineLocked ? (this.lockedDomaine ?? '') : '',
       date_from: '',
       date_to: '',
       onlyVisible: true,
@@ -197,7 +232,7 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
     this.isLoadingMarkers = true;
     this.error = null;
 
-    const formValue = this.filterForm.value;
+    const formValue = this.filterForm.getRawValue();
     const bbox = formValue.onlyVisible ? this.buildBboxFromMap() : undefined;
     const limit = Math.min(Math.max(formValue.limit ?? 1000, 1), 2000);
 
@@ -205,6 +240,7 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
       statut: formValue.statut || undefined,
       priorite: formValue.priorite || undefined,
       gravite: formValue.gravite || undefined,
+      domaine: this.domaineLocked ? undefined : (formValue.domaine || undefined),
       date_from: formValue.date_from || undefined,
       date_to: formValue.date_to || undefined,
       bbox,
@@ -438,10 +474,10 @@ export class OrganisationMapComponent implements OnInit, AfterViewInit, OnDestro
   private getMarkerColor(marker: MapReportMarker): string {
     if (marker.statut === 'RESOLU') return '#22c55e';
     switch (marker.priorite) {
-      case 'CRITIQUE': return '#ef4444';
+      case 'URGENTE': return '#ef4444';
       case 'HAUTE': return '#f97316';
       case 'MOYENNE': return '#eab308';
-      case 'FAIBLE': return '#22c55e';
+      case 'BASSE': return '#22c55e';
       default: return '#94a3b8';
     }
   }

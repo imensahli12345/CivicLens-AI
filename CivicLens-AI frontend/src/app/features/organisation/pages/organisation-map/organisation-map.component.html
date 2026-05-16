@@ -58,6 +58,16 @@
           </select>
         </label>
 
+        <label class="filter-field">
+          <span>Domaine</span>
+          <select formControlName="domaine">
+            <option *ngFor="let opt of domaineOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+          <small class="filter-hint" *ngIf="domaineLocked">
+            Filtre domaine verrouillé (profil: {{ lockedDomaine || '—' }}).
+          </small>
+        </label>
+
         <div class="filter-grid">
           <label class="filter-field">
             <span>Date début</span>

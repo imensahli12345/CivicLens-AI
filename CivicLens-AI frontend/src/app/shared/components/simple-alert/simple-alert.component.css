@@ -40,3 +40,9 @@
   color: inherit;
   background: rgba(255, 255, 255, 0.55);
 }
+
+.simple-alert__link {
+  color: inherit;
+  text-decoration: underline;
+  margin-left: 6px;
+}

@@ -3,6 +3,9 @@
     <h1>🏛️ Organisations</h1>
     <div class="header-actions">
       <span class="badge">{{ filteredOrganisations.length }} organisations</span>
+      <button class="btn-create btn-secondary" type="button" (click)="downloadReport()" [disabled]="loading || downloadingPdf">
+        {{ downloadingPdf ? 'Téléchargement…' : 'Télécharger rapport' }}
+      </button>
       <button class="btn-create" (click)="toggleForm()">
         {{ showForm ? '✕ Annuler' : '+ Nouvelle Organisation' }}
       </button>
@@ -127,7 +130,7 @@
       </div>
 
       <div *ngIf="selectedOrganisation as o" class="modal-body">
-        <div class="info-grid">
+        <div *ngIf="!editMode" class="info-grid">
           <div class="info-item">
             <div class="info-label">Nom</div>
             <div class="info-value">{{ o.nomOrganisation }}</div>
@@ -135,6 +138,10 @@
           <div class="info-item">
             <div class="info-label">Email</div>
             <div class="info-value">{{ o.email }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Mot de passe</div>
+            <div class="info-value">********</div>
           </div>
           <div class="info-item">
             <div class="info-label">Type</div>
@@ -149,10 +156,6 @@
             <div class="info-value">{{ o.region || '—' }}</div>
           </div>
           <div class="info-item">
-            <div class="info-label">Délégation</div>
-            <div class="info-value">{{ o.delegation || '—' }}</div>
-          </div>
-          <div class="info-item">
             <div class="info-label">Statut</div>
             <div class="info-value"><span class="status-badge" [class]="o.statut?.toLowerCase()">{{ o.statut }}</span></div>
           </div>
@@ -161,13 +164,105 @@
             <div class="info-value">{{ o.dateCreation ? (o.dateCreation | date:'dd/MM/yyyy') : '—' }}</div>
           </div>
         </div>
+
+        <form *ngIf="editMode" class="edit-form" [formGroup]="editForm" (ngSubmit)="saveEdit()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom</label>
+              <input type="text" formControlName="nomOrganisation" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" formControlName="email" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type</label>
+              <select formControlName="typeOrganisation">
+                <option value="">-- Choisir --</option>
+                <option *ngFor="let t of typesOrganisation" [value]="t">{{ t }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Domaine</label>
+              <select formControlName="domaineOrganisation">
+                <option value="">-- Choisir --</option>
+                <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Gouvernorat</label>
+              <select formControlName="region">
+                <option value="">-- Choisir --</option>
+                <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nouveau mot de passe</label>
+              <div class="password-wrap">
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="nouveauMotDePasse" placeholder="••••••••" />
+                <button class="btn-eye" type="button" (click)="togglePasswordVisibility()">
+                  {{ showPassword ? 'Cacher' : 'Afficher' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" *ngIf="editForm.get('nouveauMotDePasse')?.value">
+            <div class="form-group">
+              <label>Mot de passe admin</label>
+              <input type="password" formControlName="motDePasseAdmin" placeholder="Votre mot de passe" />
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" [disabled]="editForm.invalid || saving">
+            {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </form>
       </div>
 
       <div class="modal-footer" *ngIf="selectedOrganisation as o">
-        <button class="status-toggle status-toggle-primary" type="button" (click)="toggleOrganisation(o)" [disabled]="togglingId === o.id">
+        <button *ngIf="!editMode" class="status-toggle status-toggle-primary" type="button" (click)="toggleOrganisation(o)" [disabled]="togglingId === o.id">
           {{ o.statut === 'ACTIF' ? 'Désactiver le compte' : 'Activer le compte' }}
         </button>
+        <button *ngIf="!editMode" class="status-toggle" type="button" (click)="startEdit()">
+          Modifier
+        </button>
+        <button *ngIf="!editMode" class="status-toggle status-toggle-danger" type="button" (click)="deleteSelected()" [disabled]="deleting">
+          {{ deleting ? 'Suppression...' : 'Supprimer' }}
+        </button>
+        <button *ngIf="editMode" class="status-toggle" type="button" (click)="cancelEdit()">
+          Annuler
+        </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-backdrop" *ngIf="confirmOpen" (click)="closeConfirm()">
+  <div class="confirm-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="confirm-icon" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"></path>
+        <path d="M8 6V4h8v2"></path>
+        <path d="M19 6l-1 14H6L5 6"></path>
+        <path d="M10 11v6"></path>
+        <path d="M14 11v6"></path>
+      </svg>
+    </div>
+    <h3 class="confirm-title">{{ confirmTitle }}</h3>
+    <p class="confirm-text">{{ confirmMessage }}</p>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-btn confirm-btn--ghost" (click)="closeConfirm()" [disabled]="deleting">
+        Annuler
+      </button>
+      <button type="button" class="confirm-btn confirm-btn--danger" (click)="confirmDelete()" [disabled]="deleting">
+        {{ deleting ? 'Suppression...' : 'Oui, supprimer' }}
+      </button>
     </div>
   </div>
 </div>

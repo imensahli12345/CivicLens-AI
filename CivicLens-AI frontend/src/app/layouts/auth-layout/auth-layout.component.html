@@ -35,8 +35,69 @@
         </div>
         <div class="stage-footnote">
           Accès réservé. Utilisez vos identifiants pour continuer.
+          <button type="button" class="reclamation-link" (click)="openReclamation()">
+            <span class="reclamation-link__chev">›</span>
+            Réclamation
+          </button>
         </div>
       </section>
     </div>
   </main>
+
+  <div *ngIf="reclamationOpen" class="reclamation-overlay" (click)="closeReclamation()">
+    <div class="reclamation-card" (click)="$event.stopPropagation()">
+      <div class="reclamation-head">
+        <div>
+          <div class="reclamation-title">Réclamation</div>
+          <div class="reclamation-subtitle">Signalez un problème sur l’application</div>
+        </div>
+        <button type="button" class="reclamation-close" (click)="closeReclamation()" aria-label="Fermer">×</button>
+      </div>
+
+      <div *ngIf="reclamationSent" class="reclamation-banner success">Réclamation envoyée.</div>
+      <div *ngIf="reclamationError" class="reclamation-banner error">{{ reclamationError }}</div>
+
+      <div class="reclamation-form">
+        <label class="reclamation-label" for="authReclamationEmail">Email *</label>
+        <input
+          id="authReclamationEmail"
+          class="reclamation-input"
+          type="email"
+          [(ngModel)]="reclamationEmail"
+          [disabled]="reclamationSending"
+          placeholder="votre@email.com"
+          autocomplete="email"
+        />
+
+        <label class="reclamation-label" for="authReclamationSubject">Sujet</label>
+        <input
+          id="authReclamationSubject"
+          class="reclamation-input"
+          type="text"
+          [(ngModel)]="reclamationSubject"
+          [disabled]="reclamationSending"
+          placeholder="Ex: Bug, blocage, affichage…"
+          maxlength="120"
+        />
+
+        <label class="reclamation-label" for="authReclamationMessage">Message *</label>
+        <textarea
+          id="authReclamationMessage"
+          class="reclamation-textarea"
+          [(ngModel)]="reclamationMessage"
+          [disabled]="reclamationSending"
+          placeholder="Décrivez le problème (min 10 caractères)..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="reclamation-actions">
+        <button type="button" class="btn btn-ghost" (click)="closeReclamation()" [disabled]="reclamationSending">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="sendReclamation()" [disabled]="reclamationSending">
+          <span class="reclamation-spinner" *ngIf="reclamationSending"></span>
+          <span *ngIf="!reclamationSending">Envoyer</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

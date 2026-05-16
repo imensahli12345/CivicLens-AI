@@ -50,11 +50,23 @@ export class ApiService {
         errorMessage = error.error;
         return throwError(() => new Error(errorMessage));
       }
+      if (error.error && typeof error.error === 'object') {
+        const message = (error.error as any)?.message;
+        const link = (error.error as any)?.link;
+        const originalId = (error.error as any)?.originalId;
+        if (typeof message === 'string' && message.trim()) {
+          errorMessage = message.trim();
+          const wrapped: any = new Error(errorMessage);
+          if (typeof link === 'string' && link.trim()) wrapped.link = link.trim();
+          if (typeof originalId === 'number') wrapped.originalId = originalId;
+          return throwError(() => wrapped);
+        }
+      }
       if (error.status === 400) errorMessage = error.error?.message || 'Données invalides';
       else if (error.status === 401) errorMessage = 'Session expirée. Reconnectez-vous.';
       else if (error.status === 403) errorMessage = 'Accès refusé';
       else if (error.status === 404) errorMessage = 'Ressource introuvable';
-      else if (error.status === 409) errorMessage = 'Cet email est déjà utilisé';
+      else if (error.status === 409) errorMessage = 'Un conflit a été détecté. Veuillez réessayer.';
       else if (error.status === 500) errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
     }
     return throwError(() => new Error(errorMessage));

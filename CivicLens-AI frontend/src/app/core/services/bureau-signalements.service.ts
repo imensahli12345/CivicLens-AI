@@ -138,6 +138,10 @@ export class BureauSignalementsService {
       );
   }
 
+  downloadSignalementPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
+
   getOrganisations(): Observable<OrganisationOption[]> {
     return this.http
       .get<RawOrganisation[] | OrganisationsResponse>(`${environment.apiUrl}/bureau/organisations`)

@@ -4,9 +4,10 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SignalementCardComponent } from '../../components/signalement-card/signalement-card.component';
 import { SignalementService } from '../../../../core/services/signalement.service';
-import { Signalement, SignalementStatut } from '../../../../shared/models/signalement.model';
+import { Signalement, SignalementCategorie, SignalementStatut } from '../../../../shared/models/signalement.model';
 
 type FilterStatut = SignalementStatut | 'TOUS';
+type FilterDomaine = SignalementCategorie | 'TOUS';
 
 @Component({
   selector: 'app-mes-signalements',
@@ -20,6 +21,7 @@ export class MesSignalementsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   filterStatut = signal<FilterStatut>('TOUS');
+  filterDomaine = signal<FilterDomaine>('TOUS');
   searchQuery = signal('');
 
   deleteModalOpen = signal(false);
@@ -35,16 +37,32 @@ export class MesSignalementsComponent implements OnInit {
     { label: 'Rejetés',     value: 'REJETE'      },
   ];
 
+  domaines: { label: string; value: FilterDomaine }[] = [
+    { label: 'Tous domaines', value: 'TOUS' },
+    { label: 'Route', value: 'ROUTE' },
+    { label: 'Éclairage', value: 'ECLAIRAGE' },
+    { label: 'Eau', value: 'EAU' },
+    { label: 'Transport', value: 'TRANSPORT' },
+    { label: 'Électricité', value: 'ELECTRICITE' },
+    { label: 'Infrastructure', value: 'INFRASTRUCTURE' },
+    { label: 'Déchets', value: 'DECHETS' },
+    { label: 'Autre', value: 'AUTRE' }
+  ];
+
   filtered = computed(() => {
     let list = this.signalements();
     const q = this.searchQuery().toLowerCase().trim();
     const f = this.filterStatut();
+    const d = this.filterDomaine();
     if (f !== 'TOUS') {
       if (f === 'EN_COURS') {
         list = list.filter(s => ['EN_COURS', 'OUVERTE', 'ENVOYEE', 'EN_COURS_DETUDE'].includes(s.statut as any));
       } else {
         list = list.filter(s => s.statut === f);
       }
+    }
+    if (d !== 'TOUS') {
+      list = list.filter(s => s.categorie === d);
     }
     if (q) list = list.filter(s =>
       s.titre.toLowerCase().includes(q) ||
@@ -85,6 +103,10 @@ export class MesSignalementsComponent implements OnInit {
 
   setFilter(f: FilterStatut) {
     this.filterStatut.set(f);
+  }
+
+  setDomaine(d: FilterDomaine) {
+    this.filterDomaine.set(d);
   }
 
   onSearch(event: Event) {

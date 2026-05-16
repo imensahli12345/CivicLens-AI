@@ -1,0 +1,40 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="title">Demandes d’activation</div>
+      <div class="subtitle">Validation des comptes désactivés depuis la plateforme.</div>
+    </div>
+    <button class="btn" (click)="load()" [disabled]="loading">Rafraîchir</button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div *ngIf="!loading && !error" class="table">
+    <div class="row header">
+      <div>Date</div>
+      <div>Type</div>
+      <div>Message</div>
+      <div>Statut</div>
+      <div class="actions">Action</div>
+    </div>
+    <div class="row" *ngFor="let n of items">
+      <div class="muted">{{ formatDate(n.createdAt) }}</div>
+      <div class="mono">{{ n.type }}</div>
+      <div class="msg">{{ n.message }}</div>
+      <div>
+        <span class="badge" [class.badge-new]="!n.approved" [class.badge-done]="n.approved">
+          {{ n.approved ? 'Activé' : 'En attente' }}
+        </span>
+      </div>
+      <div class="actions">
+        <button class="btn primary" (click)="approve(n)" [disabled]="n.approved || approvingId === n.id || !n.relatedUserId">
+          Activer
+        </button>
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="items.length === 0">Aucune demande.</div>
+  </div>
+</div>

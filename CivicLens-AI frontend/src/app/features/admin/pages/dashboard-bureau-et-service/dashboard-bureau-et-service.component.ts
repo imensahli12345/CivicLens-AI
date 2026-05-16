@@ -164,7 +164,7 @@ export class DashboardBureauEtServiceComponent implements OnInit {
     this.loading = false;
   }
 
-  onServiceAction(action: 'view' | 'activate' | 'deactivate'): void {
+  onServiceAction(action: 'view' | 'activate' | 'deactivate' | 'password'): void {
     this.servicesTableConfig = this.getServicesTableConfig(action);
     this.openServicesModal();
   }
@@ -327,11 +327,10 @@ export class DashboardBureauEtServiceComponent implements OnInit {
     }
   }
 
-  private getServicesTableConfig(action: 'view' | 'activate' | 'deactivate'): ServicesTableConfig {
+  private getServicesTableConfig(action: 'view' | 'activate' | 'deactivate' | 'password'): ServicesTableConfig {
     if (action === 'activate') {
       return {
         showActions: true,
-        filterStatus: 'INACTIF',
         actionType: 'activate'
       };
     }
@@ -339,8 +338,14 @@ export class DashboardBureauEtServiceComponent implements OnInit {
     if (action === 'deactivate') {
       return {
         showActions: true,
-        filterStatus: 'ACTIF',
         actionType: 'deactivate'
+      };
+    }
+
+    if (action === 'password') {
+      return {
+        showActions: true,
+        actionType: 'password'
       };
     }
 

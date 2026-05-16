@@ -22,6 +22,7 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
   lightboxOpen = signal(false);
   lightboxUrl = signal<string | null>(null);
   voteAlert = signal(false);
+  exportingPdf = signal(false);
   private voteAlertTimeoutId: ReturnType<typeof setTimeout> | null = null;
   
   private map: L.Map | undefined;
@@ -188,5 +189,137 @@ export class SignalementDetailsComponent implements OnInit, AfterViewInit {
         console.error('Erreur lors du vote', err);
       }
     });
+  }
+
+  async downloadPdf(e?: Event): Promise<void> {
+    e?.stopPropagation();
+    const sig = this.signalement();
+    if (!sig || this.exportingPdf()) return;
+
+    this.exportingPdf.set(true);
+    this.signalementService.downloadSignalementPdf(String(sig.id)).subscribe({
+      next: (blob) => {
+        const fileName = `signalement_${sig.id}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.exportingPdf.set(false);
+      },
+      error: () => {
+        this.exportingPdf.set(false);
+        this.error.set('Impossible de télécharger le PDF. Veuillez réessayer.');
+      }
+    });
+  }
+
+
+  private escapeHtml(value: string): string {
+    return (value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private buildPrintableHtml(data: {
+    title: string;
+    status: string;
+    date: string;
+    address: string;
+    description: string;
+    categorie: string;
+    gravite: string;
+    priorite: string;
+    votes: number;
+    coords: string;
+    images: string[];
+  }): string {
+    const imagesHtml = data.images.length
+      ? `<div class="section"><div class="h2">Images</div><div class="images">${data.images
+          .map((src) => `<img src="${this.escapeHtml(src)}" alt="Image signalement" />`)
+          .join('')}</div></div>`
+      : '';
+
+    return `<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${this.escapeHtml(data.title)}</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;margin:0;background:#fff}
+    .page{padding:28px}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .title{font-size:22px;font-weight:800;margin:0}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#e2e8f0;font-weight:700;font-size:12px;white-space:nowrap}
+    .meta{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px;color:#334155}
+    .meta div{padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px}
+    .section{margin-top:14px}
+    .h2{font-size:14px;font-weight:800;margin:0 0 8px 0}
+    .desc{white-space:pre-wrap;line-height:1.45;font-size:13px;border:1px solid #e2e8f0;border-radius:12px;padding:12px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px}
+    .stats div{padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px}
+    .images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .images img{width:100%;height:auto;border-radius:12px;border:1px solid #e2e8f0;object-fit:cover}
+    .footer{margin-top:18px;font-size:11px;color:#64748b}
+    @media print{
+      .page{padding:0}
+      body{margin:16mm}
+      .images{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1 class="title">${this.escapeHtml(data.title)}</h1>
+        <div class="meta">
+          <div><b>Statut</b> : ${this.escapeHtml(data.status)}</div>
+          <div><b>Date</b> : ${this.escapeHtml(data.date)}</div>
+          <div><b>Adresse</b> : ${this.escapeHtml(data.address)}</div>
+          <div><b>Coordonnées</b> : ${this.escapeHtml(data.coords)}</div>
+        </div>
+      </div>
+      <span class="badge">CivicLens</span>
+    </div>
+
+    <div class="section">
+      <div class="h2">Description</div>
+      <div class="desc">${this.escapeHtml(data.description)}</div>
+    </div>
+
+    <div class="section">
+      <div class="h2">Détails</div>
+      <div class="stats">
+        <div><b>Catégorie</b> : ${this.escapeHtml(data.categorie || '—')}</div>
+        <div><b>Gravité</b> : ${this.escapeHtml(data.gravite || '—')}</div>
+        <div><b>Priorité</b> : ${this.escapeHtml(data.priorite || '—')}</div>
+        <div><b>Votes</b> : ${this.escapeHtml(String(data.votes ?? 0))}</div>
+      </div>
+    </div>
+
+    ${imagesHtml}
+
+    <div class="footer">Document généré depuis CivicLens AI.</div>
+  </div>
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        try { window.focus(); } catch(e) {}
+        window.print();
+      }, 350);
+      window.onafterprint = () => { try { window.close(); } catch(e) {} };
+    });
+  </script>
+</body>
+</html>`;
   }
 }

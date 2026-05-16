@@ -56,6 +56,11 @@ export interface MapStats {
   avg_score_ai?: number | null;
 }
 
+export interface MapContext {
+  org_domaine?: string | null;
+  domaine_locked: boolean;
+}
+
 export interface MapFilters {
   statut?: string;
   priorite?: string;
@@ -91,5 +96,9 @@ export class MapSignalementsService {
 
   getStats(): Observable<MapStats> {
     return this.http.get<MapStats>(`${this.baseUrl}/map/stats`);
+  }
+
+  getContext(): Observable<MapContext> {
+    return this.http.get<MapContext>(`${this.baseUrl}/map/context`);
   }
 }

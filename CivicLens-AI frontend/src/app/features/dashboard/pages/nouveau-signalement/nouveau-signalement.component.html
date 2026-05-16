@@ -24,7 +24,17 @@
       <!-- Error banner -->
       <div *ngIf="error()" class="alert-error">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        {{ error() }}
+        <span>
+          {{ error() }}
+          <a
+            *ngIf="errorLink()"
+            class="alert-link"
+            [href]="errorLink()!"
+            (click)="$event.stopPropagation()"
+          >
+            Cliquez ici
+          </a>
+        </span>
       </div>
 
       <!-- Description -->
@@ -67,10 +77,24 @@
         </div>
         
         <!-- Image Preview -->
-        <div class="image-previews" *ngIf="images.length > 0">
-          <div class="preview-chip" *ngFor="let img of images; let i = index">
-            <span class="preview-name">{{ img.name }}</span>
-            <button type="button" class="btn-remove-img" (click)="removeImage(i)">×</button>
+        <div class="image-previews-grid" *ngIf="images.length > 0">
+          <div
+            class="preview-thumb"
+            *ngFor="let img of images; let i = index"
+            (click)="openPreview(i)"
+            role="button"
+            tabindex="0"
+            aria-label="Aperçu image"
+          >
+            <img class="preview-thumb__img" [src]="img.url" [alt]="img.name" />
+            <button
+              type="button"
+              class="preview-thumb__remove"
+              (click)="$event.stopPropagation(); removeImage(i)"
+              aria-label="Supprimer l'image"
+            >
+              ×
+            </button>
           </div>
         </div>
       </div>
@@ -78,11 +102,30 @@
       <!-- Localisation -->
       <div class="form-group">
         <label class="form-label">Localisation Exacte <span class="required">*</span></label>
-        
+        <div class="address-block">
+          <div class="address-title">Adresse exacte (en lettre)</div>
+          <div class="address-row">
+            <input
+              class="address-input"
+              type="text"
+              formControlName="adresseTexte"
+              placeholder="Ex: Avenue Habib Bourguiba, Tunis"
+              maxlength="180"
+            />
+            <button type="button" class="btn btn-secondary address-btn" (click)="locateAddress()" [disabled]="addressSearching()">
+              <span class="spinner" *ngIf="addressSearching()"></span>
+              {{ addressSearching() ? 'Recherche...' : 'Localiser l’adresse' }}
+            </button>
+          </div>
+          <div class="address-hint">Optionnel. Si vous voulez, cliquez sur “Localiser l’adresse” pour placer le point automatiquement.</div>
+          <span *ngIf="hasError('adresseTexte', 'maxlength')" class="field-error">Adresse trop longue (max 180 caractères)</span>
+        </div>
+
         <div class="location-box" [class.located]="form.value.latitude">
           <p style="font-size: 13px; color: #555; margin-bottom: 15px;">
             Cliquez sur la carte pour définir l'emplacement précis du problème, ou utilisez le bouton pour centrer sur votre position.
           </p>
+
           <button type="button" class="btn btn-secondary btn-locate" (click)="locateMe()" [disabled]="locating()">
             <svg *ngIf="!locating()" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
             <span class="spinner" *ngIf="locating()"></span>
@@ -109,5 +152,32 @@
       </div>
 
     </form>
+
+    <div class="create-lightbox" *ngIf="previewOpen()" (click)="closePreview()">
+      <div class="create-lightbox__card" (click)="$event.stopPropagation()">
+        <button type="button" class="create-lightbox__close" (click)="closePreview($event)" aria-label="Fermer">
+          ×
+        </button>
+        <button
+          type="button"
+          class="create-lightbox__nav create-lightbox__nav--left"
+          (click)="prevPreview($event)"
+          [disabled]="images.length <= 1"
+          aria-label="Image précédente"
+        >
+          ‹
+        </button>
+        <img class="create-lightbox__img" *ngIf="previewUrl" [src]="previewUrl" alt="Aperçu" />
+        <button
+          type="button"
+          class="create-lightbox__nav create-lightbox__nav--right"
+          (click)="nextPreview($event)"
+          [disabled]="images.length <= 1"
+          aria-label="Image suivante"
+        >
+          ›
+        </button>
+      </div>
+    </div>
   </div>
 </div>

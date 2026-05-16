@@ -1,12 +1,44 @@
-<div class="page-container">
-  <div class="page-header">
-    <h1>📈 Statistiques</h1>
+<div class="stats-page">
+  <header class="stats-header">
+    <div class="stats-title">
+      <div class="stats-title-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/>
+          <path d="M7 14l3-3 3 3 5-6"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="stats-h1">Statistiques</h1>
+        <div class="stats-subtitle">Vue d’ensemble des comptes et des signalements</div>
+      </div>
+    </div>
+
+    <div class="stats-actions">
+      <div class="stats-range" *ngIf="data?.range?.days">
+        Période : {{ data.range.days }} jours
+      </div>
+      <button class="stats-btn" type="button" (click)="downloadPdf()" [disabled]="loading || downloadingPdf">
+        <span class="stats-btn-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </span>
+        {{ downloadingPdf ? 'Téléchargement…' : 'Télécharger rapport' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="state state--loading">
+    <span class="state-spinner" aria-hidden="true"></span>
+    Chargement...
   </div>
+  <div *ngIf="error" class="state state--error">{{ error }}</div>
 
-  <div *ngIf="loading" class="loading">Chargement...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-
-  <div *ngIf="totals && series" class="cards-grid">
+  <section *ngIf="totals && series" class="cards-grid" aria-label="Indicateurs clés">
     <div class="metric-card" *ngFor="let c of cards" [class]="'metric-card ' + c.color">
       <div class="metric-top">
         <div class="metric-icon">
@@ -49,25 +81,47 @@
           </svg>
         </div>
         <div class="metric-meta">
-          <div class="metric-value">{{ c.value }}</div>
+          <div class="metric-meta-top">
+            <div class="metric-value">{{ formatCompact(c.value) }}</div>
+            <div
+              class="metric-trend"
+              [attr.data-trend]="getTrend(series[c.seriesKey])"
+              *ngIf="series?.[c.seriesKey]?.length">
+              <span class="metric-trend-arrow" aria-hidden="true">▲</span>
+              <span class="metric-trend-value">
+                {{ getDelta(series[c.seriesKey]) >= 0 ? '+' : '' }}{{ formatCompact(getDelta(series[c.seriesKey])) }}
+              </span>
+            </div>
+          </div>
           <div class="metric-label">{{ c.label }}</div>
+          <div class="metric-sub" *ngIf="series?.[c.seriesKey]?.length">
+            <span class="metric-sub-label">vs jour précédent</span>
+            <span class="metric-sub-sep">•</span>
+            <span class="metric-sub-pct" *ngIf="getDeltaPct(series[c.seriesKey]) !== null; else noPct">
+              {{ getDeltaPct(series[c.seriesKey])! >= 0 ? '+' : '' }}{{ getDeltaPct(series[c.seriesKey])!.toFixed(1) }}%
+            </span>
+            <ng-template #noPct>
+              <span class="metric-sub-pct">—</span>
+            </ng-template>
+          </div>
         </div>
       </div>
 
       <button class="metric-chart" type="button" (click)="openChart(c.seriesKey, c.label, c.color)">
+        <span class="metric-chart-label">Voir l’évolution</span>
         <svg class="mini-chart" viewBox="0 0 260 72" preserveAspectRatio="none">
           <path class="mini-area" [attr.d]="getAreaPath(series[c.seriesKey], 260, 72, 10)"></path>
           <path class="mini-line" [attr.d]="getLinePath(series[c.seriesKey], 260, 72, 10)"></path>
         </svg>
       </button>
     </div>
-  </div>
+  </section>
 
   <div class="chart-modal-overlay" *ngIf="chartOpen" (click)="closeChart()">
     <div class="chart-modal" (click)="$event.stopPropagation()">
       <div class="chart-modal-head">
         <div class="chart-modal-title">{{ activeChartTitle }}</div>
-        <button class="chart-modal-close" type="button" (click)="closeChart()">✕</button>
+        <button class="chart-modal-close" type="button" (click)="closeChart()" aria-label="Fermer">✕</button>
       </div>
       <div class="chart-modal-body" *ngIf="activeChartKey">
         <div class="chart-modal-sub">Période : {{ data?.range?.days }} derniers jours</div>

@@ -9,14 +9,15 @@
 
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
     <div class="form-group">
-      <label class="form-label">Email</label>
+      <label class="form-label">Email ou CIN</label>
       <div class="input-wrapper">
         <input
-          type="email"
+          type="text"
           formControlName="email"
           class="form-control"
           [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-          placeholder="exemple@email.com"
+          placeholder="exemple@email.com ou 12345678"
+          autocomplete="username"
         />
       </div>
       <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
@@ -40,8 +41,19 @@
       </div>
     </div>
 
+    <div class="forgot-row">
+      <button type="button" class="forgot-link" (click)="openResetModal()">Mot de passe oublié ?</button>
+      <button type="button" class="forgot-link" (click)="openActivationModal()">Demander l’activation</button>
+    </div>
+
     <div *ngIf="errorMessage" class="alert alert-error">
       {{ errorMessage }}
+    </div>
+
+    <div *ngIf="disabledAccount" class="activation-callout">
+      <div class="activation-title">Compte désactivé</div>
+      <div class="activation-sub">Envoyez une demande d’activation. Pour les citoyens, l’activation est automatique.</div>
+      <button type="button" class="btn btn-secondary activation-btn" (click)="openActivationModal()">Demander l’activation</button>
     </div>
 
     <div *ngIf="successMessage" class="alert alert-success">
@@ -57,4 +69,80 @@
       <p>Vous n'avez pas de compte ? <a routerLink="/register">S'inscrire</a></p>
     </div>
   </form>
+</div>
+
+<div *ngIf="resetOpen" class="reset-overlay" (click)="closeResetModal()">
+  <div class="reset-card" (click)="$event.stopPropagation()">
+    <div class="reset-head">
+      <div>
+        <div class="reset-title">Réinitialiser le mot de passe</div>
+        <div class="reset-subtitle">Entrez votre CIN et votre numéro de téléphone</div>
+      </div>
+      <button type="button" class="reset-close" (click)="closeResetModal()" aria-label="Fermer">×</button>
+    </div>
+
+    <form [formGroup]="resetForm" (ngSubmit)="submitReset()" class="reset-form">
+      <div class="reset-grid">
+        <div class="form-group">
+          <label class="form-label">CIN</label>
+          <input class="form-control" type="text" formControlName="cin" maxlength="8" inputmode="numeric" pattern="[0-9]*" placeholder="12345678" />
+          <div *ngIf="resetForm.get('cin')?.invalid && resetForm.get('cin')?.touched" class="error-message">CIN invalide</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Numéro de téléphone</label>
+          <input class="form-control" type="text" formControlName="telephone" inputmode="numeric" pattern="[0-9]*" placeholder="XXXXXXXX" />
+          <div *ngIf="resetForm.get('telephone')?.invalid && resetForm.get('telephone')?.touched" class="error-message">Numéro invalide</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nouveau mot de passe</label>
+        <input class="form-control" type="password" formControlName="nouveauMotDePasse" placeholder="••••••" />
+        <div *ngIf="resetForm.get('nouveauMotDePasse')?.invalid && resetForm.get('nouveauMotDePasse')?.touched" class="error-message">Minimum 6 caractères</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmer le nouveau mot de passe</label>
+        <input class="form-control" type="password" formControlName="confirmNouveauMotDePasse" placeholder="••••••" />
+        <div *ngIf="resetForm.hasError('passwordMismatch') && resetForm.get('confirmNouveauMotDePasse')?.touched" class="error-message">Les mots de passe ne correspondent pas</div>
+      </div>
+
+      <div *ngIf="resetError" class="alert alert-error">{{ resetError }}</div>
+      <div *ngIf="resetSuccess" class="alert alert-success">{{ resetSuccess }}</div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="resetLoading">
+        <span *ngIf="!resetLoading">Modifier le mot de passe</span>
+        <span *ngIf="resetLoading" class="spinner"></span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="activationOpen" class="reset-overlay" (click)="closeActivationModal()">
+  <div class="reset-card" (click)="$event.stopPropagation()">
+    <div class="reset-head">
+      <div>
+        <div class="reset-title">Demande d’activation</div>
+        <div class="reset-subtitle">Entrez votre email ou votre CIN</div>
+      </div>
+      <button type="button" class="reset-close" (click)="closeActivationModal()" aria-label="Fermer">×</button>
+    </div>
+
+    <form [formGroup]="activationForm" (ngSubmit)="submitActivationRequest()" class="reset-form">
+      <div class="form-group">
+        <label class="form-label">Email ou CIN</label>
+        <input class="form-control" type="text" formControlName="identifier" placeholder="exemple@email.com ou 12345678" autocomplete="username" />
+        <div *ngIf="activationForm.get('identifier')?.invalid && activationForm.get('identifier')?.touched" class="error-message">Email ou CIN invalide</div>
+      </div>
+
+      <div *ngIf="activationError" class="alert alert-error">{{ activationError }}</div>
+      <div *ngIf="activationSuccess" class="alert alert-success">{{ activationSuccess }}</div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="activationLoading">
+        <span *ngIf="!activationLoading">Envoyer la demande</span>
+        <span *ngIf="activationLoading" class="spinner"></span>
+      </button>
+    </form>
+  </div>
 </div>

@@ -19,7 +19,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0.75rem;
+  padding: 0.75rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
   animation: fadeInUp 0.7s ease-out;
@@ -29,7 +29,14 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0 0.75rem;
+  padding: 0;
+}
+
+.dashboard-inner {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.1rem;
 }
 
 .dashboard-content::-webkit-scrollbar {
@@ -60,16 +67,12 @@
 
 .dashboard-content .page-container,
 .dashboard-content .details-page {
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
-  .dashboard-top { padding: 0 0.5rem; }
-  .dashboard-content { padding: 0.5rem; }
+  .dashboard-inner { padding: 0 0.75rem; }
+  .dashboard-content { padding: 0.5rem 0; }
 }
 
 .phone-notification::before {

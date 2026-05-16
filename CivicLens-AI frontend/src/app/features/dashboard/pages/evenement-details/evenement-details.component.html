@@ -79,7 +79,7 @@
           <div class="progress-fill" [style.width.%]="(evenement.nombreParticipations / evenement.nombreVolontairesRequis) * 100"></div>
         </div>
 
-        <button *ngIf="!isOrganizer && !hasParticipated && !isPast(evenement.dateEvenement)" class="btn btn-primary btn-block" (click)="participer()" [disabled]="isParticipating">
+        <button *ngIf="!isOrganizer && !hasParticipated && !isPast(evenement.dateEvenement)" class="btn btn-primary btn-block" (click)="openParticipationModal(false)" [disabled]="isParticipating">
           <span *ngIf="isParticipating" class="spinner small"></span>
           <span *ngIf="!isParticipating">Participer à l'événement</span>
         </button>
@@ -117,13 +117,25 @@
           Vous participez à cet événement !
         </div>
 
+        <div *ngIf="hasParticipated && !isOrganizer && myParticipationComment" class="status-alert over" style="margin-top: 0.75rem; text-align:left;">
+          <strong>Votre commentaire :</strong>
+          <div style="margin-top:0.35rem; font-weight:500; white-space:pre-wrap;">{{ myParticipationComment }}</div>
+        </div>
+
         <div *ngIf="hasParticipated && !isOrganizer" class="cancel-section">
+          <button *ngIf="canEditParticipationComment" class="btn btn-outline btn-block" style="margin-top: 1rem;"
+                  (click)="openParticipationModal(true)" [disabled]="isParticipating">
+            Modifier mon commentaire
+          </button>
           <button class="btn btn-outline btn-block" style="color: #ef4444; border-color: #fca5a5; margin-top: 1rem;" 
                   (click)="openCancelParticipation()" 
                   [disabled]="!canCancel || canceling">
             <span *ngIf="canceling" class="spinner small"></span>
             <span *ngIf="!canceling">Annuler ma participation</span>
           </button>
+          <p *ngIf="hasParticipated && !canEditParticipationComment && !isPast(evenement.dateEvenement)" class="hint-text" style="font-size: 0.8rem; margin-top: 0.5rem; text-align: center; color: #64748b;">
+            La modification du commentaire est bloquée à moins de 24 heures de l'événement.
+          </p>
           <p *ngIf="!canCancel" class="hint-text text-danger" style="font-size: 0.8rem; margin-top: 0.5rem; text-align: center; color: #dc2626;">
             L'annulation est impossible à moins de 3 jours de l'événement.
           </p>
@@ -133,6 +145,36 @@
           Cet événement est passé ou terminé.
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Participation modal -->
+<div *ngIf="participationModalOpen" class="modal-overlay" (click)="closeParticipationModal()">
+  <div class="modal-card fade-up" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-icon info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title">{{ participationEditMode ? 'Modifier mon commentaire' : 'Participer à l’événement' }}</div>
+        <div class="modal-subtitle">Vous pouvez écrire un commentaire. La modification est possible jusqu’à 24h avant l’événement.</div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Commentaire</label>
+        <textarea class="form-control" [(ngModel)]="participationComment" placeholder="Ex: Je peux aider pour l’organisation, apporter du matériel…"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeParticipationModal()" [disabled]="isParticipating">Annuler</button>
+      <button class="btn btn-primary" (click)="submitParticipation()" [disabled]="isParticipating">
+        <span class="spinner tiny" *ngIf="isParticipating"></span>
+        <span *ngIf="!isParticipating">{{ participationEditMode ? 'Enregistrer' : 'Participer' }}</span>
+      </button>
     </div>
   </div>
 </div>

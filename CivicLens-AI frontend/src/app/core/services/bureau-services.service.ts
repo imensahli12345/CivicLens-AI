@@ -54,6 +54,14 @@ export class BureauServicesService {
     );
   }
 
+  updatePassword(serviceId: string, nouveauMotDePasse: string, motDePasseBureau: string): Observable<HttpResponse<string>> {
+    return this.http.put(
+      `${this.baseUrl}/services/${serviceId}/password`,
+      { nouveauMotDePasse, motDePasseBureau },
+      { observe: 'response', responseType: 'text' }
+    );
+  }
+
   private normalizeService(raw: RawBureauService): BureauService {
     const rawStatus = this.readField(raw, ['statut', 'Statut', 'status', 'Status']);
     return {

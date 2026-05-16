@@ -20,6 +20,7 @@ export class DashboardHeaderComponent implements OnInit {
 
   notificationsOpen = signal(false);
   profileMenuOpen = signal(false);
+  mobileNavOpen = signal(false);
   topNotifications = signal<Notification[]>([]);
   unreadCount = signal(0);
   loadingTop = signal(false);
@@ -61,6 +62,7 @@ export class DashboardHeaderComponent implements OnInit {
     this.notificationsOpen.set(open);
     if (open) {
       this.profileMenuOpen.set(false);
+      this.mobileNavOpen.set(false);
     }
     if (open) {
       // UX simple : quand l'utilisateur ouvre, on marque tout comme lu puis on recharge les 3 dernières.
@@ -115,7 +117,13 @@ export class DashboardHeaderComponent implements OnInit {
     this.profileMenuOpen.set(false);
     if (n.relatedEvenementId) {
       this.router.navigate(['/dashboard/evenements', n.relatedEvenementId]);
+      return;
     }
+    if (n.relatedSignalementId != null) {
+      this.router.navigate(['/dashboard/signalement', n.relatedSignalementId]);
+      return;
+    }
+    this.router.navigate(['/dashboard/notifications']);
   }
 
   toggleProfileMenu(event?: Event): void {
@@ -125,6 +133,18 @@ export class DashboardHeaderComponent implements OnInit {
     this.profileMenuOpen.set(open);
     if (open) {
       this.notificationsOpen.set(false);
+      this.mobileNavOpen.set(false);
+    }
+  }
+
+  toggleMobileNav(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    const open = !this.mobileNavOpen();
+    this.mobileNavOpen.set(open);
+    if (open) {
+      this.notificationsOpen.set(false);
+      this.profileMenuOpen.set(false);
     }
   }
 
@@ -137,6 +157,7 @@ export class DashboardHeaderComponent implements OnInit {
   closeMenus(): void {
     if (this.notificationsOpen()) this.notificationsOpen.set(false);
     if (this.profileMenuOpen()) this.profileMenuOpen.set(false);
+    if (this.mobileNavOpen()) this.mobileNavOpen.set(false);
   }
 
   getIcon(name: string): string {

@@ -4,6 +4,16 @@
   [class.simple-alert--success]="type === 'success'"
   [class.simple-alert--error]="type === 'error'"
 >
-  <span>{{ message }}</span>
+  <span>
+    {{ displayText }}
+    <a
+      *ngIf="linkUrl"
+      class="simple-alert__link"
+      [href]="linkUrl"
+      (click)="$event.stopPropagation()"
+    >
+      Cliquez ici
+    </a>
+  </span>
   <button type="button" (click)="onClose()" aria-label="Fermer">x</button>
 </div>

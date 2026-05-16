@@ -14,10 +14,11 @@ export class StatistiquesComponent implements OnInit {
   loading = true;
   error = '';
   days = 30;
+  downloadingPdf = false;
   chartOpen = false;
   activeChartKey: string | null = null;
   activeChartTitle = '';
-  activeChartColor: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark' = 'blue';
+  activeChartColor: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark' | 'red' = 'blue';
 
   constructor(private adminService: AdminService) {}
 
@@ -25,6 +26,30 @@ export class StatistiquesComponent implements OnInit {
     this.adminService.getStatsTimeseries(this.days).subscribe({
       next: (d) => { this.data = d; this.loading = false; },
       error: () => { this.error = 'Erreur de chargement'; this.loading = false; }
+    });
+  }
+
+  downloadPdf(): void {
+    if (this.downloadingPdf) return;
+    this.downloadingPdf = true;
+
+    this.adminService.downloadAppStatsPdf(this.data?.range?.days ?? this.days).subscribe({
+      next: (blob) => {
+        const fileName = `rapport_statistiques_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '')}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.downloadingPdf = false;
+      },
+      error: () => {
+        this.error = 'Impossible de télécharger le rapport PDF.';
+        this.downloadingPdf = false;
+      }
     });
   }
 
@@ -41,7 +66,7 @@ export class StatistiquesComponent implements OnInit {
     icon: 'users' | 'alert' | 'building' | 'bank' | 'check' | 'lock';
     label: string;
     value: number;
-    color: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark';
+    color: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark' | 'red';
     seriesKey: string;
   }> {
     const t = this.totals || {};
@@ -51,11 +76,14 @@ export class StatistiquesComponent implements OnInit {
       { key: 'bureaux', icon: 'building', label: 'Bureaux de Contrôle', value: t.totalBureaux ?? 0, color: 'green', seriesKey: 'bureaux' },
       { key: 'organisations', icon: 'bank', label: 'Organisations', value: t.totalOrganisations ?? 0, color: 'orange', seriesKey: 'organisations' },
       { key: 'signalements', icon: 'alert', label: 'Signalements', value: t.totalSignalements ?? 0, color: 'purple', seriesKey: 'signalements' },
+      { key: 'envoyees', icon: 'alert', label: 'Signalements envoyés', value: t.signalementsEnvoyes ?? 0, color: 'orange', seriesKey: 'envoyees' },
+      { key: 'enCours', icon: 'alert', label: 'Signalements en cours', value: t.signalementsEnCours ?? 0, color: 'yellow', seriesKey: 'enCours' },
+      { key: 'rejetes', icon: 'alert', label: 'Signalements rejetés', value: t.signalementsRejetes ?? 0, color: 'red', seriesKey: 'rejetes' },
       { key: 'resolus', icon: 'check', label: 'Signalements résolus', value: t.signalementsResolus ?? 0, color: 'teal', seriesKey: 'resolus' }
     ];
   }
 
-  openChart(seriesKey: string, title: string, color: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark'): void {
+  openChart(seriesKey: string, title: string, color: 'blue' | 'purple' | 'green' | 'orange' | 'yellow' | 'teal' | 'dark' | 'red'): void {
     this.activeChartKey = seriesKey;
     this.activeChartTitle = title;
     this.activeChartColor = color;
@@ -76,6 +104,35 @@ export class StatistiquesComponent implements OnInit {
   getLast(series: Array<{ date: string; value: number }>): number {
     if (!series || series.length === 0) return 0;
     return series[series.length - 1]?.value ?? 0;
+  }
+
+  getPrev(series: Array<{ date: string; value: number }>): number {
+    if (!series || series.length < 2) return 0;
+    return series[series.length - 2]?.value ?? 0;
+  }
+
+  getDelta(series: Array<{ date: string; value: number }>): number {
+    return this.getLast(series) - this.getPrev(series);
+  }
+
+  getDeltaPct(series: Array<{ date: string; value: number }>): number | null {
+    const prev = this.getPrev(series);
+    if (!prev) return null;
+    return (this.getDelta(series) / prev) * 100;
+  }
+
+  getTrend(series: Array<{ date: string; value: number }>): 'up' | 'down' | 'flat' {
+    const d = this.getDelta(series);
+    if (d > 0) return 'up';
+    if (d < 0) return 'down';
+    return 'flat';
+  }
+
+  formatCompact(value: number): string {
+    const v = Number(value) || 0;
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace('.0', '')}M`;
+    if (v >= 10_000) return `${Math.round(v / 1_000)}k`;
+    return String(v);
   }
 
   getLinePath(series: Array<{ date: string; value: number }>, w = 160, h = 46, pad = 6): string {

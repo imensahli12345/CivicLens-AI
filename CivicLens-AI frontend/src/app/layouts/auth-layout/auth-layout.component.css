@@ -202,6 +202,164 @@
   text-align: center;
 }
 
+.reclamation-link {
+  margin-left: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(229, 231, 235, 0.92);
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reclamation-link__chev {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.reclamation-link:hover {
+  color: #ffffff;
+}
+
+.reclamation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.reclamation-card {
+  width: min(560px, 100%);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 18px;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.45);
+  padding: 18px 18px 16px;
+}
+
+.reclamation-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.reclamation-title {
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.reclamation-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.reclamation-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.04);
+  color: rgba(15, 23, 42, 0.8);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.reclamation-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.reclamation-label {
+  font-size: 12px;
+  font-weight: 750;
+  color: rgba(15, 23, 42, 0.86);
+}
+
+.reclamation-input,
+.reclamation-textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.03);
+  padding: 10px 12px;
+  font-weight: 650;
+  outline: none;
+  color: #0f172a;
+}
+
+.reclamation-textarea {
+  resize: vertical;
+  min-height: 110px;
+  font-weight: 600;
+}
+
+.reclamation-banner {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 750;
+  border: 1px solid transparent;
+}
+
+.reclamation-banner.success {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.reclamation-banner.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.reclamation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.reclamation-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 23, 42, 0.28);
+  border-top-color: rgba(15, 23, 42, 0.78);
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes authGlowShift {
   from {
     filter: saturate(1) brightness(1);

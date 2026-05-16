@@ -21,8 +21,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let service of filteredServices; trackBy: trackById">
-          <td class="services-table__name">{{ service.nom }}</td>
+        <tr
+          *ngFor="let service of filteredServices; trackBy: trackById"
+          [class.row-clickable]="config.actionType === 'password'"
+          (click)="onRowClick(service)"
+        >
+          <td class="services-table__name">{{ displayServiceName(service.nom) }}</td>
           <td><span class="domain-chip">{{ service.domaine }}</span></td>
           <td class="services-table__email">{{ service.email }}</td>
           <td>
@@ -40,7 +44,8 @@
                 class="icon-btn"
                 [class.icon-btn--activate]="config.actionType === 'activate'"
                 [class.icon-btn--deactivate]="config.actionType === 'deactivate'"
-                (click)="onActionClick(service)"
+                [class.icon-btn--password]="config.actionType === 'password'"
+                (click)="$event.stopPropagation(); onActionClick(service)"
                 [title]="getActionTitle()"
                 [attr.aria-label]="getActionTitle()">
                 <svg *ngIf="config.actionType === 'activate'" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -53,6 +58,14 @@
                      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="9"></circle>
                   <line x1="5.6" y1="5.6" x2="18.4" y2="18.4"></line>
+                </svg>
+
+                <svg *ngIf="config.actionType === 'password'" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10h-8"></path>
+                  <path d="M13 10V7a4 4 0 1 1 8 0v3"></path>
+                  <rect x="3" y="10" width="10" height="10" rx="2"></rect>
+                  <path d="M7 15h2"></path>
                 </svg>
               </button>
             </div>
@@ -96,10 +109,22 @@
           <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
         </svg>
       </ng-container>
+      <ng-container *ngIf="confirmMode === 'password'">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10h-8"></path>
+          <path d="M13 10V7a4 4 0 1 1 8 0v3"></path>
+          <rect x="3" y="10" width="10" height="10" rx="2"></rect>
+          <path d="M7 15h2"></path>
+        </svg>
+      </ng-container>
     </div>
 
     <h3 class="modal-title">
-      {{ confirmMode === 'activate' ? 'Activer ce service ?' : 'Desactiver ce service ?' }}
+      <ng-container *ngIf="confirmMode === 'password'">Modifier le mot de passe</ng-container>
+      <ng-container *ngIf="confirmMode !== 'password'">
+        {{ confirmMode === 'activate' ? 'Activer ce service ?' : 'Desactiver ce service ?' }}
+      </ng-container>
     </h3>
 
     <p class="modal-text">
@@ -111,21 +136,54 @@
         Confirmez-vous la desactivation du service
         " {{ selectedService?.nom }} " ? Il ne recevra plus de nouveaux signalements.
       </ng-container>
+      <ng-container *ngIf="confirmMode === 'password'">
+        Definissez un nouveau mot de passe pour
+        " {{ selectedService?.nom }} ".
+      </ng-container>
     </p>
+
+    <div class="password-form" *ngIf="confirmMode === 'password'">
+      <label class="password-field">
+        <span>Mot de passe du bureau</span>
+        <input type="password" [(ngModel)]="bureauPassword" [disabled]="processing" placeholder="Votre mot de passe" />
+      </label>
+      <label class="password-field">
+        <span>Nouveau mot de passe</span>
+        <input type="password" [(ngModel)]="passwordValue" [disabled]="processing" placeholder="Minimum 6 caracteres" />
+      </label>
+      <label class="password-field">
+        <span>Confirmer le mot de passe</span>
+        <input type="password" [(ngModel)]="passwordConfirm" [disabled]="processing" placeholder="Répéter le mot de passe" />
+      </label>
+      <p class="password-error" *ngIf="passwordError">{{ passwordError }}</p>
+    </div>
 
     <div class="modal-actions">
       <button type="button" class="btn btn--ghost" (click)="closeModal()" [disabled]="processing">
         Annuler
       </button>
-      <button type="button"
-              class="btn"
-              [class.btn--primary]="confirmMode === 'activate'"
-              [class.btn--danger]="confirmMode === 'deactivate'"
-              [disabled]="processing"
-              (click)="confirm()">
+      <button
+        *ngIf="confirmMode !== 'password'"
+        type="button"
+        class="btn"
+        [class.btn--primary]="confirmMode === 'activate'"
+        [class.btn--danger]="confirmMode === 'deactivate'"
+        [disabled]="processing"
+        (click)="confirm()"
+      >
         {{ processing
             ? 'Veuillez patienter...'
             : (confirmMode === 'activate' ? 'Oui, activer' : 'Oui, desactiver') }}
+      </button>
+
+      <button
+        *ngIf="confirmMode === 'password'"
+        type="button"
+        class="btn btn--primary"
+        [disabled]="processing"
+        (click)="confirmPassword()"
+      >
+        {{ processing ? 'Veuillez patienter...' : 'Enregistrer' }}
       </button>
     </div>
   </div>

@@ -9,10 +9,51 @@
       <a routerLink="/admin/citoyens" routerLinkActive="active">👥 Citoyens</a>
       <a routerLink="/admin/bureaux" routerLinkActive="active">🏢 Bureaux de Contrôle</a>
       <a routerLink="/admin/organisations" routerLinkActive="active">🏛️ Organisations</a>
+      <a routerLink="/admin/reclamations" routerLinkActive="active">📨 Réclamations</a>
+      <a routerLink="/admin/activation-requests" routerLinkActive="active">✅ Activations</a>
+      <a routerLink="/admin/notifications" routerLinkActive="active">
+        <span>🔔 Notifications</span>
+        <span class="notif-badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
+      </a>
     </nav>
+    <button class="password-btn" (click)="openPasswordModal()">🔑 Mot de passe</button>
     <button class="logout-btn" (click)="logout()">🚪 Déconnexion</button>
   </aside>
   <main class="admin-main">
     <router-outlet></router-outlet>
   </main>
+</div>
+
+<div class="modal-overlay" *ngIf="passwordOpen()" (click)="closePasswordModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">Modifier le mot de passe</div>
+      <button class="modal-close" type="button" (click)="closePasswordModal()">×</button>
+    </div>
+
+    <form class="modal-body" [formGroup]="passwordForm" (ngSubmit)="submitPassword()">
+      <div class="field">
+        <label>Ancien mot de passe</label>
+        <input type="password" formControlName="ancienMotDePasse" autocomplete="current-password" />
+      </div>
+
+      <div class="field">
+        <label>Nouveau mot de passe</label>
+        <input type="password" formControlName="nouveauMotDePasse" autocomplete="new-password" />
+      </div>
+
+      <div class="field">
+        <label>Confirmer le nouveau mot de passe</label>
+        <input type="password" formControlName="confirmNouveauMotDePasse" autocomplete="new-password" />
+      </div>
+
+      <div class="alert alert-error" *ngIf="passwordError()">{{ passwordError() }}</div>
+      <div class="alert alert-success" *ngIf="passwordSuccess()">{{ passwordSuccess() }}</div>
+
+      <div class="modal-actions">
+        <button class="btn" type="button" (click)="closePasswordModal()">Annuler</button>
+        <button class="btn primary" type="submit" [disabled]="passwordLoading()">Enregistrer</button>
+      </div>
+    </form>
+  </div>
 </div>

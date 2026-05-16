@@ -28,6 +28,21 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/organisations/organisations.component').then(m => m.OrganisationsComponent)
       },
       {
+        path: 'reclamations',
+        loadComponent: () =>
+          import('./pages/reclamations/reclamations.component').then(m => m.ReclamationsComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./pages/platform-notifications/platform-notifications.component').then(m => m.PlatformNotificationsComponent)
+      },
+      {
+        path: 'activation-requests',
+        loadComponent: () =>
+          import('./pages/activation-requests/activation-requests.component').then(m => m.ActivationRequestsComponent)
+      },
+      {
         path: 'statistiques',
         redirectTo: 'dashboard',
         pathMatch: 'full'

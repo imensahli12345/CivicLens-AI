@@ -14,6 +14,14 @@
     </div>
 
     <div class="header-right">
+    <button class="btn-icon mobile-menu-btn" type="button" title="Menu" (click)="toggleMobileNav($event)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
     <!-- Tunisia badge -->
     <div class="country-badge">
       <span class="flag">🇹🇳</span>
@@ -84,6 +92,22 @@
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: link.route === '/dashboard' }"
         (click)="notificationsOpen.set(false); profileMenuOpen.set(false)"
+      >
+        <span class="nav-icon" [innerHTML]="getIcon(link.icon)"></span>
+        <span class="nav-label">{{ link.label }}</span>
+      </a>
+    </nav>
+  </div>
+
+  <div *ngIf="mobileNavOpen()" class="mobile-nav-backdrop" (click)="mobileNavOpen.set(false)">
+    <nav class="mobile-nav" aria-label="Navigation du dashboard" (click)="$event.stopPropagation()">
+      <a
+        *ngFor="let link of links"
+        class="mobile-nav-link"
+        [routerLink]="link.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: link.route === '/dashboard' }"
+        (click)="mobileNavOpen.set(false); notificationsOpen.set(false); profileMenuOpen.set(false)"
       >
         <span class="nav-icon" [innerHTML]="getIcon(link.icon)"></span>
         <span class="nav-label">{{ link.label }}</span>

@@ -18,15 +18,25 @@ export class BureauxComponent implements OnInit {
   success = '';
   showForm = false;
   submitting = false;
+  downloadingPdf = false;
   delegations: string[] = [];
+  editDelegations: string[] = [];
   filterRegion = '';
   filterDelegation = '';
   filterDelegations: string[] = [];
   selectedBureau: any | null = null;
   detailsOpen = false;
   togglingId: string | null = null;
+  editMode = false;
+  saving = false;
+  deleting = false;
+  showPassword = false;
+  confirmOpen = false;
+  confirmTitle = '';
+  confirmMessage = '';
 
   form: FormGroup;
+  editForm: FormGroup;
 
   regionDelegations: { [key: string]: string[] } = {
     'Tunis': ['Tunis', 'Carthage', 'Le Bardo', 'La Goulette', 'Le Kram', 'La Marsa', 'Kalâat el-Andalous', 'Sidi Hassine', 'Ezzouhour', 'Djebel Jelloud', 'Bab El Bhar', 'Bab Souika', 'Cité El Khadra', 'El Kabaria', 'El Menzah', 'El Omrane', 'El Omrane Supérieur', 'El Ouardia', 'Ettahrir', 'Hrairia', 'Medina', 'Séjoumi'],
@@ -65,6 +75,15 @@ export class BureauxComponent implements OnInit {
       region: ['', Validators.required],
       delegation: ['', Validators.required]
     });
+
+    this.editForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      matricule: ['', Validators.required],
+      region: ['', Validators.required],
+      delegation: ['', Validators.required],
+      nouveauMotDePasse: [''],
+      motDePasseAdmin: ['']
+    });
   }
 
   ngOnInit() {
@@ -85,6 +104,14 @@ export class BureauxComponent implements OnInit {
           .replace(/\s+/g, '.')
           .replace(/[^a-z0-9.]/g, '');
         this.form.get('email')?.setValue(`bureau.${normalized}@civiclens.tn`);
+      }
+    });
+
+    this.editForm.get('region')?.valueChanges.subscribe(region => {
+      this.editDelegations = this.regionDelegations[region] || [];
+      const currentDelegation = this.editForm.get('delegation')?.value;
+      if (currentDelegation && !this.editDelegations.includes(currentDelegation)) {
+        this.editForm.get('delegation')?.setValue('');
       }
     });
   }
@@ -120,11 +147,17 @@ export class BureauxComponent implements OnInit {
   openDetails(bureau: any): void {
     this.selectedBureau = bureau;
     this.detailsOpen = true;
+    this.editMode = false;
+    this.showPassword = false;
   }
 
   closeDetails(): void {
     this.detailsOpen = false;
     this.selectedBureau = null;
+    this.editMode = false;
+    this.showPassword = false;
+    this.saving = false;
+    this.deleting = false;
   }
 
   toggleBureau(bureau: any): void {
@@ -168,6 +201,148 @@ export class BureauxComponent implements OnInit {
       error: (err) => {
         this.error = typeof err.error === 'string' ? err.error : 'Erreur lors de la création';
         this.submitting = false;
+      }
+    });
+  }
+
+  startEdit(): void {
+    const b = this.selectedBureau;
+    if (!b) return;
+
+    this.editMode = true;
+    this.showPassword = false;
+    this.error = '';
+    this.success = '';
+    this.editDelegations = this.regionDelegations[b.region] || [];
+
+    this.editForm.reset({
+      email: b.email ?? '',
+      matricule: b.matricule ?? '',
+      region: b.region ?? '',
+      delegation: b.delegation ?? '',
+      nouveauMotDePasse: '',
+      motDePasseAdmin: ''
+    });
+  }
+
+  cancelEdit(): void {
+    this.editMode = false;
+    this.showPassword = false;
+    this.editForm.reset();
+  }
+
+  saveEdit(): void {
+    if (!this.selectedBureau?.id) return;
+    if (this.editForm.invalid) return;
+    if (this.saving) return;
+
+    this.saving = true;
+    this.error = '';
+    this.success = '';
+
+    const payload = { ...this.editForm.value };
+    if (payload.nouveauMotDePasse) {
+      if (!payload.motDePasseAdmin) {
+        this.error = "Mot de passe admin requis pour changer le mot de passe.";
+        this.saving = false;
+        return;
+      }
+    } else {
+      delete payload.nouveauMotDePasse;
+      delete payload.motDePasseAdmin;
+    }
+
+    this.adminService.updateBureauDetails(this.selectedBureau.id, payload).subscribe({
+      next: (updated) => {
+        const idx = this.bureaux.findIndex((x) => x.id === this.selectedBureau?.id);
+        if (idx >= 0) {
+          this.bureaux[idx] = { ...this.bureaux[idx], ...updated };
+        }
+        this.selectedBureau = idx >= 0 ? this.bureaux[idx] : { ...this.selectedBureau, ...updated };
+        this.success = 'Bureau mis à jour avec succès.';
+        this.saving = false;
+        this.editMode = false;
+        this.showPassword = false;
+      },
+      error: (err) => {
+        this.error = typeof err?.error === 'string'
+          ? err.error
+          : (err?.error?.message ?? 'Erreur lors de la mise à jour.');
+        this.saving = false;
+      }
+    });
+  }
+
+  deleteSelected(): void {
+    const b = this.selectedBureau;
+    if (!b?.id) return;
+    if (this.deleting) return;
+
+    this.confirmTitle = 'Supprimer ce bureau ?';
+    this.confirmMessage = 'Cette action supprimera aussi tous les services rattachés à ce bureau.';
+    this.confirmOpen = true;
+  }
+
+  closeConfirm(): void {
+    if (this.deleting) return;
+    this.confirmOpen = false;
+  }
+
+  confirmDelete(): void {
+    const b = this.selectedBureau;
+    if (!b?.id) return;
+    if (this.deleting) return;
+
+    this.deleting = true;
+    this.error = '';
+    this.success = '';
+
+    this.adminService.deleteBureau(b.id).subscribe({
+      next: () => {
+        this.success = 'Bureau supprimé.';
+        this.deleting = false;
+        this.confirmOpen = false;
+        this.closeDetails();
+        this.loadBureaux();
+      },
+      error: (err) => {
+        this.error = typeof err?.error === 'string'
+          ? err.error
+          : (err?.error?.message ?? 'Impossible de supprimer ce bureau.');
+        this.deleting = false;
+        this.confirmOpen = false;
+      }
+    });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  downloadReport(): void {
+    if (this.downloadingPdf) return;
+    this.downloadingPdf = true;
+    this.error = '';
+
+    this.adminService.downloadBureauxPdf({
+      region: this.filterRegion || undefined,
+      delegation: this.filterDelegation || undefined
+    }).subscribe({
+      next: (blob) => {
+        const fileName = `rapport_bureaux_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '')}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.downloadingPdf = false;
+      },
+      error: () => {
+        this.error = 'Impossible de télécharger le rapport PDF.';
+        this.downloadingPdf = false;
       }
     });
   }

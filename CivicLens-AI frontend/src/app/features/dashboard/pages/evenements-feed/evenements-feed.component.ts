@@ -20,6 +20,9 @@ export class EvenementsFeedComponent implements OnInit {
   errorMsg = '';
   participatingId: string | null = null;
   currentUserId: string | null = null;
+  participationModalOpen = false;
+  participationComment = '';
+  selectedEvenement: Evenement | null = null;
 
   constructor(
     private evenementService: EvenementService,
@@ -74,13 +77,30 @@ export class EvenementsFeedComponent implements OnInit {
     return ev.participations.some(p => p.citoyenId === this.currentUserId);
   }
 
-  participer(evenement: Evenement): void {
-    this.participatingId = evenement.id;
-    this.evenementService.participer(evenement.id, { commentaire: "Participation depuis le feed" }).subscribe({
+  openParticipation(evenement: Evenement): void {
+    if (this.isPast(evenement.dateEvenement)) return;
+    this.errorMsg = '';
+    this.selectedEvenement = evenement;
+    this.participationComment = '';
+    this.participationModalOpen = true;
+  }
+
+  closeParticipation(): void {
+    if (this.participatingId) return;
+    this.participationModalOpen = false;
+    this.participationComment = '';
+    this.selectedEvenement = null;
+  }
+
+  submitParticipation(): void {
+    if (!this.selectedEvenement) return;
+    this.participatingId = this.selectedEvenement.id;
+    const commentaire = this.participationComment.trim();
+    this.evenementService.participer(this.selectedEvenement.id, { commentaire }).subscribe({
       next: () => {
         this.participatingId = null;
         this.errorMsg = '';
-        // Mettre à jour localement ou recharger
+        this.closeParticipation();
         this.loadEvenements();
       },
       error: (err) => {

@@ -144,6 +144,10 @@
   position: relative;
 }
 
+.mobile-menu-btn {
+  display: none;
+}
+
 .country-badge {
   display: flex;
   align-items: center;
@@ -334,6 +338,8 @@
   .header-bottom { gap: 0.5rem; }
   .header-nav { justify-content: flex-start; }
   .header-greeting-inline { display: none; }
+  .mobile-menu-btn { display: inline-flex; }
+  .header-bottom { display: none; }
 }
 
 @media (max-width: 1100px) {
@@ -346,4 +352,49 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.35);
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(var(--header-height) + 10px) 14px 14px;
+}
+
+.mobile-nav {
+  width: min(520px, 100%);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.18);
+  overflow: hidden;
+  display: grid;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 800;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.mobile-nav-link:last-child {
+  border-bottom: none;
+}
+
+.mobile-nav-link:hover {
+  background: #f8fafc;
+}
+
+.mobile-nav-link.active {
+  background: #eff6ff;
+  color: #1d4ed8;
 }

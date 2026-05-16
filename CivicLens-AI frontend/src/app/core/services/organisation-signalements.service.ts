@@ -24,6 +24,7 @@ export interface OrganisationSignalementActionApi {
   ouvrirSignalement(id: number): Observable<HttpResponse<OrganisationSignalementActionResponse>>;
   resoudreSignalement(id: number): Observable<HttpResponse<unknown>>;
   uploadRapport(id: number, file: File): Observable<OrganisationRapportUploadResponse>;
+  downloadSignalementPdf(id: number): Observable<Blob>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -88,6 +89,10 @@ export class OrganisationSignalementsService implements OrganisationSignalementA
       `${this.baseUrl}/${id}/rapport`,
       formData
     );
+  }
+
+  downloadSignalementPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/pdf`, { responseType: 'blob' });
   }
 
   private normalizeSignalement(item: BureauSignalement): BureauSignalement {

@@ -21,6 +21,10 @@ export class EvenementDetailsComponent implements OnInit {
   currentUserId: string | null = null;
   backTab: 'region' | 'mes' = 'region';
 
+  participationModalOpen = false;
+  participationComment = '';
+  participationEditMode = false;
+
   editModalOpen = false;
   deleteModalOpen = false;
   cancelModalOpen = false;
@@ -128,21 +132,59 @@ export class EvenementDetailsComponent implements OnInit {
     return diffDays >= 3;
   }
 
-  participer(): void {
+  get myParticipationComment(): string {
+    if (!this.evenement?.participations || !this.currentUserId) return '';
+    const p = this.evenement.participations.find(x => x.citoyenId === this.currentUserId);
+    return (p?.commentaire ?? '').trim();
+  }
+
+  get canEditParticipationComment(): boolean {
+    if (!this.evenement || !this.hasParticipated || this.isOrganizer) return false;
+    const evDate = new Date(this.evenement.dateEvenement).getTime();
+    const now = Date.now();
+    const diffHours = (evDate - now) / (1000 * 3600);
+    return diffHours >= 24 && !this.isPast(this.evenement.dateEvenement);
+  }
+
+  openParticipationModal(edit: boolean): void {
     if (!this.evenement) return;
+    this.errorMsg = '';
+    this.participationEditMode = edit;
+    this.participationComment = edit ? this.myParticipationComment : '';
+    this.participationModalOpen = true;
+  }
+
+  closeParticipationModal(): void {
+    if (this.isParticipating) return;
+    this.participationModalOpen = false;
+    this.participationEditMode = false;
+    this.participationComment = '';
+  }
+
+  submitParticipation(): void {
+    if (!this.evenement || this.isParticipating) return;
+    const comment = this.participationComment.trim();
     this.isParticipating = true;
-    this.evenementService.participer(this.evenement.id, { commentaire: "Je participe !" }).subscribe({
+    this.errorMsg = '';
+
+    const action$ = this.participationEditMode
+      ? this.evenementService.updateParticipationCommentaire(this.evenement.id, { commentaire: comment })
+      : this.evenementService.participer(this.evenement.id, { commentaire: comment });
+
+    action$.subscribe({
       next: () => {
         this.isParticipating = false;
-        this.errorMsg = '';
-        this.loadDetails(this.evenement!.id); // recharger pour voir ma participation
+        this.closeParticipationModal();
+        this.loadDetails(this.evenement!.id);
       },
       error: (err) => {
         this.isParticipating = false;
         const msg =
           (err?.error && typeof err.error === 'string' && err.error.trim())
             ? err.error
-            : "Impossible d'enregistrer votre participation pour le moment.";
+            : (this.participationEditMode
+              ? "Impossible de modifier votre commentaire."
+              : "Impossible d'enregistrer votre participation pour le moment.");
         this.errorMsg = msg;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
