@@ -10,8 +10,18 @@ using Microsoft.Extensions.FileProviders;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
+
+var configuredUploadsRoot = builder.Configuration["UploadsRoot"];
+var contentRootUploadsRoot = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+var primaryUploadsRoot = !string.IsNullOrWhiteSpace(configuredUploadsRoot)
+    ? configuredUploadsRoot
+    : contentRootUploadsRoot;
+builder.Configuration["UploadsRoot"] = primaryUploadsRoot;
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -87,7 +97,13 @@ builder.Services.AddCors(options =>
                 "http://localhost:4201",
                 "https://localhost:4201",
                 "http://localhost:4202",
-                "https://localhost:4202"
+                "https://localhost:4202",
+                "http://127.0.0.1:4200",
+                "https://127.0.0.1:4200",
+                "http://127.0.0.1:4201",
+                "https://127.0.0.1:4201",
+                "http://127.0.0.1:4202",
+                "https://127.0.0.1:4202"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -136,18 +152,28 @@ app.UseSwaggerUI();
 
 app.UseCors("Frontend");
 
-var uploadsRoot = app.Configuration["UploadsRoot"];
-if (string.IsNullOrWhiteSpace(uploadsRoot))
+var uploadsRoots = new List<string> { primaryUploadsRoot, contentRootUploadsRoot }
+    .Where(p => !string.IsNullOrWhiteSpace(p))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToList();
+
+foreach (var root in uploadsRoots)
 {
-    uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
+    Directory.CreateDirectory(root);
+    Directory.CreateDirectory(Path.Combine(root, "signalements"));
+    Directory.CreateDirectory(Path.Combine(root, "rapports"));
 }
-Directory.CreateDirectory(uploadsRoot);
-Directory.CreateDirectory(Path.Combine(uploadsRoot, "signalements"));
-Directory.CreateDirectory(Path.Combine(uploadsRoot, "rapports"));
+
+var providers = uploadsRoots
+    .Select(root => (IFileProvider)new PhysicalFileProvider(root))
+    .ToList();
+IFileProvider uploadsProvider = providers.Count == 1
+    ? providers[0]
+    : new CompositeFileProvider(providers);
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    FileProvider = uploadsProvider,
     RequestPath = "/uploads"
 });
 

@@ -272,7 +272,11 @@ namespace CivicLens.API.Services.Classes
             if (signalement.Statut != StatutSignalement.OUVERTE)
                 throw new InvalidOperationException($"Impossible d'envoyer (statut actuel : {signalement.Statut}).");
 
-            if (signalement.Domaine.HasValue && organisation.DomaineOrganisation != signalement.Domaine.Value)
+            if (
+                signalement.Domaine.HasValue
+                && organisation.DomaineOrganisation != Domaine.AUTRE
+                && organisation.DomaineOrganisation != signalement.Domaine.Value
+            )
                 throw new InvalidOperationException($"L'organisation selectionnee ({organisation.DomaineOrganisation}) ne correspond pas au domaine du signalement ({signalement.Domaine}).");
 
             signalement.Statut = StatutSignalement.ENVOYEE;

@@ -368,6 +368,30 @@ namespace CivicLens.API.Controllers
             return Ok(new { message = "Participation annulée avec succès." });
         }
 
+        [HttpPut("{id:guid}/participation/commentaire")]
+        public async Task<IActionResult> UpdateParticipationCommentaire([FromRoute] Guid id, [FromBody] UpdateParticipationCommentaireDto dto, CancellationToken ct)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
+                return Unauthorized("Token invalide.");
+
+            var participation = await _db.Participations
+                .Include(p => p.Evenement)
+                .FirstOrDefaultAsync(p => p.EvenementId == id && p.CitoyenId == citoyenId, ct);
+
+            if (participation == null)
+                return NotFound("Participation introuvable.");
+
+            var timeUntilEvent = participation.Evenement.DateEvenement - DateTime.UtcNow;
+            if (timeUntilEvent.TotalHours < 24)
+                return BadRequest("La modification du commentaire est impossible à moins de 24 heures de l'événement.");
+
+            participation.Commentaire = (dto.Commentaire ?? string.Empty).Trim();
+            await _db.SaveChangesAsync(ct);
+
+            return Ok(new { message = "Commentaire mis à jour.", commentaire = participation.Commentaire });
+        }
+
         // ─────────────────────────────────────────────────────────────
         // PUT /api/evenements/{id}
         // Modification (lieu + date) — Organisateur uniquement
@@ -577,6 +601,11 @@ namespace CivicLens.API.Controllers
             await tx.CommitAsync(ct);
 
             return Ok(new { message = "Événement confirmé avec succès." });
+        }
+
+        public class UpdateParticipationCommentaireDto
+        {
+            public string? Commentaire { get; set; }
         }
     }
 }

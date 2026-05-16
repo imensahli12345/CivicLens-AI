@@ -123,6 +123,9 @@ namespace CivicLens_AI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ActionToken")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("CitoyenId")
                         .HasColumnType("uuid");
 
@@ -139,8 +142,14 @@ namespace CivicLens_AI.Migrations
                     b.Property<Guid?>("RelatedEvenementId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("RelatedReclamationId")
+                        .HasColumnType("uuid");
+
                     b.Property<long?>("RelatedSignalementId")
                         .HasColumnType("bigint");
+
+                    b.Property<Guid?>("RelatedUserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -182,6 +191,47 @@ namespace CivicLens_AI.Migrations
                     b.HasIndex("EvenementId");
 
                     b.ToTable("Participations");
+                });
+
+            modelBuilder.Entity("CivicLens.API.Models.Entities.PlatformReclamation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppVersion")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Context")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("FromUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("PlatformReclamations");
                 });
 
             modelBuilder.Entity("CivicLens.API.Models.Entities.Signalement", b =>
@@ -435,13 +485,11 @@ namespace CivicLens_AI.Migrations
 
             modelBuilder.Entity("CivicLens.API.Models.Entities.Notification", b =>
                 {
-                    b.HasOne("CivicLens.API.Models.Entities.Citoyen", "Citoyen")
-                        .WithMany("Notifications")
+                    b.HasOne("CivicLens.API.Models.Entities.User", null)
+                        .WithMany()
                         .HasForeignKey("CitoyenId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Citoyen");
                 });
 
             modelBuilder.Entity("CivicLens.API.Models.Entities.Participation", b =>
@@ -566,8 +614,6 @@ namespace CivicLens_AI.Migrations
             modelBuilder.Entity("CivicLens.API.Models.Entities.Citoyen", b =>
                 {
                     b.Navigation("Evenements");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("Participations");
 

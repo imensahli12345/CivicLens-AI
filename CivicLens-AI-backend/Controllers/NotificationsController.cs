@@ -15,7 +15,7 @@ namespace CivicLens.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "CITOYEN")]
+    [Authorize]
     public class NotificationsController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -25,25 +25,24 @@ namespace CivicLens.API.Controllers
             _db = db;
         }
 
-        private async Task<Guid?> GetCurrentCitoyenIdAsync(CancellationToken ct)
+        private async Task<Guid?> GetCurrentUserIdAsync(CancellationToken ct)
         {
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("nameid")?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 return null;
-            // We expect Role=Citoyen already, but keep it safe
-            var exists = await _db.Citoyens.AsNoTracking().AnyAsync(c => c.Id == citoyenId, ct);
-            return exists ? citoyenId : null;
+            var exists = await _db.Users.AsNoTracking().AnyAsync(u => u.Id == userId, ct);
+            return exists ? userId : null;
         }
 
         [HttpGet("mes")]
         public async Task<IActionResult> GetMyNotifications([FromQuery] int? limit, CancellationToken ct)
         {
-            var citoyenId = await GetCurrentCitoyenIdAsync(ct);
-            if (citoyenId == null) return Unauthorized("Token invalide.");
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId == null) return Unauthorized("Token invalide.");
 
             IQueryable<Notification> q = _db.Notifications
                 .AsNoTracking()
-                .Where(n => n.CitoyenId == citoyenId)
+                .Where(n => n.CitoyenId == userId)
                 .OrderByDescending(n => n.CreatedAt);
 
             if (limit.HasValue && limit.Value > 0)
@@ -57,6 +56,8 @@ namespace CivicLens.API.Controllers
                 // One of the two will be non-null depending on whether the notif is about a Signalement or an Evenement
                 RelatedEvenementId = n.RelatedEvenementId,
                 RelatedSignalementId = n.RelatedSignalementId,
+                RelatedReclamationId = n.RelatedReclamationId,
+                RelatedUserId = n.RelatedUserId,
                 CreatedAt = n.CreatedAt,
                 IsRead = n.IsRead
             }).ToListAsync(ct);
@@ -67,12 +68,12 @@ namespace CivicLens.API.Controllers
         [HttpGet("mes/unread-count")]
         public async Task<IActionResult> GetUnreadCount(CancellationToken ct)
         {
-            var citoyenId = await GetCurrentCitoyenIdAsync(ct);
-            if (citoyenId == null) return Unauthorized("Token invalide.");
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId == null) return Unauthorized("Token invalide.");
 
             var count = await _db.Notifications
                 .AsNoTracking()
-                .Where(n => n.CitoyenId == citoyenId && !n.IsRead)
+                .Where(n => n.CitoyenId == userId && !n.IsRead)
                 .CountAsync(ct);
 
             return Ok(new { unreadCount = count });
@@ -81,10 +82,10 @@ namespace CivicLens.API.Controllers
         [HttpPut("{id:guid}/read")]
         public async Task<IActionResult> MarkAsRead([FromRoute] Guid id, CancellationToken ct)
         {
-            var citoyenId = await GetCurrentCitoyenIdAsync(ct);
-            if (citoyenId == null) return Unauthorized("Token invalide.");
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId == null) return Unauthorized("Token invalide.");
 
-            var notif = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.CitoyenId == citoyenId, ct);
+            var notif = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.CitoyenId == userId, ct);
             if (notif == null) return NotFound();
 
             notif.IsRead = true;
@@ -96,11 +97,11 @@ namespace CivicLens.API.Controllers
         [HttpPut("mes/mark-all-read")]
         public async Task<IActionResult> MarkAllAsRead(CancellationToken ct)
         {
-            var citoyenId = await GetCurrentCitoyenIdAsync(ct);
-            if (citoyenId == null) return Unauthorized("Token invalide.");
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId == null) return Unauthorized("Token invalide.");
 
             var notifs = await _db.Notifications
-                .Where(n => n.CitoyenId == citoyenId && !n.IsRead)
+                .Where(n => n.CitoyenId == userId && !n.IsRead)
                 .ToListAsync(ct);
 
             foreach (var n in notifs) n.IsRead = true;

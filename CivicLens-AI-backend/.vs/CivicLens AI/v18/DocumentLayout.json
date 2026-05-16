@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\data\\dataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|solutionrelative:data\\dataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\models\\entities\\participation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|solutionrelative:models\\entities\\participation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\models\\entities\\signalement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|solutionrelative:models\\entities\\signalement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -17,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\models\\enums\\domaine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|solutionrelative:models\\enums\\domaine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\data\\dataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|solutionrelative:data\\dataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{661BA0B3-62E1-4945-BAC9-2E4963A4046F}|CivicLens AI.csproj|c:\\users\\haninsahli\\desktop\\projet dev civiclens\\civiclens-ai-backend\\models\\entities\\evenement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -82,11 +86,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Signalement.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\Signalement.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\Signalement.cs",
@@ -95,50 +99,23 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-28T17:26:51.645Z",
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "StatutCompte.cs",
-              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\StatutCompte.cs",
-              "RelativeDocumentMoniker": "Models\\Enums\\StatutCompte.cs",
-              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\StatutCompte.cs",
-              "RelativeToolTip": "Models\\Enums\\StatutCompte.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAIAAAAAAAAAA==",
+              "Title": "Participation.cs",
+              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\Participation.cs",
+              "RelativeDocumentMoniker": "Models\\Entities\\Participation.cs",
+              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\Participation.cs",
+              "RelativeToolTip": "Models\\Entities\\Participation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T11:56:02.615Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-15T19:59:02.48Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Role.cs",
-              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Role.cs",
-              "RelativeDocumentMoniker": "Models\\Enums\\Role.cs",
-              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Role.cs",
-              "RelativeToolTip": "Models\\Enums\\Role.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T00:26:44.846Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Domaine.cs",
-              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Domaine.cs",
-              "RelativeDocumentMoniker": "Models\\Enums\\Domaine.cs",
-              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Domaine.cs",
-              "RelativeToolTip": "Models\\Enums\\Domaine.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-13T18:56:49.548Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Evenement.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\Evenement.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\Evenement.cs",
@@ -146,12 +123,11 @@
               "RelativeToolTip": "Models\\Entities\\Evenement.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-11T12:39:36.749Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-11T12:39:36.749Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -163,7 +139,56 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 0,
+              "Title": "DataSeeder.cs",
+              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Data\\DataSeeder.cs",
+              "RelativeDocumentMoniker": "Data\\DataSeeder.cs",
+              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Data\\DataSeeder.cs",
+              "RelativeToolTip": "Data\\DataSeeder.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-28T11:53:57.536Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Domaine.cs",
+              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Domaine.cs",
+              "RelativeDocumentMoniker": "Models\\Enums\\Domaine.cs",
+              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Domaine.cs",
+              "RelativeToolTip": "Models\\Enums\\Domaine.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-13T18:56:49.548Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Role.cs",
+              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Role.cs",
+              "RelativeDocumentMoniker": "Models\\Enums\\Role.cs",
+              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\Role.cs",
+              "RelativeToolTip": "Models\\Enums\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T00:26:44.846Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "StatutCompte.cs",
+              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\StatutCompte.cs",
+              "RelativeDocumentMoniker": "Models\\Enums\\StatutCompte.cs",
+              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Enums\\StatutCompte.cs",
+              "RelativeToolTip": "Models\\Enums\\StatutCompte.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-28T11:56:02.615Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "EvenementsController.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Controllers\\EvenementsController.cs",
               "RelativeDocumentMoniker": "Controllers\\EvenementsController.cs",
@@ -175,7 +200,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "AdminController.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
@@ -187,20 +212,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "DataSeeder.cs",
-              "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Data\\DataSeeder.cs",
-              "RelativeDocumentMoniker": "Data\\DataSeeder.cs",
-              "ToolTip": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Data\\DataSeeder.cs",
-              "RelativeToolTip": "Data\\DataSeeder.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBAAAABFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T11:53:57.536Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -212,7 +224,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "CivicLens AI.http",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\CivicLens AI.http",
               "RelativeDocumentMoniker": "CivicLens AI.http",
@@ -224,7 +236,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "SignalementsController.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Controllers\\SignalementsController.cs",
               "RelativeDocumentMoniker": "Controllers\\SignalementsController.cs",
@@ -236,7 +248,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "AIService.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Services\\Classes\\AIService.cs",
               "RelativeDocumentMoniker": "Services\\Classes\\AIService.cs",
@@ -248,7 +260,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "BureauDeControlRepository.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Repository\\Classes\\BureauDeControlRepository.cs",
               "RelativeDocumentMoniker": "Repository\\Classes\\BureauDeControlRepository.cs",
@@ -260,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "BureauDeControle.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\BureauDeControle.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\BureauDeControle.cs",
@@ -272,7 +284,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "Citoyen.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\Citoyen.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\Citoyen.cs",
@@ -284,7 +296,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\Models\\Entities\\User.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\User.cs",
@@ -296,7 +308,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\Users\\HaninSahli\\Desktop\\Projet Dev CivicLens\\CivicLens-AI-backend\\appsettings.Development.json",
               "RelativeDocumentMoniker": "appsettings.Development.json",

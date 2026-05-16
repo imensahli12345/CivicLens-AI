@@ -13,8 +13,13 @@ namespace CivicLens.API.Services.Interfaces
         /// RelatedEvenementId sera null (car c'est une notif de signalement).
         /// </summary>
         void PrepareSignalementNotification(
-            Guid citoyenId,
+            Guid userId,
             long signalementId,
+            string type,
+            string message);
+
+        void PreparePlatformNotification(
+            Guid userId,
             string type,
             string message);
     }

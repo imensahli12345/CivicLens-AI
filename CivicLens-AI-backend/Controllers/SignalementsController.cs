@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using CivicLens.API.Services.Interfaces;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.Text.Json;
 
 namespace CivicLens.API.Controllers
 {
@@ -35,6 +39,7 @@ namespace CivicLens.API.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IAIService _aiService;
         private readonly string _uploadsRoot;
+        private readonly List<string> _uploadsReadRoots;
 
         public SignalementsController(AppDbContext db, IWebHostEnvironment env, IAIService aiService, IConfiguration config)
         {
@@ -42,6 +47,10 @@ namespace CivicLens.API.Controllers
             _env = env;
             _aiService = aiService;
             _uploadsRoot = config["UploadsRoot"] ?? Path.Combine(_env.ContentRootPath, "uploads");
+            _uploadsReadRoots = new List<string> { _uploadsRoot, Path.Combine(_env.ContentRootPath, "uploads") }
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         [HttpPost]
@@ -111,7 +120,26 @@ namespace CivicLens.API.Controllers
 
             var duplicateCheck = await _aiService.CheckDuplicateAsync(dto.Description.Trim(), lat, lon, aiResult.Domain, existingReports);
             if (duplicateCheck != null && duplicateCheck.Is_Duplicate)
-                return Conflict(new { message = "Un signalement similaire ou identique existe déjà. Merci pour votre engagement !", originalId = duplicateCheck.Original_Report_Id });
+            {
+                var originalId = duplicateCheck.Original_Report_Id;
+                var origin = Request.Headers.Origin.FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(origin))
+                {
+                    var referer = Request.Headers.Referer.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+                    {
+                        origin = refererUri.GetLeftPart(UriPartial.Authority);
+                    }
+                }
+                origin ??= "http://localhost:4200";
+
+                var link = originalId.HasValue ? $"{origin}/dashboard/signalement/{originalId.Value}" : null;
+                var message = originalId.HasValue
+                    ? $"Un signalement similaire ou identique existe déjà. Vous pouvez le consulter et voter ici : {link}"
+                    : "Un signalement similaire ou identique existe déjà. Merci pour votre engagement !";
+
+                return Conflict(new { message, originalId, link });
+            }
 
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
             try
@@ -272,6 +300,342 @@ namespace CivicLens.API.Controllers
                 };
 
             return Ok(new { signalement, images, historique = historiqueDto });
+        }
+
+        [HttpGet("{id:long}/pdf")]
+        public async Task<IActionResult> DownloadPdf([FromRoute] long id, CancellationToken ct)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var citoyenId))
+                return Unauthorized("Token invalide.");
+
+            var signalement = await _db.Signalements
+                .AsNoTracking()
+                .Where(s => s.Id == id)
+                .Select(s => new
+                {
+                    s.Id,
+                    s.Description,
+                    CreatedAt = s.DateCreation,
+                    Statut = s.Statut.ToString(),
+                    Gravite = s.Gravite.ToString(),
+                    Priorite = s.Priorite.ToString(),
+                    Categorie = s.Domaine.ToString(),
+                    s.Adresse,
+                    s.Latitude,
+                    s.Longitude,
+                    s.CitoyenId,
+                    Votes = s.Votes.Count()
+                })
+                .FirstOrDefaultAsync(ct);
+
+            if (signalement is null)
+                return NotFound("Signalement introuvable.");
+
+            if (signalement.CitoyenId != citoyenId)
+                return Forbid();
+
+            var imageUrls = await _db.ImagesSignalement
+                .AsNoTracking()
+                .Where(i => i.SignalementId == id)
+                .OrderBy(i => i.Id)
+                .Select(i => i.UrlImage)
+                .ToListAsync(ct);
+
+            var images = new List<byte[]>();
+            foreach (var url in imageUrls)
+            {
+                var bytes = await TryReadUploadsFileAsync(url, ct);
+                if (bytes is not null && bytes.Length > 0)
+                    images.Add(bytes);
+                if (images.Count >= 3)
+                    break;
+            }
+
+            var title = $"Signalement #{signalement.Id}";
+            var dateText = signalement.CreatedAt.ToString("dd/MM/yyyy HH:mm");
+            var coordsText = $"{signalement.Latitude:0.######}, {signalement.Longitude:0.######}";
+            var adresseText = FormatAdresse(signalement.Adresse);
+            var statutColor = GetStatusColor(signalement.Statut);
+
+            var pdfBytes = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(18);
+                    page.DefaultTextStyle(x => x.FontFamily("Helvetica").FontSize(10).FontColor("#0f172a"));
+
+                    page.Header().Column(header =>
+                    {
+                        header.Item()
+                            .Background("#0ea5e9")
+                            .PaddingHorizontal(16)
+                            .PaddingVertical(14)
+                            .Row(row =>
+                            {
+                                row.RelativeItem().Column(col =>
+                                {
+                                    col.Item().Text("CivicLens").FontSize(16).FontColor(Colors.White).SemiBold();
+                                    col.Item().PaddingTop(2).Text("Rapport de signalement").FontSize(10).FontColor(Colors.White);
+                                    col.Item().PaddingTop(6).Text(title).FontSize(22).FontColor(Colors.White).Bold();
+                                });
+
+                                row.ConstantItem(170).AlignRight().Column(col =>
+                                {
+                                    col.Item().AlignRight().Text(dateText).FontSize(10).FontColor(Colors.White);
+                                    col.Item().PaddingTop(8).AlignRight().Element(e => BuildStatusPill(e, signalement.Statut, statutColor));
+                                });
+                            });
+                    });
+
+                    page.Content()
+                        .Background("#f8fafc")
+                        .Padding(14)
+                        .Column(content =>
+                        {
+                            content.Spacing(10);
+
+                            content.Item().Row(row =>
+                            {
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Adresse", adresseText, "#0ea5e9"));
+                                row.ConstantItem(10);
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Coordonnées", coordsText, "#6366f1"));
+                            });
+
+                            content.Item().Row(row =>
+                            {
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Catégorie", signalement.Categorie ?? "—", "#3b82f6"));
+                                row.ConstantItem(10);
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Gravité", signalement.Gravite ?? "—", "#f59e0b"));
+                                row.ConstantItem(10);
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Priorité", signalement.Priorite ?? "—", "#ef4444"));
+                                row.ConstantItem(10);
+                                row.RelativeItem().Element(e => BuildInfoCard(e, "Votes", signalement.Votes.ToString(), "#64748b"));
+                            });
+
+                            content.Item().Element(e => BuildSection(e, "Description", signalement.Description ?? "—", "#0ea5e9"));
+
+                            content.Item().Element(card =>
+                            {
+                                card.Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Background(Colors.White)
+                                    .Padding(10)
+                                    .Column(col =>
+                                    {
+                                        col.Item().Row(r =>
+                                        {
+                                            r.RelativeItem().Text("Images").FontSize(12).FontColor("#0f172a").SemiBold();
+                                            r.ConstantItem(80).AlignRight().Text($"{images.Count}/3").FontSize(9).FontColor(Colors.Grey.Darken1);
+                                        });
+                                        col.Item().PaddingTop(6).LineHorizontal(2).LineColor("#0ea5e9");
+
+                                        if (images.Count == 0)
+                                        {
+                                            col.Item().PaddingTop(10).Text("Aucune image attachée.").FontSize(10).FontColor(Colors.Grey.Darken2);
+                                            return;
+                                        }
+
+                                        col.Item().PaddingTop(10).Row(row =>
+                                        {
+                                            row.Spacing(10);
+
+                                            for (var i = 0; i < images.Count; i++)
+                                            {
+                                                row.RelativeItem()
+                                                    .Height(150)
+                                                    .Border(1)
+                                                    .BorderColor(Colors.Grey.Lighten2)
+                                                    .Background(Colors.Grey.Lighten5)
+                                                    .Padding(4)
+                                                    .AlignCenter()
+                                                    .AlignMiddle()
+                                                    .Image(images[i])
+                                                    .FitArea();
+                                            }
+
+                                            for (var i = images.Count; i < 3; i++)
+                                            {
+                                                row.RelativeItem()
+                                                    .Height(150)
+                                                    .Border(1)
+                                                    .BorderColor(Colors.Grey.Lighten2)
+                                                    .Background(Colors.Grey.Lighten5);
+                                            }
+                                        });
+                                    });
+                            });
+                        });
+
+                    page.Footer()
+                        .Background("#f8fafc")
+                        .PaddingBottom(8)
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            text.Span("CivicLens • ").FontColor(Colors.Grey.Darken2);
+                            text.Span($"Signalement #{signalement.Id} • ").FontColor(Colors.Grey.Darken2);
+                            text.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm")).FontColor(Colors.Grey.Darken2);
+                        });
+                });
+            }).GeneratePdf();
+
+            var fileName = $"signalement_{signalement.Id}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+
+        private static void BuildInfoCard(IContainer container, string label, string value, string accentHex)
+        {
+            container
+                .Border(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .Background(Colors.White)
+                .Row(row =>
+                {
+                    row.ConstantItem(4).Background(accentHex);
+                    row.RelativeItem().Padding(10).Column(col =>
+                    {
+                        col.Item().Text(label).FontSize(8).FontColor(Colors.Grey.Darken1);
+                        col.Item().PaddingTop(2).Text(string.IsNullOrWhiteSpace(value) ? "—" : value).FontSize(11).FontColor("#0f172a").SemiBold();
+                    });
+                });
+        }
+
+        private static void BuildSection(IContainer container, string title, string body, string accentHex)
+        {
+            container
+                .Border(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .Background(Colors.White)
+                .Padding(10)
+                .Column(col =>
+                {
+                    col.Item().Text(title).FontSize(12).FontColor("#0f172a").SemiBold();
+                    col.Item().PaddingTop(6).LineHorizontal(2).LineColor(accentHex);
+                    col.Item().PaddingTop(10).MaxHeight(100).Text(string.IsNullOrWhiteSpace(body) ? "—" : body).FontSize(10).FontColor(Colors.Grey.Darken3).LineHeight(1.25f);
+                });
+        }
+
+        private static void BuildStatusPill(IContainer container, string value, string colorHex)
+        {
+            container
+                .Background(colorHex)
+                .PaddingHorizontal(12)
+                .PaddingVertical(6)
+                .Text(value)
+                .FontSize(10)
+                .FontColor(Colors.White)
+                .SemiBold();
+        }
+
+        private static string GetStatusColor(string statut)
+        {
+            return statut switch
+            {
+                "RESOLU" => "#16a34a",
+                "REJETE" => "#dc2626",
+                "EN_ATTENTE" => "#f59e0b",
+                "ENVOYEE" => "#2563eb",
+                "EN_COURS_DETUDE" => "#9333ea",
+                "OUVERTE" => "#0ea5e9",
+                _ => "#64748b"
+            };
+        }
+
+        private async Task<byte[]?> TryReadUploadsFileAsync(string? urlOrPath, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(urlOrPath))
+                return null;
+
+            var normalized = urlOrPath.Trim();
+            var queryIdx = normalized.IndexOf('?', StringComparison.Ordinal);
+            if (queryIdx >= 0)
+                normalized = normalized.Substring(0, queryIdx);
+
+            if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                var idx = normalized.IndexOf("/uploads/", StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                    normalized = normalized.Substring(idx + "/uploads/".Length);
+            }
+            else if (normalized.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized.Substring("/uploads/".Length);
+            }
+            else if (normalized.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized.Substring("uploads/".Length);
+            }
+
+            normalized = Uri.UnescapeDataString(normalized);
+            normalized = normalized.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+            foreach (var root in _uploadsReadRoots)
+            {
+                var fullPath = Path.GetFullPath(Path.Combine(root, normalized));
+                var rootFull = Path.GetFullPath(root);
+                if (!fullPath.StartsWith(rootFull, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!System.IO.File.Exists(fullPath))
+                    continue;
+
+                return await System.IO.File.ReadAllBytesAsync(fullPath, ct);
+            }
+
+            return null;
+        }
+
+        private static string FormatAdresse(string? adresseRaw)
+        {
+            if (string.IsNullOrWhiteSpace(adresseRaw))
+                return "—";
+
+            var trimmed = adresseRaw.Trim();
+            if (!trimmed.StartsWith("{", StringComparison.Ordinal) && !trimmed.StartsWith("[", StringComparison.Ordinal))
+                return trimmed;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(trimmed);
+                var root = doc.RootElement;
+
+                static string GetString(JsonElement element, string name)
+                {
+                    if (element.ValueKind != JsonValueKind.Object)
+                        return string.Empty;
+                    if (!element.TryGetProperty(name, out var prop))
+                        return string.Empty;
+                    return prop.ValueKind == JsonValueKind.String ? prop.GetString() ?? string.Empty : prop.ToString();
+                }
+
+                var road = GetString(root, "road");
+                var neighbourhood = GetString(root, "neighbourhood");
+                var city = GetString(root, "city");
+                var town = GetString(root, "town");
+                var village = GetString(root, "village");
+                var county = GetString(root, "county");
+                var state = GetString(root, "state");
+
+                var locality = !string.IsNullOrWhiteSpace(city) ? city
+                    : !string.IsNullOrWhiteSpace(town) ? town
+                    : !string.IsNullOrWhiteSpace(village) ? village
+                    : !string.IsNullOrWhiteSpace(county) ? county
+                    : string.Empty;
+
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(road)) parts.Add(road);
+                if (!string.IsNullOrWhiteSpace(neighbourhood)) parts.Add(neighbourhood);
+                if (!string.IsNullOrWhiteSpace(locality)) parts.Add(locality);
+                if (!string.IsNullOrWhiteSpace(state)) parts.Add(state);
+
+                return parts.Count > 0 ? string.Join(", ", parts) : trimmed;
+            }
+            catch
+            {
+                return trimmed;
+            }
         }
 
         [HttpGet("mes/stats")]

@@ -40,6 +40,11 @@ public class BureauDeControleService : IBureauDeControleService
         return await _repository.DeactivateServiceAsync(bureauId, serviceId, ct);
     }
 
+    public async Task<Service> UpdateServicePasswordAsync(Guid bureauId, Guid serviceId, string nouveauMotDePasse, CancellationToken ct)
+    {
+        return await _repository.UpdateServicePasswordAsync(bureauId, serviceId, nouveauMotDePasse, ct);
+    }
+
     public Service CreateService(Service service)
     {
         return _repository.CreateService(service);

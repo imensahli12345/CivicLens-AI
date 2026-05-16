@@ -23,6 +23,7 @@ namespace CivicLens.API.Data
         public DbSet<Participation> Participations { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PlatformReclamation> PlatformReclamations { get; set; }
 
         private static string SerializeStatuts(List<StatutSignalement> v) => JsonSerializer.Serialize(v);
         private static List<StatutSignalement> DeserializeStatuts(string v) =>
@@ -176,12 +177,15 @@ namespace CivicLens.API.Data
                 .HasForeignKey(i => i.SignalementId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Citoyen → Notifications
+            // Notifications → Users (tous les rôles)
             modelBuilder.Entity<Notification>()
-                .HasOne(n => n.Citoyen)
-                .WithMany(c => c.Notifications)
+                .HasOne<User>()
+                .WithMany()
                 .HasForeignKey(n => n.CitoyenId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlatformReclamation>()
+                .HasIndex(r => r.CreatedAt);
 
             base.OnModelCreating(modelBuilder);
         }

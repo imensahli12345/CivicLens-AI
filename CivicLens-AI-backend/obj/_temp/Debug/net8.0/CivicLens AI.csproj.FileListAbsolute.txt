@@ -1,9 +1,0 @@
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.csproj.AssemblyReference.cache
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\rpswa.dswa.cache.json
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.AssemblyInfoInputs.cache
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.AssemblyInfo.cs
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.csproj.CoreCompileInputs.cache
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\HaninSahli\Desktop\Projet Dev CivicLens\CivicLens-AI-backend\obj\_temp\Debug\net8.0\CivicLens AI.sourcelink.json

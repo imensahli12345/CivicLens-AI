@@ -15,7 +15,5 @@ namespace CivicLens.API.Models.Entities
         public ICollection<Evenement> Evenements { get; set; } = new List<Evenement>();
         public ICollection<Participation> Participations { get; set; } = new List<Participation>();
         public ICollection<Vote> Votes { get; set; } = new List<Vote>();
-
-        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }

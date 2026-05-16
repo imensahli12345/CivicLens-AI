@@ -6,11 +6,7 @@ namespace CivicLens.API.Models.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        // Foreign Key
         public Guid CitoyenId { get; set; }
-
-        // Navigation
-        public Citoyen Citoyen { get; set; } = null!;
 
         public string Type { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
@@ -18,6 +14,9 @@ namespace CivicLens.API.Models.Entities
         public Guid? RelatedEvenementId { get; set; }
         //new code so we can save the signalement related to the notification
         public long? RelatedSignalementId { get; set; }
+        public Guid? RelatedReclamationId { get; set; }
+        public Guid? RelatedUserId { get; set; }
+        public string? ActionToken { get; set; }
 
         public bool IsRead { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -9,5 +9,6 @@ public interface IBureauDeControleService
     //activate and desactivate service statut
     Task<Service> ActivateServiceAsync(Guid bureauId, Guid serviceId, CancellationToken ct);
     Task<Service> DeactivateServiceAsync(Guid bureauId, Guid serviceId, CancellationToken ct);
+    Task<Service> UpdateServicePasswordAsync(Guid bureauId, Guid serviceId, string nouveauMotDePasse, CancellationToken ct);
     Service CreateService(Service service);
 }

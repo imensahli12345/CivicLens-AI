@@ -12,6 +12,33 @@ public class BureauDeControleRepository : IBureauDeControleRepository
         _context = context;
     }
 
+    private async Task EnsureServicesBackfilledAsync(Guid bureauId, CancellationToken ct)
+    {
+        var delegation = await _context.BureauxDeControle
+            .AsNoTracking()
+            .Where(b => b.Id == bureauId)
+            .Select(b => b.Delegation)
+            .FirstOrDefaultAsync(ct);
+
+        if (string.IsNullOrWhiteSpace(delegation))
+            return;
+
+        await _context.Database.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""Services"" (""Id"", ""Nom"", ""Domaine"", ""BureauDeControleId"")
+            SELECT 
+                u.""Id"",
+                'Service ' || (CASE WHEN POSITION('.' IN u.""Email"") > 0 THEN UPPER(SUBSTRING(u.""Email"" FROM 1 FOR POSITION('.' IN u.""Email"")-1)) ELSE 'ROUTE' END), 
+                (CASE WHEN POSITION('.' IN u.""Email"") > 0 THEN UPPER(SUBSTRING(u.""Email"" FROM 1 FOR POSITION('.' IN u.""Email"")-1)) ELSE 'ROUTE' END),
+                {bureauId}
+            FROM ""Users"" u
+            WHERE u.""Role"" = {Role.SERVICE.ToString()}
+              AND u.""Delegation"" = {delegation}
+              AND NOT EXISTS (
+                SELECT 1 FROM ""Services"" s WHERE s.""Id"" = u.""Id""
+              );
+        ", ct);
+    }
+
     public BureauDeControle? GetById(Guid id)
     {
         return _context.BureauxDeControle
@@ -34,6 +61,17 @@ public class BureauDeControleRepository : IBureauDeControleRepository
 
     public async Task<List<Service>> GetServicesAsync(Guid bureauId, CancellationToken ct)
     {
+        var services = await _context.Services
+            .AsNoTracking()
+            .Where(s => s.BureauDeControleId == bureauId)
+            .OrderBy(s => s.Domaine)
+            .ToListAsync(ct);
+
+        if (services.Count > 0)
+            return services;
+
+        await EnsureServicesBackfilledAsync(bureauId, ct);
+
         return await _context.Services
             .AsNoTracking()
             .Where(s => s.BureauDeControleId == bureauId)
@@ -97,6 +135,17 @@ public class BureauDeControleRepository : IBureauDeControleRepository
             _context.Services.Update(service);
             await SaveAsync(ct);
         }
+        return service;
+    }
+
+    public async Task<Service> UpdateServicePasswordAsync(Guid bureauId, Guid serviceId, string nouveauMotDePasse, CancellationToken ct)
+    {
+        var service = await GetServiceByIdAsync(bureauId, serviceId, ct)
+            ?? throw new KeyNotFoundException("Service introuvable pour ce bureau.");
+
+        service.MotDePasseHash = BCrypt.Net.BCrypt.HashPassword((nouveauMotDePasse ?? string.Empty).Trim());
+        _context.Services.Update(service);
+        await SaveAsync(ct);
         return service;
     }
 }

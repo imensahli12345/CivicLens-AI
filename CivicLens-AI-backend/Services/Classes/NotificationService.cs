@@ -15,18 +15,35 @@ namespace CivicLens.API.Services.Classes
 
         /// <inheritdoc/>
         public void PrepareSignalementNotification(
-            Guid citoyenId,
+            Guid userId,
             long signalementId,
             string type,
             string message)
         {
             var notification = new Notification
             {
-                CitoyenId = citoyenId,
+                CitoyenId = userId,
                 Type = type,
                 Message = message,
                 // RelatedEvenementId is intentionally null — this notification concerns a Signalement
                 RelatedSignalementId = signalementId,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _notificationRepository.Add(notification);
+        }
+
+        public void PreparePlatformNotification(
+            Guid userId,
+            string type,
+            string message)
+        {
+            var notification = new Notification
+            {
+                CitoyenId = userId,
+                Type = type,
+                Message = message,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             };
